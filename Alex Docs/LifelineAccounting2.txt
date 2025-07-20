@@ -1,0 +1,595 @@
+CREATE DATABASE LifelineAccounting;
+GO
+
+USE LifelineAccounting;
+GO
+
+-- Companies Table
+CREATE TABLE Companies (
+    CompanyID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyName NVARCHAR(100) NOT NULL,
+    CompanyNotes NVARCHAR(MAX) NULL,
+    AdminUserID INT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_Companies_AdminUser FOREIGN KEY (AdminUserID) REFERENCES Users(UserID)
+);
+GO
+
+-- Users Table
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY IDENTITY(1,1),
+    Username NVARCHAR(50) UNIQUE NOT NULL,
+    PasswordHash NVARCHAR(256) NOT NULL,
+    Email NVARCHAR(100),
+    UserNotes NVARCHAR(MAX) NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME()
+);
+GO
+
+-- UserCompanyRole Table
+CREATE TABLE UserCompanyRole (
+    UserCompanyRoleID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT NOT NULL,
+    CompanyID INT NOT NULL,
+    Role NVARCHAR(50) NOT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_UserCompanyRole_User FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    CONSTRAINT FK_UserCompanyRole_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT UQ_UserCompanyRole UNIQUE (UserID, CompanyID)
+);
+GO
+
+-- ChartOfAccounts Table
+CREATE TABLE ChartOfAccounts (
+    AccountID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    AccountCode NVARCHAR(20) NOT NULL,
+    AccountName NVARCHAR(100) NOT NULL,
+    AccountType NVARCHAR(50) NOT NULL,
+    AccountNotes NVARCHAR(MAX),
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    IsActive BIT DEFAULT 1,
+    CONSTRAINT FK_ChartOfAccounts_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT UQ_ChartOfAccounts_CompanyCode UNIQUE (CompanyID, AccountCode)
+);
+GO
+
+-- GeneralLedger Table
+CREATE TABLE GeneralLedger (
+    TransactionID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    AccountID INT NOT NULL,
+    TransactionDate DATETIME2 NOT NULL,
+    Description NVARCHAR(200),
+    DebitAmount DECIMAL(18,2) DEFAULT 0.00,
+    CreditAmount DECIMAL(18,2) DEFAULT 0.00,
+    GLNotes NVARCHAR(MAX),
+    CurrencyCode CHAR(3) DEFAULT 'USD',
+    ExchangeRate DECIMAL(10,6) DEFAULT 1.000000,
+    UserID INT,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_GeneralLedger_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT FK_GeneralLedger_Account FOREIGN KEY (AccountID) REFERENCES ChartOfAccounts(AccountID),
+    CONSTRAINT FK_GeneralLedger_User FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+GO
+
+-- Customers Table
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    Name NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100),
+    Phone NVARCHAR(20),
+    Address NVARCHAR(200),
+    PaymentTerms NVARCHAR(50),
+    CustomerNotes NVARCHAR(MAX),
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_Customers_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+);
+GO
+
+-- Vendors Table
+CREATE TABLE Vendors (
+    VendorID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    Name NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100),
+    Phone NVARCHAR(20),
+    Address NVARCHAR(200),
+    PaymentTerms NVARCHAR(50),
+    VendorNotes NVARCHAR(MAX),
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_Vendors_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+);
+GO
+
+-- Invoices Table
+CREATE TABLE Invoices (
+    InvoiceID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    CustomerID INT NOT NULL,
+    InvoiceNumber NVARCHAR(50) NOT NULL,
+    InvoiceDate DATETIME2 NOT NULL,
+    DueDate DATETIME2 NOT NULL,
+    TotalAmount DECIMAL(18,2) NOT NULL,
+    Status NVARCHAR(20) DEFAULT 'Draft',
+    InvoiceNotes NVARCHAR(MAX),
+    CurrencyCode CHAR(3) DEFAULT 'USD',
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    UserID INT,
+    SubscriptionID INT NULL,
+    CONSTRAINT FK_Invoices_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT FK_Invoices_Customer FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    CONSTRAINT FK_Invoices_User FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    CONSTRAINT FK_Invoices_Subscription FOREIGN KEY (SubscriptionID) REFERENCES Subscriptions(SubscriptionID),
+    CONSTRAINT UQ_Invoices_CompanyNumber UNIQUE (CompanyID, InvoiceNumber)
+);
+GO
+
+-- InvoiceLineItems Table
+CREATE TABLE InvoiceLineItems (
+    LineItemID INT PRIMARY KEY IDENTITY(1,1),
+    InvoiceID INT NOT NULL,
+    InventoryID INT NULL,
+    Description NVARCHAR(200),
+    Quantity INT NOT NULL,
+    UnitPrice DECIMAL(18,2) NOT NULL,
+    TotalAmount DECIMAL(18,2) NOT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_InvoiceLineItems_Invoice FOREIGN KEY (InvoiceID) REFERENCES Invoices(InvoiceID),
+    CONSTRAINT FK_InvoiceLineItems_Inventory FOREIGN KEY (InventoryID) REFERENCES Inventory(InventoryID)
+);
+GO
+
+-- Bills Table
+CREATE TABLE Bills (
+    BillID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    VendorID INT NOT NULL,
+    BillNumber NVARCHAR(50) NOT NULL,
+    BillDate DATETIME2 NOT NULL,
+    DueDate DATETIME2 NOT NULL,
+    TotalAmount DECIMAL(18,2) NOT NULL,
+    Status NVARCHAR(20) DEFAULT 'Pending',
+    BillNotes NVARCHAR(MAX),
+    CurrencyCode CHAR(3) DEFAULT 'USD',
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    UserID INT,
+    CONSTRAINT FK_Bills_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT FK_Bills_Vendor FOREIGN KEY (VendorID) REFERENCES Vendors(VendorID),
+    CONSTRAINT FK_Bills_User FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    CONSTRAINT UQ_Bills_CompanyNumber UNIQUE (CompanyID, BillNumber)
+);
+GO
+
+-- BillLineItems Table
+CREATE TABLE BillLineItems (
+    LineItemID INT PRIMARY KEY IDENTITY(1,1),
+    BillID INT NOT NULL,
+    InventoryID INT NULL,
+    Description NVARCHAR(200),
+    Quantity INT NOT NULL,
+    UnitPrice DECIMAL(18,2) NOT NULL,
+    TotalAmount DECIMAL(18,2) NOT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_BillLineItems_Bill FOREIGN KEY (BillID) REFERENCES Bills(BillID),
+    CONSTRAINT FK_BillLineItems_Inventory FOREIGN KEY (InventoryID) REFERENCES Inventory(InventoryID)
+);
+GO
+
+-- Payments Table
+CREATE TABLE Payments (
+    PaymentID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    InvoiceID INT NULL,
+    BillID INT NULL,
+    PaymentDate DATETIME2 NOT NULL,
+    Amount DECIMAL(18,2) NOT NULL,
+    PaymentMethod NVARCHAR(50),
+    PaymentNotes NVARCHAR(MAX),
+    CurrencyCode CHAR(3) DEFAULT 'USD',
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    UserID INT,
+    CONSTRAINT FK_Payments_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT FK_Payments_Invoice FOREIGN KEY (InvoiceID) REFERENCES Invoices(InvoiceID),
+    CONSTRAINT FK_Payments_Bill FOREIGN KEY (BillID) REFERENCES Bills(BillID),
+    CONSTRAINT FK_Payments_User FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+GO
+
+-- BankAccounts Table
+CREATE TABLE BankAccounts (
+    BankAccountID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    AccountNumber NVARCHAR(50) UNIQUE NOT NULL,
+    BankName NVARCHAR(100),
+    AccountType NVARCHAR(50),
+    BankAcctNotes NVARCHAR(MAX),
+    CurrencyCode CHAR(3) DEFAULT 'USD',
+    Balance DECIMAL(18,2) DEFAULT 0.00,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_BankAccounts_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+);
+GO
+
+-- BankTransactions Table
+CREATE TABLE BankTransactions (
+    BankTransactionID INT PRIMARY KEY IDENTITY(1,1),
+    BankAccountID INT NOT NULL,
+    TransactionDate DATETIME2 NOT NULL,
+    TransactionNumber NVARCHAR(20) NULL,
+    Description NVARCHAR(MAX) NULL,
+    Amount DECIMAL(18,2) NOT NULL,
+    TransactionType NVARCHAR(20),
+    Reconciled BIT DEFAULT 0,
+    GeneralLedgerID INT NULL,
+    IsImported BIT DEFAULT 0,
+    MatchStatus NVARCHAR(20) DEFAULT 'Unmatched',
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_BankTransactions_BankAccount FOREIGN KEY (BankAccountID) REFERENCES BankAccounts(BankAccountID),
+    CONSTRAINT FK_BankTransactions_GeneralLedger FOREIGN KEY (GeneralLedgerID) REFERENCES GeneralLedger(TransactionID)
+);
+GO
+
+-- Inventory Table
+CREATE TABLE Inventory (
+    InventoryID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    ProductCode NVARCHAR(50) NOT NULL,
+    ProductName NVARCHAR(100) NOT NULL,
+    Quantity INT NOT NULL,
+    UnitPrice DECIMAL(18,2) NOT NULL,
+    CostPrice DECIMAL(18,2) NOT NULL,
+    InventoryNotes NVARCHAR(MAX) NULL,
+    ValuationMethod NVARCHAR(20) DEFAULT 'FIFO',
+    LocationID INT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_Inventory_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT FK_Inventory_Location FOREIGN KEY (LocationID) REFERENCES InventoryLocations(LocationID),
+    CONSTRAINT UQ_Inventory_CompanyProductCode UNIQUE (CompanyID, ProductCode)
+);
+GO
+
+-- Employees Table
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    Name NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100),
+    HourlyRate DECIMAL(18,2),
+    TaxWithholding DECIMAL(18,2),
+    EmployeeNotes NVARCHAR(MAX) NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_Employees_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+);
+GO
+
+-- Payroll Table
+CREATE TABLE Payroll (
+    PayrollID INT PRIMARY KEY IDENTITY(1,1),
+    EmployeeID INT NOT NULL,
+    PayPeriodStart DATETIME2 NOT NULL,
+    PayPeriodEnd DATETIME2 NOT NULL,
+    GrossPay DECIMAL(18,2) NOT NULL,
+    NetPay DECIMAL(18,2) NOT NULL,
+    TaxesWithheld DECIMAL(18,2) NOT NULL,
+    PaymentDate DATETIME2 NOT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_Payroll_Employee FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
+);
+GO
+
+-- TaxRates Table
+CREATE TABLE TaxRates (
+    TaxRateID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    TaxName NVARCHAR(50) NOT NULL,
+    Rate DECIMAL(5,2) NOT NULL,
+    Region NVARCHAR(100),
+    TaxRegime NVARCHAR(50) NULL,
+    EffectiveDate DATETIME2 NOT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_TaxRates_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+);
+GO
+
+-- TaxTransactions Table
+CREATE TABLE TaxTransactions (
+    TaxTransactionID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    InvoiceID INT NULL,
+    BillID INT NULL,
+    TaxRateID INT NOT NULL,
+    TaxAmount DECIMAL(18,2) NOT NULL,
+    TransactionDate DATETIME2 NOT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_TaxTransactions_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT FK_TaxTransactions_Invoice FOREIGN KEY (InvoiceID) REFERENCES Invoices(InvoiceID),
+    CONSTRAINT FK_TaxTransactions_Bill FOREIGN KEY (BillID) REFERENCES Bills(BillID),
+    CONSTRAINT FK_TaxTransactions_TaxRate FOREIGN KEY (TaxRateID) REFERENCES TaxRates(TaxRateID)
+);
+GO
+
+-- Budgets Table
+CREATE TABLE Budgets (
+    BudgetID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    AccountID INT NOT NULL,
+    Description NVARCHAR(200) NULL,
+    BudgetYear INT NOT NULL,
+    BudgetMonth INT NOT NULL,
+    Amount DECIMAL(18,2) NOT NULL,
+    BudgetNotes NVARCHAR(MAX) NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    UserID INT,
+    CONSTRAINT FK_Budgets_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT FK_Budgets_Account FOREIGN KEY (AccountID) REFERENCES ChartOfAccounts(AccountID),
+    CONSTRAINT FK_Budgets_User FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+GO
+
+-- Projects Table
+CREATE TABLE Projects (
+    ProjectID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    ProjectName NVARCHAR(200) NOT NULL,
+    CustomerID INT NOT NULL,
+    StartDate DATETIME2 NOT NULL,
+    EndDate DATETIME2,
+    Budget DECIMAL(18,2),
+    ProjectNotes NVARCHAR(MAX) NULL,
+    Status NVARCHAR(20),
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_Projects_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT FK_Projects_Customer FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+GO
+
+-- TimeEntries Table
+CREATE TABLE TimeEntries (
+    TimeEntryID INT PRIMARY KEY IDENTITY(1,1),
+    ProjectID INT NOT NULL,
+    EmployeeID INT NOT NULL,
+    WorkDate DATETIME2 NOT NULL,
+    Hours DECIMAL(5,2) NOT NULL,
+    TimeEntryNotes NVARCHAR(MAX) NULL,
+    Billable BIT DEFAULT 1,
+    Rate DECIMAL(18,2),
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_TimeEntries_Project FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID),
+    CONSTRAINT FK_TimeEntries_Employee FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
+);
+GO
+
+-- FixedAssets Table
+CREATE TABLE FixedAssets (
+    AssetID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    AssetName NVARCHAR(100) NOT NULL,
+    AssetTagNumber NVARCHAR(200),
+    PurchaseDate DATETIME2 NOT NULL,
+    PurchaseCost DECIMAL(18,2) NOT NULL,
+    DepreciationMethod NVARCHAR(20),
+    UsefulLifeYears INT,
+    AssetNotes NVARCHAR(MAX) NULL,
+    CurrentValue DECIMAL(18,2),
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    DisposalDate DATETIME2 NULL,
+    CONSTRAINT FK_FixedAssets_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+);
+GO
+
+-- ExchangeRates Table
+CREATE TABLE ExchangeRates (
+    ExchangeRateID INT PRIMARY KEY IDENTITY(1,1),
+    FromCurrency CHAR(3) NOT NULL,
+    ToCurrency CHAR(3) NOT NULL,
+    Rate DECIMAL(10,6) NOT NULL,
+    EffectiveDate DATETIME2 NOT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME()
+);
+GO
+
+-- AuditLog Table
+CREATE TABLE AuditLog (
+    AuditID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT NOT NULL,
+    CompanyID INT DEFAULT 0 NULL,
+    Action NVARCHAR(100),
+    TableName NVARCHAR(50),
+    RecordID INT,
+    ActionDate DATETIME2 DEFAULT SYSDATETIME(),
+    Details NVARCHAR(MAX),
+    CONSTRAINT FK_AuditLog_User FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    CONSTRAINT FK_AuditLog_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+);
+GO
+
+-- Subscriptions Table
+CREATE TABLE Subscriptions (
+    SubscriptionID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    CustomerID INT NOT NULL,
+    PlanName NVARCHAR(100) NOT NULL,
+    BillingCycle NVARCHAR(50),
+    RenewalDate DATETIME2 NOT NULL,
+    Status NVARCHAR(20) DEFAULT 'Active',
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_Subscriptions_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT FK_Subscriptions_Customer FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+GO
+
+-- Documents Table
+CREATE TABLE Documents (
+    DocumentID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    FilePath NVARCHAR(255) NOT NULL,
+    FileName NVARCHAR(100) NOT NULL,
+    UploadDate DATETIME2 DEFAULT SYSDATETIME(),
+    InvoiceID INT NULL,
+    BillID INT NULL,
+    CustomerID INT NULL,
+    VendorID INT NULL,
+    CONSTRAINT FK_Documents_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID),
+    CONSTRAINT FK_Documents_Invoice FOREIGN KEY (InvoiceID) REFERENCES Invoices(InvoiceID),
+    CONSTRAINT FK_Documents_Bill FOREIGN KEY (BillID) REFERENCES Bills(BillID),
+    CONSTRAINT FK_Documents_Customer FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    CONSTRAINT FK_Documents_Vendor FOREIGN KEY (VendorID) REFERENCES Vendors(VendorID)
+);
+GO
+
+-- InventoryLocations Table
+CREATE TABLE InventoryLocations (
+    LocationID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    LocationName NVARCHAR(100) NOT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_InventoryLocations_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+);
+GO
+
+-- PayrollDeductions Table
+CREATE TABLE PayrollDeductions (
+    DeductionID INT PRIMARY KEY IDENTITY(1,1),
+    PayrollID INT NOT NULL,
+    EmployeeID INT NOT NULL,
+    DeductionType NVARCHAR(50) NOT NULL,
+    Amount DECIMAL(18,2) NOT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_PayrollDeductions_Payroll FOREIGN KEY (PayrollID) REFERENCES Payroll(PayrollID),
+    CONSTRAINT FK_PayrollDeductions_Employee FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
+);
+GO
+
+-- CustomFields Table
+CREATE TABLE CustomFields (
+    CustomFieldID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    FieldName NVARCHAR(100) NOT NULL,
+    FieldType NVARCHAR(50) NOT NULL,
+    TableName NVARCHAR(50) NOT NULL,
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_CustomFields_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+);
+GO
+
+-- CustomFieldValues Table
+CREATE TABLE CustomFieldValues (
+    ValueID INT PRIMARY KEY IDENTITY(1,1),
+    CustomFieldID INT NOT NULL,
+    RecordID INT NOT NULL,
+    Value NVARCHAR(MAX),
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_CustomFieldValues_CustomField FOREIGN KEY (CustomFieldID) REFERENCES CustomFields(CustomFieldID)
+);
+GO
+
+-- Integrations Table
+CREATE TABLE Integrations (
+    IntegrationID INT PRIMARY KEY IDENTITY(1,1),
+    CompanyID INT NOT NULL,
+    IntegrationType NVARCHAR(50) NOT NULL,
+    APIKey NVARCHAR(255),
+    Settings NVARCHAR(MAX),
+    CreatedDate DATETIME2 DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_Integrations_Company FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+);
+GO
+
+-- Indexes
+CREATE UNIQUE NONCLUSTERED INDEX IX_Users_Username ON Users(Username);
+CREATE NONCLUSTERED INDEX IX_UserCompanyRole_UserID ON UserCompanyRole(UserID);
+CREATE NONCLUSTERED INDEX IX_UserCompanyRole_CompanyID ON UserCompanyRole(CompanyID);
+CREATE NONCLUSTERED INDEX IX_ChartOfAccounts_CompanyID_AccountType ON ChartOfAccounts(CompanyID, AccountType);
+CREATE NONCLUSTERED INDEX IX_GeneralLedger_CompanyID ON GeneralLedger(CompanyID);
+CREATE NONCLUSTERED INDEX IX_GeneralLedger_AccountID ON GeneralLedger(AccountID);
+CREATE NONCLUSTERED INDEX IX_GeneralLedger_TransactionDate ON GeneralLedger(TransactionDate);
+CREATE NONCLUSTERED INDEX IX_Customers_CompanyID ON Customers(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Vendors_CompanyID ON Vendors(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Invoices_CompanyID ON Invoices(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Invoices_CustomerID ON Invoices(CustomerID);
+CREATE NONCLUSTERED INDEX IX_Invoices_InvoiceDate ON Invoices(InvoiceDate);
+CREATE NONCLUSTERED INDEX IX_Invoices_SubscriptionID ON Invoices(SubscriptionID);
+CREATE NONCLUSTERED INDEX IX_InvoiceLineItems_InvoiceID ON InvoiceLineItems(InvoiceID);
+CREATE NONCLUSTERED INDEX IX_InvoiceLineItems_InventoryID ON InvoiceLineItems(InventoryID);
+CREATE NONCLUSTERED INDEX IX_Bills_CompanyID ON Bills(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Bills_VendorID ON Bills(VendorID);
+CREATE NONCLUSTERED INDEX IX_Bills_BillDate ON Bills(BillDate);
+CREATE NONCLUSTERED INDEX IX_BillLineItems_BillID ON BillLineItems(BillID);
+CREATE NONCLUSTERED INDEX IX_BillLineItems_InventoryID ON BillLineItems(InventoryID);
+CREATE NONCLUSTERED INDEX IX_Payments_CompanyID ON Payments(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Payments_InvoiceID ON Payments(InvoiceID);
+CREATE NONCLUSTERED INDEX IX_Payments_BillID ON Payments(BillID);
+CREATE NONCLUSTERED INDEX IX_BankAccounts_CompanyID ON BankAccounts(CompanyID);
+CREATE NONCLUSTERED INDEX IX_BankTransactions_BankAccountID ON BankTransactions(BankAccountID);
+CREATE NONCLUSTERED INDEX IX_BankTransactions_TransactionDate ON BankTransactions(TransactionDate);
+CREATE NONCLUSTERED INDEX IX_BankTransactions_IsImported ON BankTransactionsullie(IsImported);
+CREATE NONCLUSTERED INDEX IX_Inventory_CompanyID ON Inventory(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Inventory_LocationID ON Inventory(LocationID);
+CREATE NONCLUSTERED INDEX IX_Employees_CompanyID ON Employees(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Payroll_EmployeeID ON Payroll(EmployeeID);
+CREATE NONCLUSTERED INDEX IX_Payroll_PaymentDate ON Payroll(PaymentDate);
+CREATE NONCLUSTERED INDEX IX_TaxRates_CompanyID ON TaxRates(CompanyID);
+CREATE NONCLUSTERED INDEX IX_TaxRates_EffectiveDate ON TaxRates(EffectiveDate);
+CREATE NONCLUSTERED INDEX IX_TaxRates_TaxRegime ON TaxRates(TaxRegime);
+CREATE NONCLUSTERED INDEX IX_TaxTransactions_CompanyID ON TaxTransactions(CompanyID);
+CREATE NONCLUSTERED INDEX IX_TaxTransactions_InvoiceID ON TaxTransactions(InvoiceID);
+CREATE NONCLUSTERED INDEX IX_TaxTransactions_BillID ON TaxTransactions(BillID);
+CREATE NONCLUSTERED INDEX IX_Budgets_CompanyID ON Budgets(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Budgets_AccountID ON Budgets(AccountID);
+CREATE NONCLUSTERED INDEX IX_Projects_CompanyID ON Projects(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Projects_CustomerID ON Projects(CustomerID);
+CREATE NONCLUSTERED INDEX IX_TimeEntries_ProjectID ON TimeEntries(ProjectID);
+CREATE NONCLUSTERED INDEX IX_TimeEntries_EmployeeID ON TimeEntries(EmployeeID);
+CREATE NONCLUSTERED INDEX IX_FixedAssets_CompanyID ON FixedAssets(CompanyID);
+CREATE NONCLUSTERED INDEX IX_ExchangeRates_EffectiveDate ON ExchangeRates(EffectiveDate);
+CREATE NONCLUSTERED INDEX IX_AuditLog_UserID ON AuditLog(UserID);
+CREATE NONCLUSTERED INDEX IX_AuditLog_CompanyID ON AuditLog(CompanyID);
+CREATE NONCLUSTERED INDEX IX_AuditLog_ActionDate ON AuditLog(ActionDate);
+CREATE NONCLUSTERED INDEX IX_Subscriptions_CompanyID ON Subscriptions(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Subscriptions_CustomerID ON Subscriptions(CustomerID);
+CREATE NONCLUSTERED INDEX IX_Documents_CompanyID ON Documents(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Documents_InvoiceID ON Documents(InvoiceID);
+CREATE NONCLUSTERED INDEX IX_Documents_BillID ON Documents(BillID);
+CREATE NONCLUSTERED INDEX IX_Documents_CustomerID ON Documents(CustomerID);
+CREATE NONCLUSTERED INDEX IX_Documents_VendorID ON Documents(VendorID);
+CREATE NONCLUSTERED INDEX IX_InventoryLocations_CompanyID ON InventoryLocations(CompanyID);
+CREATE NONCLUSTERED INDEX IX_PayrollDeductions_PayrollID ON PayrollDeductions(PayrollID);
+CREATE NONCLUSTERED INDEX IX_PayrollDeductions_EmployeeID ON PayrollDeductions(EmployeeID);
+CREATE NONCLUSTERED INDEX IX_CustomFields_CompanyID ON CustomFields(CompanyID);
+CREATE NONCLUSTERED INDEX IX_CustomFields_TableName ON CustomFields(TableName);
+CREATE NONCLUSTERED INDEX IX_CustomFieldValues_CustomFieldID ON CustomFieldValues(CustomFieldID);
+CREATE NONCLUSTERED INDEX IX_CustomFieldValues_RecordID ON CustomFieldValues(RecordID);
+CREATE NONCLUSTERED INDEX IX_Integrations_CompanyID ON Integrations(CompanyID);
+CREATE NONCLUSTERED INDEX IX_Integrations_IntegrationType ON Integrations(IntegrationType);
+GO
+
+-- Audit Trigger Example for Subscriptions Table
+CREATE TRIGGER TR_Subscriptions_Audit
+ON Subscriptions
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @Action NVARCHAR(100);
+    IF EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted)
+        SET @Action = 'UPDATE';
+    ELSE IF EXISTS (SELECT * FROM inserted)
+        SET @Action = 'INSERT';
+    ELSE
+        SET @Action = 'DELETE';
+    INSERT INTO AuditLog (UserID, CompanyID, Action, TableName, RecordID, ActionDate, Details)
+    SELECT 
+        CONVERT(INT, CONTEXT_INFO()),
+        COALESCE(i.CompanyID, d.CompanyID),
+        @Action,
+        'Subscriptions',
+        COALESCE(i.SubscriptionID, d.SubscriptionID),
+        SYSDATETIME(),
+        NULL
+    FROM inserted i
+    FULL OUTER JOIN deleted d ON i.SubscriptionID = d.SubscriptionID;
+END;
+GO
