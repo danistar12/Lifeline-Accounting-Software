@@ -1,0 +1,8 @@
+django
+djangorestframework
+djangorestframework-simplejwt
+django-mssql-backend==2.8.1
+celery>=5.0.0
+redis>=4.0.0
+django-cors-headers==4.7.0
+Pillow>=10.0.0

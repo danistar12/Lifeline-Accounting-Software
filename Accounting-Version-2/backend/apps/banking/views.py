@@ -1,0 +1,35 @@
+from django.shortcuts import render
+from rest_framework import viewsets
+from .models import BankAccount, BankTransaction, BankReconciliation
+from .serializers import BankAccountSerializer, BankTransactionSerializer, BankReconciliationSerializer
+from apps.core.permissions import HasCompanyRole
+
+class BankAccountViewSet(viewsets.ModelViewSet):
+    queryset = BankAccount.objects.all()
+    serializer_class = BankAccountSerializer
+    permission_classes = [HasCompanyRole]
+    allowed_roles = ['Admin', 'Accountant', 'Viewer']
+
+    def get_queryset(self):
+        user = self.request.user
+        return BankAccount.objects.filter(company__in=user.companies.all())
+
+class BankTransactionViewSet(viewsets.ModelViewSet):
+    queryset = BankTransaction.objects.all()
+    serializer_class = BankTransactionSerializer
+    permission_classes = [HasCompanyRole]
+    allowed_roles = ['Admin', 'Accountant', 'Viewer']
+
+    def get_queryset(self):
+        user = self.request.user
+        return BankTransaction.objects.filter(bank_account__company__in=user.companies.all())
+
+class BankReconciliationViewSet(viewsets.ModelViewSet):
+    queryset = BankReconciliation.objects.all()
+    serializer_class = BankReconciliationSerializer
+    permission_classes = [HasCompanyRole]
+    allowed_roles = ['Admin', 'Accountant', 'Viewer']
+
+    def get_queryset(self):
+        user = self.request.user
+        return BankReconciliation.objects.filter(bank_account__company__in=user.companies.all())
