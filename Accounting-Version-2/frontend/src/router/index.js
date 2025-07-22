@@ -1,28 +1,60 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import AccountsView from '../views/AccountsView.vue';
-import BankingView from '../views/BankingView.vue';
-import CoreView from '../views/CoreView.vue';
-import DashboardView from '../views/DashboardView.vue';
-import DocumentsView from '../views/DocumentsView.vue';
-import ImporterView from '../views/ImporterView.vue';
-import PaymentsAPView from '../views/PaymentsAPView.vue';
-import PaymentsARView from '../views/PaymentsARView.vue';
-import PayrollView from '../views/PayrollView.vue';
-import ReportsView from '../views/ReportsView.vue';
-import SubscriptionsView from '../views/SubscriptionsView.vue';
+// Import views
+import DashboardView from '../views/dashboard/DashboardView.vue';
+
+// Core data management
+import CustomersView from '../views/customers/CustomersView.vue';
+import VendorsView from '../views/vendors/VendorsView.vue';
+
+// Accounts receivable
+import InvoicesView from '../views/invoicing/InvoicesView.vue';
+import PaymentsARView from '../views/invoicing/PaymentsARView.vue';
+
+// Accounts payable
+import BillsView from '../views/bills/BillsView.vue';
+import PaymentsAPView from '../views/bills/PaymentsAPView.vue';
+
+// Financial management
+import BankingView from '../views/banking/BankingView.vue';
+import InventoryView from '../views/inventory/InventoryView.vue';
+import PayrollView from '../views/payroll/PayrollView.vue';
+
+// Projects management
+import ProjectsView from '../views/projects/ProjectsView.vue';
+
+// Support functions
+import ReportsView from '../views/reports/ReportsView.vue';
+import DocumentsView from '../views/admin/DocumentsView.vue';
+import SubscriptionsView from '../views/settings/SubscriptionsView.vue';
 
 const routes = [
+  // Overview
   { path: '/', name: 'dashboard', component: DashboardView },
-  { path: '/accounts', name: 'accounts', component: AccountsView },
-  { path: '/banking', name: 'banking', component: BankingView },
-  { path: '/core', name: 'core', component: CoreView },
-  { path: '/documents', name: 'documents', component: DocumentsView },
-  { path: '/importer', name: 'importer', component: ImporterView },
-  { path: '/payments-ap', name: 'payments-ap', component: PaymentsAPView },
+  
+  // Core data management
+  { path: '/customers', name: 'customers', component: CustomersView },
+  { path: '/vendors', name: 'vendors', component: VendorsView },
+  
+  // Accounts receivable
+  { path: '/invoices', name: 'invoices', component: InvoicesView },
   { path: '/payments-ar', name: 'payments-ar', component: PaymentsARView },
+  
+  // Accounts payable
+  { path: '/bills', name: 'bills', component: BillsView },
+  { path: '/payments-ap', name: 'payments-ap', component: PaymentsAPView },
+  
+  // Financial management
+  { path: '/banking', name: 'banking', component: BankingView },
+  { path: '/inventory', name: 'inventory', component: InventoryView },
   { path: '/payroll', name: 'payroll', component: PayrollView },
+  
+  // Projects management
+  { path: '/projects', name: 'projects', component: ProjectsView },
+  
+  // Support functions
   { path: '/reports', name: 'reports', component: ReportsView },
+  { path: '/documents', name: 'documents', component: DocumentsView },
   { path: '/subscriptions', name: 'subscriptions', component: SubscriptionsView },
 ];
 

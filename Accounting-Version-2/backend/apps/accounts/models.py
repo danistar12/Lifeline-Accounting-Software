@@ -3,6 +3,13 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from apps.core.models import Company
 
 class User(AbstractUser):
+    user_id = models.AutoField(primary_key=True, db_column='UserID')
+    username = models.CharField(max_length=150, unique=True, db_column='Username')
+    password_hash = models.CharField(max_length=128, db_column='PasswordHash')
+    email = models.EmailField(db_column='Email')
+    user_notes = models.TextField(blank=True, null=True, db_column='UserNotes')
+    created_date = models.DateTimeField(auto_now_add=True, db_column='CreatedDate')
+    
     companies = models.ManyToManyField(Company, through='UserCompanyRole')
     groups = models.ManyToManyField(
         Group,
@@ -21,40 +28,38 @@ class User(AbstractUser):
         related_query_name="user",
     )
 
+    # Override the password field to use our custom field
+    def save(self, *args, **kwargs):
+        if self.password and not self.password_hash:
+            self.password_hash = self.password
+        super().save(*args, **kwargs)
+
     class Meta:
         db_table = 'Users'
 
 class UserCompanyRole(models.Model):
-    user_company_role_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    role = models.CharField(max_length=100) # e.g., 'Admin', 'Accountant', 'Viewer'
+    user_company_role_id = models.AutoField(primary_key=True, db_column='UserCompanyRoleID')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='UserID')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, db_column='CompanyID')
+    role = models.CharField(max_length=100, db_column='Role')  # e.g., 'Admin', 'Accountant', 'Viewer'
+    created_date = models.DateTimeField(auto_now_add=True, db_column='CreatedDate')
 
     class Meta:
         db_table = 'UserCompanyRole'
         unique_together = ('user', 'company')
 
-class ChartOfAccounts(models.Model):
-    account_id = models.AutoField(primary_key=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    account_code = models.CharField(max_length=20)
-    account_name = models.CharField(max_length=255)
-    account_type = models.CharField(max_length=50) # e.g., 'Asset', 'Liability', 'Equity', 'Revenue', 'Expense'
-    balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+class AuditLog(models.Model):
+    audit_id = models.AutoField(primary_key=True, db_column='AuditID')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, db_column='UserID')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, db_column='CompanyID')
+    action = models.CharField(max_length=100, db_column='Action')
+    table_name = models.CharField(max_length=100, db_column='TableName')
+    record_id = models.IntegerField(db_column='RecordID')
+    action_date = models.DateTimeField(auto_now_add=True, db_column='ActionDate')
+    details = models.TextField(blank=True, null=True, db_column='Details')
+
+    def __str__(self):
+        return f"{self.action} on {self.table_name} by {self.user}"
 
     class Meta:
-        db_table = 'ChartOfAccounts'
-        unique_together = ('company', 'account_code')
-
-class GeneralLedger(models.Model):
-    transaction_id = models.AutoField(primary_key=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    account = models.ForeignKey(ChartOfAccounts, on_delete=models.CASCADE)
-    date = models.DateField()
-    description = models.TextField()
-    debit = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-    credit = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-
-    class Meta:
-        db_table = 'GeneralLedger'
+        db_table = 'AuditLog'

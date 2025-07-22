@@ -1,0 +1,333 @@
+CustomFields
+ CustomFieldID
+ CompanyID
+ FieldName
+ FieldType
+ TableName
+ CreatedDate
+
+CustomFieldValues
+ ValueID
+ CustomFieldID
+ RecordID
+ Value
+ CreatedDate
+
+InvoiceLineItems
+ LineItemID
+ InvoiceID
+ InventoryID
+ Description
+ Quantity
+ UnitPrice
+ TotalAmount
+ CreatedDate
+
+Inventory
+ InventoryID
+ CompanyID
+ ProductCode
+ ProductName
+ Quantity
+ UnitPrice
+ CostPrice
+ InventoryNotes
+ ValuationMethod
+ LocationID
+ CreatedDate
+
+BillLineItems
+ LineItemID
+ BillID
+ InventoryID
+ Description
+ Quantity
+ UnitPrice
+ TotalAmount
+ CreatedDate
+
+InventoryLocations
+ LocationID
+ CompanyID
+ LocationName
+ CreatedDate
+
+PayrollDeductions
+ DeductionID
+ PayrollID
+ EmployeeID
+ DeductionType
+ Amount
+ CreatedDate
+
+Payroll
+ PayrollID
+ EmployeeID
+ PayPeriodStart
+ PayPeriodEnd
+ GrossPay
+ NetPay
+ TaxesWithheld
+ PaymentDate
+ CreatedDate
+
+Employees
+ EmployeeID
+ CompanyID
+ Name
+ Email
+ HourlyRate
+ TaxWithholding
+ EmployeeNotes
+ CreatedDate
+
+ TimeEntries
+ TimeEntryID
+ ProjectID
+ EmployeeID
+ WorkDate
+ Hours
+ TimeEntryNotes
+ Billable
+ Rate
+ CreatedDate
+
+Projects
+ ProjectID
+ CompanyID
+ ProjectName
+ CustomerID
+ StartDate
+ EndDate
+ Budget
+ ProjectNotes
+ Status
+ CreatedDate
+
+Customers
+ CustomerID
+ CompanyID
+ Name
+ Email
+ Phone
+ Address
+ PaymentTerms
+ CustomerNotes
+ CreatedDate
+
+Subscriptions
+ SubscriptionID
+ CompanyID
+ CustomerID
+ PlanName
+ BillingCycle
+ RenewalDate
+ Status
+ CreatedDate
+
+Documents
+ DocumentID
+ CompanyID
+ FilePath
+ FileName
+ UploadDate
+ InvoiceID
+ BillID
+ CustomerID
+ VendorID
+
+Vendors
+ VendorID
+ CompanyID
+ Name
+ Email
+ Phone
+ Address
+ PaymentTerms
+ VendorNotes
+ CreatedDate
+
+AuditLog
+ AuditID
+ UserID
+ CompanyID
+ Action
+ TableName
+ RecordID
+ ActionDate
+ Details
+
+Bills
+ BillID
+ CompanyID
+ VendorID
+ BillNumber
+ BillDate
+ DueDate
+ TotalAmount
+ Status
+ BillNotes
+ CurrencyCode
+ CreatedDate
+ UserID
+
+UserCompanyRole
+ UserCompanyRoleID
+ UserID
+ CompanyID
+ Role
+ CreatedDate
+
+Users
+ UserID
+ Username
+ PasswordHash
+ Email
+ UserNotes
+ CreatedDate
+
+ Budgets
+ BudgetID
+ CompanyID
+ AccountID
+ Description
+ BudgetYear
+ BudgetMonth
+ Amount
+ BudgetNotes
+ CreatedDate
+ UserID
+
+ ChartOfAccounts
+ AccountID
+ CompanyID
+ AccountCode
+ AccountName
+ AccountType
+ AccountNotes
+ CreatedDate
+ IsActive
+
+ FixedAssets
+ AssetID
+ CompanyID
+ AssetName
+ AssetTagNumber
+ PurchaseDate
+ PurchaseCost
+ DepreciationMethod
+ UsefulLifeYears
+ AssetNotes
+ CurrentValue
+ CreatedDate
+ DisposalDate
+
+BankAccounts
+ BankAccountID
+ CompanyID
+ AccountNumber
+ BankName
+ AccountType
+ BankAcctNotes
+ CurrencyCode
+ Balance
+ CreatedDate
+
+ BankTransactions
+ BankTransactionID
+ BankAccountID
+ TransactionDate
+ TransactionNumber
+ Description
+ Amount
+ TransactionType
+ Reconciled
+ GeneralLedgerID
+ IsImported
+ MatchStatus
+ CreatedDate
+
+GeneralLedger
+ TransactionID
+ CompanyID
+ AccountID
+ TransactionDate
+ Description
+ DebitAmount
+ CreditAmount
+ GLNotes
+ CurrencyCode
+ ExchangeRate
+ UserID
+ CreatedDate
+
+Integrations
+ IntegrationID
+ CompanyID
+ IntegrationType
+ APIKey
+ Settings
+ CreatedDate
+
+ Companies
+ CompanyID
+ CompanyName
+ CompanyNotes
+ AdminUserID
+ CreatedDate
+
+ Payments
+ PaymentID
+ CompanyID
+ InvoiceID
+ BillID
+ PaymentDate
+ Amount
+ PaymentMethod
+ PaymentNotes
+ CurrencyCode
+ CreatedDate
+ UserID
+
+ Invoices
+ InvoiceID
+ CompanyID
+ CustomerID
+ InvoiceNumber
+ InvoiceDate
+ DueDate
+ TotalAmount
+ Status
+ InvoiceNotes
+ CurrencyCode
+ CreatedDate
+ UserID
+ SubscriptionID
+
+ TaxTransactions
+ TaxTransactionID
+ CompanyID
+ InvoiceID
+ BillID
+ TaxRateID
+ TaxAmount
+ TransactionDate
+ CreatedDate
+
+TaxRates
+ TaxRateID
+ CompanyID
+ TaxName
+ Rate
+ Region
+ TaxRegime
+ EffectiveDate
+ CreatedDate
+
+ ExchangeRates
+ ExchangeRateID
+ FromCurrency
+ ToCurrency
+ Rate
+ EffectiveDate
+ CreatedDate
