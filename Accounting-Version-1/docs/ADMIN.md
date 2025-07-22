@@ -24,3 +24,8 @@ You will be prompted to enter:
 Once created, use these credentials to log in at `/admin/`.
 
 > Note: In a production environment, ensure you secure this interface behind HTTPS and restrict access by network or VPN as needed.
+user name: testuser
+password: testpass123
+
+user name: admin
+password: admin123

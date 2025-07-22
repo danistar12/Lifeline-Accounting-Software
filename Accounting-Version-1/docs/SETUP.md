@@ -78,5 +78,5 @@ Use these credentials at `http://localhost:8000/admin/`.
 user name: testuser
 password: testpass123
 
-user name: User1
-password: Password#1
+user name: admin
+password: admin123
