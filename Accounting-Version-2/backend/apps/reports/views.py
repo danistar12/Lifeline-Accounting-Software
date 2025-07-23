@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Sum
 from apps.core.permissions import HasCompanyRole
-from apps.accounts.models import ChartOfAccounts, GeneralLedger
+from apps.core.models import ChartOfAccounts, GeneralLedger
 from apps.banking.models import BankTransaction
 
 class ProfitLossView(APIView):

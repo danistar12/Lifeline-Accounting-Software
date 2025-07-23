@@ -1,8 +1,9 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from apps.core.models import Company
-from apps.accounts.models import User, UserCompanyRole, ChartOfAccounts
-from .models import BankAccount, BankTransaction, BankReconciliation
+from apps.accounts.models import User, UserCompanyRole
+from apps.core.models import ChartOfAccounts
+from .models import BankAccount, BankTransaction
 
 class BankingAPITest(APITestCase):
     def setUp(self):

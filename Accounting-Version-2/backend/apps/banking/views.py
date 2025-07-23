@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import BankAccount, BankTransaction, BankReconciliation
-from .serializers import BankAccountSerializer, BankTransactionSerializer, BankReconciliationSerializer
+from .models import BankAccount, BankTransaction
+from .serializers import BankAccountSerializer, BankTransactionSerializer
 from apps.core.permissions import HasCompanyRole
 
 class BankAccountViewSet(viewsets.ModelViewSet):
@@ -23,13 +23,3 @@ class BankTransactionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return BankTransaction.objects.filter(bank_account__company__in=user.companies.all())
-
-class BankReconciliationViewSet(viewsets.ModelViewSet):
-    queryset = BankReconciliation.objects.all()
-    serializer_class = BankReconciliationSerializer
-    permission_classes = [HasCompanyRole]
-    allowed_roles = ['Admin', 'Accountant', 'Viewer']
-
-    def get_queryset(self):
-        user = self.request.user
-        return BankReconciliation.objects.filter(bank_account__company__in=user.companies.all())

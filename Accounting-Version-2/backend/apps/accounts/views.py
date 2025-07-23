@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import User, UserCompanyRole, ChartOfAccounts, GeneralLedger
+from .models import User, UserCompanyRole
+from apps.core.models import ChartOfAccounts, GeneralLedger
 from .serializers import UserSerializer, UserCompanyRoleSerializer, ChartOfAccountsSerializer, GeneralLedgerSerializer
 from apps.core.permissions import HasCompanyRole
 

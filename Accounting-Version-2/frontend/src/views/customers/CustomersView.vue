@@ -3,10 +3,15 @@
     <h1 class="page-title">Customers</h1>
     
     <div class="toolbar">
-      <button class="btn btn-primary">New Customer</button>
+      <button class="btn btn-primary" @click="createCustomer">New Customer</button>
       <div class="filters">
-        <input type="text" placeholder="Search customers..." class="search-input" />
-        <select class="filter-select">
+        <input 
+          type="text" 
+          placeholder="Search customers..." 
+          class="search-input"
+          v-model="searchTerm"
+        />
+        <select class="filter-select" v-model="statusFilter">
           <option value="all">All Customers</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
@@ -16,74 +21,120 @@
     
     <div class="card">
       <div class="card-body">
-        <table class="customers-table">
+        <!-- Loading state -->
+        <div v-if="loading" class="loading-state">
+          Loading customers...
+        </div>
+        
+        <!-- Error state -->
+        <div v-else-if="error" class="error-state">
+          {{ error }}
+          <button @click="loadCustomers" class="btn btn-sm">Retry</button>
+        </div>
+        
+        <!-- Empty state -->
+        <div v-else-if="filteredCustomers().length === 0" class="empty-state">
+          No customers found.
+        </div>
+        
+        <!-- Customers table -->
+        <table v-else class="customers-table">
           <thead>
             <tr>
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Balance</th>
-              <th>Status</th>
+              <th>Payment Terms</th>
+              <th>Created Date</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Acme Corporation</td>
-              <td>contact@acmecorp.com</td>
-              <td>(555) 123-4567</td>
-              <td>$3,750.00</td>
-              <td><span class="badge badge-success">Active</span></td>
+            <tr v-for="customer in filteredCustomers()" :key="customer.customer_id">
+              <td>{{ customer.name }}</td>
+              <td>{{ customer.email || 'N/A' }}</td>
+              <td>{{ customer.phone || 'N/A' }}</td>
+              <td>{{ customer.payment_terms || 'Net 30' }}</td>
+              <td>{{ new Date(customer.created_date).toLocaleDateString() }}</td>
               <td>
-                <button class="btn btn-sm btn-outline">View</button>
-                <button class="btn btn-sm btn-outline">Edit</button>
-              </td>
-            </tr>
-            <tr>
-              <td>TechStart Inc</td>
-              <td>info@techstart.com</td>
-              <td>(555) 234-5678</td>
-              <td>$1,200.00</td>
-              <td><span class="badge badge-success">Active</span></td>
-              <td>
-                <button class="btn btn-sm btn-outline">View</button>
-                <button class="btn btn-sm btn-outline">Edit</button>
-              </td>
-            </tr>
-            <tr>
-              <td>Global Services LLC</td>
-              <td>contact@globalservices.com</td>
-              <td>(555) 345-6789</td>
-              <td>$0.00</td>
-              <td><span class="badge badge-neutral">Inactive</span></td>
-              <td>
-                <button class="btn btn-sm btn-outline">View</button>
-                <button class="btn btn-sm btn-outline">Edit</button>
+                <button class="btn btn-sm btn-outline" @click="viewCustomer(customer)">View</button>
+                <button class="btn btn-sm btn-outline" @click="editCustomer(customer)">Edit</button>
+                <button class="btn btn-sm btn-danger" @click="deleteCustomer(customer)">Delete</button>
               </td>
             </tr>
           </tbody>
         </table>
-        
-        <div class="pagination">
-          <button class="btn btn-sm">&laquo; Previous</button>
-          <span class="page-info">Page 1 of 1</span>
-          <button class="btn btn-sm">Next &raquo;</button>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { contactsService } from '@/services';
+
 export default {
   name: 'CustomersView',
   data() {
     return {
-      // Data will be populated from API calls
+      customers: [],
+      loading: false,
+      searchTerm: '',
+      statusFilter: 'all',
+      error: null
     };
   },
+  async mounted() {
+    await this.loadCustomers();
+  },
   methods: {
-    // Methods to handle customer actions
+    async loadCustomers() {
+      this.loading = true;
+      try {
+        this.customers = await contactsService.getCustomers();
+      } catch (error) {
+        console.error('Error loading customers:', error);
+        this.error = 'Failed to load customers';
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    async createCustomer() {
+      // TODO: Implement customer creation modal/form
+      console.log('Create customer clicked');
+    },
+    
+    async viewCustomer(customer) {
+      console.log('View customer:', customer);
+      // TODO: Navigate to customer detail view
+    },
+    
+    async editCustomer(customer) {
+      console.log('Edit customer:', customer);
+      // TODO: Implement customer edit modal/form
+    },
+    
+    async deleteCustomer(customer) {
+      if (confirm(`Are you sure you want to delete ${customer.name}?`)) {
+        try {
+          await contactsService.deleteCustomer(customer.customer_id);
+          await this.loadCustomers(); // Reload the list
+        } catch (error) {
+          console.error('Error deleting customer:', error);
+          alert('Failed to delete customer');
+        }
+      }
+    },
+    
+    filteredCustomers() {
+      return this.customers.filter(customer => {
+        const matchesSearch = customer.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                            customer.email?.toLowerCase().includes(this.searchTerm.toLowerCase());
+        const matchesStatus = this.statusFilter === 'all' || 
+                            (this.statusFilter === 'active' && customer.is_active !== false);
+        return matchesSearch && matchesStatus;
+      });
+    }
   }
 };
 </script>

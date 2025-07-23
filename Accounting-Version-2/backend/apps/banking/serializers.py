@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BankAccount, BankTransaction, BankReconciliation
+from .models import BankAccount, BankTransaction
 
 class BankAccountSerializer(serializers.ModelSerializer):
     class Meta:
@@ -9,9 +9,4 @@ class BankAccountSerializer(serializers.ModelSerializer):
 class BankTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankTransaction
-        fields = '__all__'
-
-class BankReconciliationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BankReconciliation
         fields = '__all__'

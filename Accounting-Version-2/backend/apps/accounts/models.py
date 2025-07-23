@@ -7,8 +7,14 @@ class User(AbstractUser):
     username = models.CharField(max_length=150, unique=True, db_column='Username')
     password_hash = models.CharField(max_length=128, db_column='PasswordHash')
     email = models.EmailField(db_column='Email')
+    first_name = models.CharField(max_length=30, blank=True, db_column='FirstName')
+    last_name = models.CharField(max_length=30, blank=True, db_column='LastName')
+    phone = models.CharField(max_length=20, blank=True, null=True, db_column='Phone')
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, db_column='Avatar')
     user_notes = models.TextField(blank=True, null=True, db_column='UserNotes')
     created_date = models.DateTimeField(auto_now_add=True, db_column='CreatedDate')
+    last_login_date = models.DateTimeField(blank=True, null=True, db_column='LastLoginDate')
+    is_active = models.BooleanField(default=True, db_column='IsActive')
     
     companies = models.ManyToManyField(Company, through='UserCompanyRole')
     groups = models.ManyToManyField(
@@ -33,6 +39,9 @@ class User(AbstractUser):
         if self.password and not self.password_hash:
             self.password_hash = self.password
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.username} ({self.email})"
 
     class Meta:
         db_table = 'Users'

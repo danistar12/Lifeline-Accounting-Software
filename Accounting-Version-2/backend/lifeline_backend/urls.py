@@ -16,9 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/auth/', include('apps.accounts.auth_urls')),
     path('api/core/', include('apps.core.urls')),
     path('api/accounts/', include('apps.accounts.urls')),
     path('api/payroll/', include('apps.payroll.urls')),
@@ -26,7 +29,16 @@ urlpatterns = [
     path('api/documents/', include('apps.documents.urls')),
     path('api/banking/', include('apps.banking.urls')),
     path('api/reports/', include('apps.reports.urls')),
-    path('api/payments-ap/', include('apps.payments_ap.urls')),
-    path('api/payments-ar/', include('apps.payments_ar.urls')),
+    path('api/payments/', include('apps.payments.urls')),
     path('api/inventory/', include('apps.inventory.urls')),
+    path('api/projects/', include('apps.project_tracking.urls')),
+    path('api/tax/', include('apps.tax.urls')),
+    path('api/finance/', include('apps.finance.urls')),
+    path('api/customization/', include('apps.customization.urls')),
+    path('api/system/', include('apps.system.urls')),
+    path('api/contacts/', include('apps.contacts.urls')),
 ]
+
+# Serve media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

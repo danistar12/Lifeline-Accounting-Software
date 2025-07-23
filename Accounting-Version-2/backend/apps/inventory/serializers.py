@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from .models import InventoryCategory, InventoryItem
+from .models import InventoryLocation, Inventory
 
-class InventoryCategorySerializer(serializers.ModelSerializer):
+class InventoryLocationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = InventoryCategory
+        model = InventoryLocation
         fields = '__all__'
 
-class InventoryItemSerializer(serializers.ModelSerializer):
+class InventorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = InventoryItem
+        model = Inventory
         fields = '__all__'

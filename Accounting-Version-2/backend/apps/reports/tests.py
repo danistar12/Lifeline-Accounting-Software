@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase
-from apps.core.models import Company
-from apps.accounts.models import User, UserCompanyRole, ChartOfAccounts, GeneralLedger
+from apps.core.models import Company, ChartOfAccounts, GeneralLedger
+from apps.accounts.models import User, UserCompanyRole
 from apps.banking.models import BankAccount, BankTransaction
 from django.utils import timezone
 
