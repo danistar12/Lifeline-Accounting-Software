@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.hashers import check_password
 from apps.core.models import Company
 
 class User(AbstractUser):
@@ -34,11 +35,22 @@ class User(AbstractUser):
         related_query_name="user",
     )
 
-    # Override the password field to use our custom field
     def save(self, *args, **kwargs):
-        if self.password and not self.password_hash:
+        # Sync password and password_hash fields
+        if self.password and self.password != self.password_hash:
             self.password_hash = self.password
+        elif self.password_hash and self.password_hash != self.password:
+            self.password = self.password_hash
         super().save(*args, **kwargs)
+
+    def check_password(self, raw_password):
+        """Check if the given raw password is correct."""
+        return check_password(raw_password, self.password_hash or self.password)
+
+    def set_password(self, raw_password):
+        """Set the password and sync both fields."""
+        super().set_password(raw_password)
+        self.password_hash = self.password
 
     def __str__(self):
         return f"{self.username} ({self.email})"

@@ -101,6 +101,33 @@ DATABASES = {
     }
 }
 
+# Development Note: Using SQLite for local development
+# Production MSSQL connection will be configured separately when ready
+
+# PRODUCTION MSSQL CONNECTION (commented out for development):
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mssql',
+#         'NAME': 'LifelineAccounting',
+#         'USER': 'LLAcct',
+#         'PASSWORD': 'SilverMoon#3',
+#         'HOST': '10.100.5.27',
+#         'PORT': '1433',
+#         'OPTIONS': {
+#             'driver': 'SQL Server',
+#         },
+#     }
+# }
+
+# MSSQL Connection String for direct pyodbc usage (if needed):
+# MSSQL_CONNECTION_STRING = (
+#     'DRIVER={SQL Server};'
+#     'SERVER=10.100.5.27;'
+#     'DATABASE=LifelineAccounting;'
+#     'UID=LLAcct;'
+#     'PWD=SilverMoon#3'
+# )
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
