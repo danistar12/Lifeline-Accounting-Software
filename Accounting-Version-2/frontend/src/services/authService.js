@@ -9,6 +9,15 @@ const authService = {
       // Store tokens in localStorage
       localStorage.setItem('access_token', response.data.access)
       localStorage.setItem('refresh_token', response.data.refresh)
+      
+      // Set active company if user has companies
+      if (response.data.user.companies && response.data.user.companies.length > 0) {
+        // Set the first company as active by default
+        const activeCompany = response.data.user.companies[0]
+        response.data.user.activeCompany = activeCompany
+        localStorage.setItem('activeCompanyId', activeCompany.company_id)
+      }
+      
       localStorage.setItem('user', JSON.stringify(response.data.user))
       
       // Set the default authorization header
@@ -120,6 +129,38 @@ const authService = {
     if (token) {
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`
     }
+    
+    // Initialize company ID header
+    const companyId = localStorage.getItem('activeCompanyId')
+    if (companyId) {
+      apiClient.defaults.headers.common['X-Company-ID'] = companyId
+    } else {
+      // If no active company is set but user has companies, set the first one as active
+      const user = this.getCurrentUser()
+      if (user && user.companies && user.companies.length > 0) {
+        const firstCompanyId = user.companies[0].company_id
+        this.setActiveCompany(firstCompanyId)
+      }
+    }
+  },
+  
+  // Set active company
+  setActiveCompany(companyId) {
+    const user = this.getCurrentUser();
+    if (!user || !user.companies) return false;
+    
+    const company = user.companies.find(c => c.company_id === companyId);
+    if (!company) return false;
+    
+    // Update user object with new active company
+    user.activeCompany = company;
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('activeCompanyId', companyId);
+    
+    // Update header for future requests
+    apiClient.defaults.headers.common['X-Company-ID'] = companyId;
+    
+    return true;
   }
 }
 

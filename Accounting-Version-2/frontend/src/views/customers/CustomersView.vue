@@ -66,6 +66,96 @@
         </table>
       </div>
     </div>
+
+    <!-- Customer Modal -->
+    <div v-if="showModal" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>{{ modalMode === 'view' ? 'View Customer' : modalMode === 'edit' ? 'Edit Customer' : 'New Customer' }}</h3>
+          <button class="close-btn" @click="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Name: <span class="required">*</span></label>
+            <input 
+              v-if="modalMode !== 'view'" 
+              type="text" 
+              v-model="selectedCustomer.name" 
+              class="form-control"
+              required
+            />
+            <span v-else class="form-value">{{ selectedCustomer.name }}</span>
+          </div>
+          
+          <div class="form-group">
+            <label>Email:</label>
+            <input 
+              v-if="modalMode !== 'view'" 
+              type="email" 
+              v-model="selectedCustomer.email" 
+              class="form-control"
+            />
+            <span v-else class="form-value">{{ selectedCustomer.email || 'N/A' }}</span>
+          </div>
+          
+          <div class="form-group">
+            <label>Phone:</label>
+            <input 
+              v-if="modalMode !== 'view'" 
+              type="text" 
+              v-model="selectedCustomer.phone" 
+              class="form-control"
+            />
+            <span v-else class="form-value">{{ selectedCustomer.phone || 'N/A' }}</span>
+          </div>
+          
+          <div class="form-group">
+            <label>Address:</label>
+            <textarea 
+              v-if="modalMode !== 'view'" 
+              v-model="selectedCustomer.address" 
+              class="form-control"
+              rows="3"
+            ></textarea>
+            <span v-else class="form-value">{{ selectedCustomer.address || 'N/A' }}</span>
+          </div>
+          
+          <div class="form-group">
+            <label>Payment Terms:</label>
+            <select 
+              v-if="modalMode !== 'view'" 
+              v-model="selectedCustomer.payment_terms" 
+              class="form-control"
+            >
+              <option value="Net 15">Net 15</option>
+              <option value="Net 30">Net 30</option>
+              <option value="Net 45">Net 45</option>
+              <option value="Net 60">Net 60</option>
+              <option value="Due on Receipt">Due on Receipt</option>
+              <option value="COD">Cash on Delivery</option>
+            </select>
+            <span v-else class="form-value">{{ selectedCustomer.payment_terms || 'Net 30' }}</span>
+          </div>
+          
+          <div class="form-group">
+            <label>Customer Notes:</label>
+            <textarea 
+              v-if="modalMode !== 'view'" 
+              v-model="selectedCustomer.customer_notes" 
+              class="form-control"
+              rows="3"
+              placeholder="Any special notes about this customer..."
+            ></textarea>
+            <span v-else class="form-value">{{ selectedCustomer.customer_notes || 'No notes' }}</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button v-if="modalMode === 'edit'" class="btn btn-primary" @click="saveCustomer" :disabled="!selectedCustomer.name">Save Changes</button>
+          <button v-if="modalMode === 'create'" class="btn btn-primary" @click="createNewCustomer" :disabled="!selectedCustomer.name">Create Customer</button>
+          <button class="btn btn-secondary" @click="closeModal">{{ modalMode === 'view' ? 'Close' : 'Cancel' }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -80,7 +170,10 @@ export default {
       loading: false,
       searchTerm: '',
       statusFilter: 'all',
-      error: null
+      error: null,
+      showModal: false,
+      modalMode: 'view', // 'view', 'edit', or 'create'
+      selectedCustomer: {}
     };
   },
   async mounted() {
@@ -91,6 +184,7 @@ export default {
       this.loading = true;
       try {
         this.customers = await contactsService.getCustomers();
+        console.log('Loaded customers:', this.customers); // Debug log
       } catch (error) {
         console.error('Error loading customers:', error);
         this.error = 'Failed to load customers';
@@ -100,18 +194,62 @@ export default {
     },
     
     async createCustomer() {
-      // TODO: Implement customer creation modal/form
-      console.log('Create customer clicked');
+      this.selectedCustomer = {
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        payment_terms: 'Net 30',
+        customer_notes: ''
+      };
+      this.modalMode = 'create';
+      this.showModal = true;
     },
     
     async viewCustomer(customer) {
-      console.log('View customer:', customer);
-      // TODO: Navigate to customer detail view
+      this.selectedCustomer = { ...customer };
+      this.modalMode = 'view';
+      this.showModal = true;
     },
     
     async editCustomer(customer) {
-      console.log('Edit customer:', customer);
-      // TODO: Implement customer edit modal/form
+      this.selectedCustomer = { ...customer };
+      this.modalMode = 'edit';
+      this.showModal = true;
+    },
+
+    closeModal() {
+      this.showModal = false;
+      this.selectedCustomer = {};
+    },
+
+    async saveCustomer() {
+      try {
+        await contactsService.updateCustomer(this.selectedCustomer.customer_id, this.selectedCustomer);
+        await this.loadCustomers(); // Reload the list
+        this.closeModal();
+        alert('Customer updated successfully!');
+      } catch (error) {
+        console.error('Error updating customer:', error);
+        alert('Failed to update customer');
+      }
+    },
+
+    async createNewCustomer() {
+      if (!this.selectedCustomer.name.trim()) {
+        alert('Customer name is required');
+        return;
+      }
+      
+      try {
+        await contactsService.createCustomer(this.selectedCustomer);
+        await this.loadCustomers(); // Reload the list
+        this.closeModal();
+        alert('Customer created successfully!');
+      } catch (error) {
+        console.error('Error creating customer:', error);
+        alert('Failed to create customer');
+      }
     },
     
     async deleteCustomer(customer) {
@@ -205,6 +343,28 @@ export default {
 .customers-table td {
   padding: 14px 20px;
   border-bottom: 1px solid #eee;
+  color: #333; /* Ensure text is dark, not grey */
+}
+
+.btn {
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .badge {
@@ -237,6 +397,152 @@ export default {
   color: #2a5298;
   background: transparent;
   cursor: pointer;
+}
+
+.btn-outline:hover {
+  background-color: #2a5298;
+  color: white;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: 1px solid #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.loading-state, .error-state, .empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #2a5298;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px;
+  border-top: 1px solid #eee;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
+.required {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #2a5298;
+  box-shadow: 0 0 0 2px rgba(42, 82, 152, 0.1);
+}
+
+.form-control:invalid {
+  border-color: #dc3545;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-value {
+  display: block;
+  padding: 8px 0;
+  color: #333;
+  min-height: 20px;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: 1px solid #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
 }
 
 .pagination {

@@ -1,139 +1,172 @@
 
 <template>
   <div v-if="isAuthenticated" class="app-container">
-    <!-- Top Navigation Bar -->
     <header class="top-nav">
+      <!-- Left Section: Logo & Mobile Menu -->
       <div class="nav-left">
+        <button class="mobile-menu-button" :class="{ active: showMobileMenu }" @click="toggleMobileMenu">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
         <div class="logo-section">
-          <img src="/logo.png" alt="Lifeline Logo" class="logo" />
-          <h1 class="app-title">Lifeline Accounting</h1>
+          <img src="/logo.png" alt="Logo" class="logo desktop-logo">
+          <h1 class="app-title">Lifeline</h1>
         </div>
       </div>
-      
-      <nav class="nav-menu">
+
+      <nav class="nav-menu" :class="{ 'mobile-open': showMobileMenu }">
         <!-- Dashboard -->
-        <router-link to="/" class="nav-item" :class="{ active: $route.name === 'dashboard' }">
-          <span class="icon">🏠</span>
+        <router-link to="/dashboard" class="nav-item" :class="{ active: $route.name === 'dashboard' }" @click="closeMobileMenu">
+          <span class="icon">📊</span>
           <span>Dashboard</span>
         </router-link>
-        
-        <!-- Customers & Vendors Dropdown -->
+
+        <!-- Business Dropdown -->
         <div class="nav-dropdown">
           <div class="nav-item dropdown-trigger" 
-               :class="{ active: ['customers', 'vendors'].includes($route.name) || activeDropdown === 'contacts' }"
-               @click="toggleDropdown('contacts')">
-            <span class="icon">👥</span>
-            <span>Contacts</span>
+               :class="{ active: ['customers', 'vendors', 'projects', 'inventory'].includes($route.name) || activeDropdown === 'business' }"
+               @click="toggleDropdown('business')">
+            <span class="icon">🏢</span>
+            <span>Business</span>
             <span class="dropdown-arrow">▼</span>
           </div>
-          <div v-show="activeDropdown === 'contacts'" class="dropdown-menu">
-            <router-link to="/customers" class="dropdown-item">
+          <div v-show="activeDropdown === 'business'" class="dropdown-menu">
+            <router-link to="/customers" class="dropdown-item" @click="closeMobileMenu">
               <span class="icon">👤</span>
               <span>Customers</span>
             </router-link>
-            <router-link to="/vendors" class="dropdown-item">
+            <router-link to="/vendors" class="dropdown-item" @click="closeMobileMenu">
               <span class="icon">🚚</span>
               <span>Vendors</span>
             </router-link>
+            <router-link to="/projects" class="dropdown-item" @click="closeMobileMenu">
+              <span class="icon">📋</span>
+              <span>Projects</span>
+            </router-link>
+            <router-link to="/inventory" class="dropdown-item" @click="closeMobileMenu">
+              <span class="icon">📦</span>
+              <span>Inventory</span>
+            </router-link>
           </div>
         </div>
-        
-        <!-- Financial Dropdown -->
+
+        <!-- Banking & Payments -->
         <div class="nav-dropdown">
           <div class="nav-item dropdown-trigger" 
-               :class="{ active: ['payments', 'banking', 'invoices', 'bills'].includes($route.name) || activeDropdown === 'financial' }"
+               :class="{ active: ['banking', 'payments', 'invoices', 'bills'].includes($route.name) || activeDropdown === 'banking' }"
+               @click="toggleDropdown('banking')">
+            <span class="icon">🏦</span>
+            <span>Banking</span>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+          <div v-show="activeDropdown === 'banking'" class="dropdown-menu">
+            <router-link to="/banking" class="dropdown-item" @click="closeMobileMenu">
+              <span class="icon">🏦</span>
+              <span>Accounts</span>
+            </router-link>
+            <router-link to="/payments" class="dropdown-item" @click="closeMobileMenu">
+              <span class="icon">💳</span>
+              <span>Payments</span>
+            </router-link>
+            <router-link to="/invoices" class="dropdown-item" @click="closeMobileMenu">
+              <span class="icon">🧾</span>
+              <span>Invoices</span>
+            </router-link>
+            <router-link to="/bills" class="dropdown-item" @click="closeMobileMenu">
+              <span class="icon">📃</span>
+              <span>Bills</span>
+            </router-link>
+          </div>
+        </div>
+
+        <!-- Financial -->
+        <div class="nav-dropdown">
+          <div class="nav-item dropdown-trigger" 
+               :class="{ active: ['payroll', 'taxes', 'expenses'].includes($route.name) || activeDropdown === 'financial' }"
                @click="toggleDropdown('financial')">
             <span class="icon">💰</span>
             <span>Financial</span>
             <span class="dropdown-arrow">▼</span>
           </div>
           <div v-show="activeDropdown === 'financial'" class="dropdown-menu">
-            <router-link to="/payments" class="dropdown-item">
-              <span class="icon">💳</span>
-              <span>Payments</span>
-            </router-link>
-            <router-link to="/banking" class="dropdown-item">
-              <span class="icon">🏦</span>
-              <span>Banking</span>
-            </router-link>
-            <router-link to="/invoices" class="dropdown-item">
-              <span class="icon">📧</span>
-              <span>Invoices</span>
-            </router-link>
-            <router-link to="/bills" class="dropdown-item">
-              <span class="icon">📄</span>
-              <span>Bills</span>
-            </router-link>
-          </div>
-        </div>
-        
-        <!-- Operations Dropdown -->
-        <div class="nav-dropdown">
-          <div class="nav-item dropdown-trigger" 
-               :class="{ active: ['projects', 'inventory', 'payroll'].includes($route.name) || activeDropdown === 'operations' }"
-               @click="toggleDropdown('operations')">
-            <span class="icon">⚙️</span>
-            <span>Operations</span>
-            <span class="dropdown-arrow">▼</span>
-          </div>
-          <div v-show="activeDropdown === 'operations'" class="dropdown-menu">
-            <router-link to="/projects" class="dropdown-item">
-              <span class="icon">📋</span>
-              <span>Projects</span>
-            </router-link>
-            <router-link to="/inventory" class="dropdown-item">
-              <span class="icon">📦</span>
-              <span>Inventory</span>
-            </router-link>
-            <router-link to="/payroll" class="dropdown-item">
+            <router-link to="/payroll" class="dropdown-item" @click="closeMobileMenu">
               <span class="icon">💼</span>
               <span>Payroll</span>
             </router-link>
+            <router-link to="/taxes" class="dropdown-item" @click="closeMobileMenu">
+              <span class="icon">📊</span>
+              <span>Taxes</span>
+            </router-link>
+            <router-link to="/expenses" class="dropdown-item" @click="closeMobileMenu">
+              <span class="icon">💸</span>
+              <span>Expenses</span>
+            </router-link>
           </div>
         </div>
         
-        <!-- Reports & More Dropdown -->
+        <!-- Reports & Admin -->
         <div class="nav-dropdown">
           <div class="nav-item dropdown-trigger" 
                :class="{ active: ['reports', 'documents', 'subscriptions'].includes($route.name) || activeDropdown === 'reports' }"
                @click="toggleDropdown('reports')">
             <span class="icon">📊</span>
-            <span>Reports & More</span>
+            <span>Reports</span>
             <span class="dropdown-arrow">▼</span>
           </div>
           <div v-show="activeDropdown === 'reports'" class="dropdown-menu">
-            <router-link to="/reports" class="dropdown-item">
+            <router-link to="/reports" class="dropdown-item" @click="closeMobileMenu">
               <span class="icon">📊</span>
-              <span>Reports</span>
+              <span>Analytics</span>
             </router-link>
-            <router-link to="/documents" class="dropdown-item">
+            <router-link to="/documents" class="dropdown-item" @click="closeMobileMenu">
               <span class="icon">📄</span>
               <span>Documents</span>
             </router-link>
-            <router-link to="/subscriptions" class="dropdown-item">
+            <router-link to="/subscriptions" class="dropdown-item" @click="closeMobileMenu">
               <span class="icon">🔄</span>
               <span>Subscriptions</span>
             </router-link>
           </div>
         </div>
       </nav>
-      
-      <!-- User Menu -->
+      <!-- Right Section: Company Selector & User Menu -->
       <div class="nav-right">
+        <!-- Company Selector -->
+        <div class="company-selector" v-if="currentUser?.companies?.length > 0">
+          <div class="company-dropdown dropdown-trigger" @click="toggleDropdown('company')">
+            <div class="company-icon">🏢</div>
+            <div class="company-name">{{ getActiveCompanyName() }}</div>
+            <span class="dropdown-arrow" :class="{ 'dropdown-arrow-active': activeDropdown === 'company' }">▼</span>
+          </div>
+          
+          <div v-show="activeDropdown === 'company'" class="dropdown-menu company-dropdown">
+            <div v-for="company in currentUser.companies" :key="company.company_id" 
+                 class="dropdown-item" 
+                 :class="{ 'active-company': getActiveCompanyId() === company.company_id }"
+                 @click="changeCompany(company.company_id)">
+              <span class="icon">🏢</span>
+              <span>{{ company.name }}</span>
+              <span v-if="getActiveCompanyId() === company.company_id" class="check-icon">✓</span>
+            </div>
+          </div>
+        </div>
+      
+        <!-- User Menu -->
         <div class="user-menu">
           <div class="user-info dropdown-trigger" @click="toggleDropdown('user')">
             <div class="user-avatar">
               <span>{{ getUserInitials() }}</span>
             </div>
-            <div class="user-details">
+            <div class="user-details desktop-only">
               <div class="user-name">{{ currentUser?.username || 'User' }}</div>
               <div class="user-role">{{ getCurrentRole() }}</div>
             </div>
-            <span class="dropdown-arrow" :class="{ 'dropdown-arrow-active': activeDropdown === 'user' }">▼</span>
+            <span class="dropdown-arrow desktop-only" :class="{ 'dropdown-arrow-active': activeDropdown === 'user' }">▼</span>
           </div>
           
           <div v-show="activeDropdown === 'user'" class="dropdown-menu user-dropdown">
-            <router-link to="/profile" class="dropdown-item">
+            <router-link to="/profile" class="dropdown-item" @click="closeMobileMenu">
               <span class="icon">👤</span>
               <span>Profile</span>
             </router-link>
@@ -146,14 +179,12 @@
         </div>
       </div>
     </header>
-    
+    <div v-if="showMobileMenu" class="mobile-overlay" @click="closeMobileMenu"></div>
     <!-- Main Content Area -->
     <main class="main-content">
       <router-view />
     </main>
   </div>
-  
-  <!-- Show router-view directly for login page when not authenticated -->
   <div v-else class="auth-container">
     <router-view />
   </div>
@@ -167,7 +198,8 @@ export default {
     return {
       isAuthenticated: false,
       currentUser: null,
-      activeDropdown: null
+      activeDropdown: null,
+      showMobileMenu: false
     }
   },
   
@@ -193,6 +225,27 @@ export default {
       this.currentUser = authService.getCurrentUser()
     },
     
+    getActiveCompanyId() {
+      return localStorage.getItem('activeCompanyId') || 
+        (this.currentUser?.companies && this.currentUser.companies.length > 0 
+          ? this.currentUser.companies[0].company_id 
+          : null)
+    },
+    
+    getActiveCompanyName() {
+      const activeCompanyId = this.getActiveCompanyId()
+      const company = this.currentUser?.companies?.find(c => c.company_id == activeCompanyId)
+      return company ? company.name : 'Select Company'
+    },
+    
+    changeCompany(companyId) {
+      localStorage.setItem('activeCompanyId', companyId)
+      // Set header for future requests
+      authService.setActiveCompany(companyId)
+      // Reload current route to refresh data with new company
+      this.$router.go()
+    },
+    
     showDropdown(dropdown) {
       this.activeDropdown = dropdown
     },
@@ -215,13 +268,28 @@ export default {
       event.stopPropagation()
     },
     
+    toggleMobileMenu() {
+      this.showMobileMenu = !this.showMobileMenu
+      // Close any open dropdowns when toggling mobile menu
+      this.activeDropdown = null
+    },
+    
+    closeMobileMenu() {
+      this.showMobileMenu = false
+      this.activeDropdown = null
+    },
+    
     // Handle clicks anywhere in the document
     handleGlobalClick(event) {
       const target = event.target
       
-      // If click is outside all dropdowns, close them
-      if (!target.closest('.nav-dropdown') && !target.closest('.user-menu')) {
+      // If click is outside all dropdowns and mobile menu, close them
+      if (!target.closest('.nav-dropdown') && 
+          !target.closest('.user-menu') && 
+          !target.closest('.company-selector') &&
+          !target.closest('.mobile-menu-button')) {
         this.activeDropdown = null
+        this.showMobileMenu = false
       }
     },
     
@@ -251,6 +319,7 @@ export default {
         // Force logout even if API call fails
         this.isAuthenticated = false
         this.currentUser = null
+        this.activeDropdown = null
         this.$router.push('/login')
       }
     }
@@ -280,18 +349,21 @@ export default {
 .top-nav {
   background: linear-gradient(120deg, #1e3c72 0%, #2a5298 100%);
   color: white;
-  padding: 12px 24px;
+  padding: 12px 20px;
   box-shadow: 0 2px 12px rgba(30,60,114,0.15);
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
   z-index: 1000;
+  min-height: 60px;
 }
 
+/* Left Section */
 .nav-left {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .logo-section {
@@ -301,27 +373,63 @@ export default {
 }
 
 .logo {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
   object-fit: contain;
 }
 
 .app-title {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   margin: 0;
   color: white;
 }
 
+/* Mobile Menu Button */
+.mobile-menu-button {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.hamburger-line {
+  width: 25px;
+  height: 3px;
+  background: white;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.mobile-menu-button.active .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.mobile-menu-button.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-button.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
 /* Navigation Menu */
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 24px; /* Increased gap between sections */
   flex: 1;
   justify-content: center;
+  max-width: 900px; /* Increased max-width to accommodate all sections */
 }
 
 .nav-item {
@@ -335,6 +443,7 @@ export default {
   transition: all 0.2s;
   font-weight: 500;
   white-space: nowrap;
+  font-size: 0.95rem;
 }
 
 .nav-item:hover, .nav-item.active {
@@ -359,6 +468,11 @@ export default {
   font-size: 0.7rem;
   margin-left: 4px;
   opacity: 0.8;
+  transition: transform 0.2s;
+}
+
+.dropdown-arrow-active {
+  transform: rotate(180deg);
 }
 
 .dropdown-menu {
@@ -406,12 +520,62 @@ export default {
   margin: 4px 0;
 }
 
-/* User Menu */
+/* Right Section */
 .nav-right {
   display: flex;
   align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
+/* Company Selector */
+.company-selector {
+  position: relative;
+}
+
+.company-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  background: rgba(255, 255, 255, 0.1);
+  min-width: 140px;
+}
+
+.company-dropdown:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.company-icon {
+  font-size: 1rem;
+}
+
+.company-name {
+  font-weight: 500;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.company-dropdown .dropdown-menu {
+  right: 0;
+  left: auto;
+  min-width: 220px;
+}
+
+.active-company {
+  background: #f0f9ff;
+  color: #1e40af;
+}
+
+.check-icon {
+  margin-left: auto;
+  color: #3b82f6;
+}
+
+/* User Menu */
 .user-menu {
   position: relative;
 }
@@ -419,8 +583,8 @@ export default {
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 6px 10px;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.2s;
@@ -431,16 +595,17 @@ export default {
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: white;
+  flex-shrink: 0;
 }
 
 .user-details {
@@ -451,12 +616,12 @@ export default {
 
 .user-name {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   line-height: 1.2;
 }
 
 .user-role {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   opacity: 0.8;
   line-height: 1.2;
 }
@@ -474,57 +639,133 @@ export default {
   background: #fef2f2;
 }
 
+/* Mobile Overlay */
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
 /* Main Content */
 .main-content {
   flex: 1;
-  padding: 32px;
+  padding: 24px;
   background: #f8fbff;
   overflow-y: auto;
 }
 
+/* Utility Classes */
+.desktop-only {
+  display: flex;
+}
+
+.desktop-logo {
+  display: block;
+}
+
 /* Responsive Design */
-@media (max-width: 1200px) {
+
+/* Large Desktop (1200px+) */
+@media (min-width: 1200px) {
+  .top-nav {
+    padding: 12px 32px;
+  }
+  
   .nav-menu {
-    gap: 4px;
+    gap: 12px;
   }
   
   .nav-item {
-    padding: 10px 12px;
-    font-size: 0.9rem;
+    padding: 12px 20px;
   }
   
-  .app-title {
-    font-size: 1.3rem;
+  .main-content {
+    padding: 32px;
   }
 }
 
-@media (max-width: 900px) {
-  .top-nav {
-    padding: 8px 16px;
-  }
-  
-  .logo {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .app-title {
-    display: none;
-  }
-  
+/* Medium Desktop/Laptop (992px - 1199px) */
+@media (max-width: 1199px) {
   .nav-menu {
-    gap: 2px;
-  }
-  
-  .nav-item span:not(.icon) {
-    display: none;
+    gap: 6px;
   }
   
   .nav-item {
-    padding: 10px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
   }
   
-  .dropdown-arrow {
+  .company-name {
+    font-size: 0.85rem;
+  }
+}
+
+/* Tablet (768px - 991px) */
+@media (max-width: 991px) {
+  .mobile-menu-button {
+    display: flex;
+  }
+  
+  .nav-menu {
+    position: fixed;
+    top: 72px;
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 72px);
+    background: white;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 20px;
+    gap: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .nav-menu.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .mobile-overlay {
+    display: block;
+  }
+  
+  .nav-item {
+    color: #374151;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #e5e7eb;
+    justify-content: flex-start;
+  }
+  
+  .nav-item:hover, .nav-item.active {
+    background: #f3f4f6;
+    color: #1e3c72;
+    transform: none;
+  }
+  
+  .nav-dropdown {
+    width: 100%;
+  }
+  
+  .dropdown-menu {
+    position: static;
+    box-shadow: none;
+    background: #f9fafb;
+    margin: 8px 0 16px 20px;
+    border-left: 3px solid #e5e7eb;
+  }
+  
+  .company-name {
     display: none;
   }
   
@@ -532,27 +773,126 @@ export default {
     display: none;
   }
   
+  .dropdown-arrow {
+    margin-left: auto;
+  }
+}
+
+/* Mobile (576px - 767px) */
+@media (max-width: 767px) {
+  .top-nav {
+    padding: 10px 16px;
+  }
+  
+  .app-title {
+    font-size: 1.2rem;
+  }
+  
+  .logo {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .company-dropdown {
+    min-width: auto;
+    padding: 8px;
+  }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+  
   .main-content {
     padding: 16px;
   }
 }
 
-@media (max-width: 640px) {
-  .logo-section {
-    gap: 8px;
+/* Small Mobile (up to 575px) */
+@media (max-width: 575px) {
+  .top-nav {
+    padding: 8px 12px;
   }
   
-  .nav-menu {
+  .app-title {
     display: none;
   }
   
-  .top-nav {
-    justify-content: space-between;
+  .desktop-logo {
+    display: none;
+  }
+  
+  .company-dropdown {
+    padding: 6px;
+  }
+  
+  .company-icon {
+    font-size: 1.2rem;
   }
   
   .user-avatar {
-    width: 36px;
-    height: 36px;
+    width: 30px;
+    height: 30px;
+    font-size: 0.75rem;
+  }
+  
+  .nav-right {
+    gap: 8px;
+  }
+  
+  .main-content {
+    padding: 12px;
+  }
+}
+
+/* Very Small Mobile (up to 400px) */
+@media (max-width: 400px) {
+  .nav-right {
+    gap: 6px;
+  }
+  
+  .logo-section {
+    gap: 6px;
+  }
+  
+  .mobile-menu-button {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .hamburger-line {
+    width: 20px;
+    height: 2px;
+  }
+}
+
+/* Fix dropdown positioning on mobile */
+@media (max-width: 991px) {
+  .company-dropdown .dropdown-menu,
+  .user-dropdown {
+    position: fixed;
+    top: 70px;
+    right: 16px;
+    left: auto;
+    width: calc(100vw - 32px);
+    max-width: 300px;
+    background: white;
+    z-index: 1002; /* Above the mobile overlay */
+  }
+
+  .company-dropdown,
+  .user-info {
+    position: relative;
+    z-index: 1002; /* Above the mobile overlay */
+  }
+
+  .mobile-overlay {
+    z-index: 999; /* Below the dropdowns */
+  }
+
+  .nav-menu {
+    z-index: 1001; /* Above overlay but below dropdowns */
   }
 }
 </style>

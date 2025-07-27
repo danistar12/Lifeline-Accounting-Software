@@ -6,7 +6,7 @@ import LoginView from '../views/auth/LoginView.vue';
 import ProfileView from '../views/ProfileView.vue';
 
 // Import views
-import DashboardView from '../views/dashboard/DashboardView.vue';
+import DashboardView from '../views/DashboardView.vue';
 
 // Core data management
 import CustomersView from '../views/customers/CustomersView.vue';

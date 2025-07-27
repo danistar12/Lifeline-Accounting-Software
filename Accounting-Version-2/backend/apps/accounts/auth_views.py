@@ -37,7 +37,7 @@ class LoginView(APIView):
                 for role in user.usercompanyrole_set.all():
                     user_companies.append({
                         'company_id': role.company.company_id,
-                        'company_name': role.company.name,
+                        'name': role.company.company_name,  # Fixed: use company_name instead of name
                         'role': role.role
                     })
                 

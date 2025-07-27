@@ -55,14 +55,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         for role in obj.usercompanyrole_set.all():
             companies.append({
                 'company_id': role.company.company_id,
-                'company_name': role.company.name,
+                'name': role.company.company_name,  # Fixed: use company_name instead of name
                 'role': role.role
             })
         return companies
 
 class UserCompanyRoleSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.username', read_only=True)
-    company_name = serializers.CharField(source='company.name', read_only=True)
+    company_name = serializers.CharField(source='company.company_name', read_only=True)  # Fixed: use company_name field
     
     class Meta:
         model = UserCompanyRole

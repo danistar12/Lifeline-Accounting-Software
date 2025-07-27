@@ -28,13 +28,20 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Request interceptor for adding auth token
+// Request interceptor for adding auth token and company ID
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Add company ID header if available
+    const companyId = localStorage.getItem('activeCompanyId');
+    if (companyId) {
+      config.headers['X-Company-ID'] = companyId;
+    }
+    
     return config;
   },
   (error) => {

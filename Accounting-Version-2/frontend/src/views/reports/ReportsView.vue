@@ -283,7 +283,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import api from '@/services/api'
+import apiClient from '@/services/api'
 
 // Reactive data
 const dashboardData = ref(null)
@@ -321,7 +321,7 @@ const initializeDates = () => {
 // Load dashboard data
 const loadDashboard = async () => {
   try {
-    const response = await api.get('/api/reports/dashboard/')
+    const response = await apiClient.get('/reports/dashboard/')
     dashboardData.value = response.data
   } catch (err) {
     error.value = 'Failed to load dashboard data'
@@ -337,7 +337,7 @@ const loadPayrollReport = async () => {
     if (payrollStartDate.value) params.append('start_date', payrollStartDate.value)
     if (payrollEndDate.value) params.append('end_date', payrollEndDate.value)
     
-    const response = await api.get(`/api/reports/payroll-summary/?${params}`)
+    const response = await apiClient.get(`/reports/payroll-summary/?${params}`)
     payrollReport.value = response.data
   } catch (err) {
     error.value = 'Failed to load payroll report'
@@ -351,7 +351,7 @@ const loadPayrollReport = async () => {
 const loadEmployees = async () => {
   try {
     loading.value = true
-    const response = await api.get('/api/reports/employees/')
+    const response = await apiClient.get('/reports/employees/')
     employees.value = response.data
   } catch (err) {
     error.value = 'Failed to load employees'
@@ -369,7 +369,7 @@ const loadBankingReport = async () => {
     if (bankingStartDate.value) params.append('start_date', bankingStartDate.value)
     if (bankingEndDate.value) params.append('end_date', bankingEndDate.value)
     
-    const response = await api.get(`/api/reports/banking/?${params}`)
+    const response = await apiClient.get(`/reports/banking/?${params}`)
     bankingReport.value = response.data
   } catch (err) {
     error.value = 'Failed to load banking report'
@@ -473,8 +473,9 @@ onMounted(() => {
 .metric .label {
   display: block;
   font-size: 0.9rem;
-  color: #666;
+  color: #555; /* Slightly lighter but still readable */
   margin-bottom: 4px;
+  font-weight: 500;
 }
 
 .metric .value {
@@ -506,7 +507,7 @@ onMounted(() => {
   border: none;
   font-size: 1rem;
   font-weight: 500;
-  color: #666;
+  color: #555; /* Darker grey for better readability */
   cursor: pointer;
   border-radius: 8px 8px 0 0;
   transition: all 0.3s ease;
@@ -519,7 +520,7 @@ onMounted(() => {
 
 .tab-button.active {
   background: #1e3c72;
-  color: white;
+  color: white; /* Keep white text on navy background */
   font-weight: 600;
 }
 
@@ -550,21 +551,33 @@ onMounted(() => {
   border: 2px solid #e3eafc;
   border-radius: 8px;
   font-size: 1rem;
+  color: #333; /* Ensure input text is dark */
+  background: white;
+}
+
+.date-controls input[type="date"]:focus {
+  outline: none;
+  border-color: #1e3c72;
+  box-shadow: 0 0 0 2px rgba(30, 60, 114, 0.1);
 }
 
 .refresh-btn {
-  background: #1e3c72;
-  color: white;
+  background: #1e3c72 !important;
+  color: white !important; /* Force white text on navy button */
   border: none;
   padding: 10px 20px;
   border-radius: 8px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
 }
 
 .refresh-btn:hover {
-  background: #2a5298;
+  background: #2a5298 !important;
+  color: white !important; /* Ensure white text stays on hover */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
 }
 
 /* Summary Stats */
@@ -584,10 +597,10 @@ onMounted(() => {
 }
 
 .stat h4 {
-  color: #666;
+  color: #555; /* Darker for better readability */
   margin-bottom: 8px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600; /* Slightly bolder */
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -628,18 +641,29 @@ onMounted(() => {
 }
 
 .data-table th {
-  background: #1e3c72;
-  color: white;
+  background: #1e3c72 !important;
+  color: white !important; /* Force white text on navy header background */
   padding: 16px 12px;
   text-align: left;
   font-weight: 600;
   font-size: 0.9rem;
 }
 
+.data-table thead th {
+  background: #1e3c72 !important;
+  color: white !important; /* Additional specificity for thead th */
+}
+
+.data-table tbody th {
+  background: #1e3c72 !important;
+  color: white !important; /* Additional specificity for tbody th if any */
+}
+
 .data-table td {
   padding: 12px;
   border-bottom: 1px solid #f0f0f0;
   font-size: 0.9rem;
+  color: #333; /* Ensure text is dark, not grey */
 }
 
 .data-table tbody tr:hover {
@@ -648,6 +672,61 @@ onMounted(() => {
 
 .data-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+/* Ensure all text elements have proper colors */
+.view-container {
+  color: #333;
+}
+
+.view-title {
+  color: #1e3c72;
+}
+
+.summary-card h3 {
+  color: #333;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Fix any remaining grey text issues */
+.view-container * {
+  color: inherit;
+}
+
+/* Override any default browser grey text - but exclude table headers */
+.view-container p,
+.view-container span,
+.view-container div,
+.view-container td {
+  color: inherit;
+}
+
+/* Specific fixes for table content - but NOT headers */
+.data-table tbody td {
+  color: #333 !important;
+}
+
+/* Ensure table headers stay white on navy */
+.data-table th,
+.data-table thead th,
+.data-table tbody th {
+  background: #1e3c72 !important;
+  color: white !important;
+}
+
+/* Fix button text */
+.refresh-btn,
+.tab-button {
+  font-weight: 600;
+}
+
+/* Ensure loading and error states are visible */
+.loading,
+.error {
+  color: #333;
+  font-weight: 500;
 }
 
 .positive {

@@ -17,6 +17,7 @@ class Customer(models.Model):
 
     class Meta:
         db_table = 'Customers'
+        ordering = ['name']  # Add default ordering to fix pagination warning
 
 class Vendor(models.Model):
     vendor_id = models.AutoField(primary_key=True, db_column='VendorID')
@@ -34,3 +35,4 @@ class Vendor(models.Model):
 
     class Meta:
         db_table = 'Vendors'
+        ordering = ['name']  # Add default ordering to fix pagination warning

@@ -4,7 +4,8 @@ class ContactsService {
   // Customer endpoints
   async getCustomers() {
     const response = await apiClient.get('/contacts/customers/');
-    return response.data;
+    // Handle paginated response from Django REST Framework
+    return response.data.results || response.data;
   }
 
   async getCustomer(id) {
@@ -30,7 +31,8 @@ class ContactsService {
   // Vendor endpoints
   async getVendors() {
     const response = await apiClient.get('/contacts/vendors/');
-    return response.data;
+    // Handle paginated response from Django REST Framework
+    return response.data.results || response.data;
   }
 
   async getVendor(id) {

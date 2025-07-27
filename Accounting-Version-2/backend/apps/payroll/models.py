@@ -14,6 +14,9 @@ class Employee(models.Model):
 
     class Meta:
         db_table = 'Employees'
+        
+    def __str__(self):
+        return f"{self.name} ({self.email})"
 
 class Payroll(models.Model):
     payroll_id = models.AutoField(primary_key=True, db_column='PayrollID')
@@ -28,6 +31,9 @@ class Payroll(models.Model):
 
     class Meta:
         db_table = 'Payroll'
+        
+    def __str__(self):
+        return f"Payroll for {self.employee.name} ({self.pay_period_start} to {self.pay_period_end})"
 
 class PayrollDeduction(models.Model):
     deduction_id = models.AutoField(primary_key=True, db_column='DeductionID')
@@ -39,3 +45,6 @@ class PayrollDeduction(models.Model):
 
     class Meta:
         db_table = 'PayrollDeductions'
+        
+    def __str__(self):
+        return f"{self.deduction_type} deduction for {self.employee.name} - ${self.amount}"

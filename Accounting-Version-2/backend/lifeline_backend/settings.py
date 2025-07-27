@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-_#u187%=3&fl871($%zbm_u%*81@e36i_n5abpez(%vjj-ycg&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 
 # Application definition
@@ -62,8 +62,8 @@ AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -188,6 +188,14 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20
 }
 
+# Disable CSRF for API endpoints (development only)
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173", 
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+]
+
 # JWT configuration
 from datetime import timedelta
 
@@ -209,6 +217,40 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# Additional CORS settings for development
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only allow all origins in development
+
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'x-company-id',  # Allow our custom company header
+]
+
+CORS_ALLOWED_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Ensure preflight requests work correctly
+CORS_PREFLIGHT_MAX_AGE = 86400
+
+# Additional CORS settings to ensure requests work
+CORS_ALLOW_HEADERS = list(CORS_ALLOWED_HEADERS)
+CORS_EXPOSE_HEADERS = ['X-Company-ID']
