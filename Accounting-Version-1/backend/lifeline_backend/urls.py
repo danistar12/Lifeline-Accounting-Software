@@ -20,6 +20,13 @@ urlpatterns = [
     # Reports and dashboard endpoints
     path('api/reports/', include('apps.reports.urls')),
     path('api/dashboard/', include('apps.dashboard.urls')),
+    # Specialized app endpoints
+    path('api/inventory/', include('apps.inventory.urls')),
+    path('api/projects/', include('apps.projects.urls')),
+    path('api/budgets/', include('apps.budgets.urls')),
+    path('api/taxes/', include('apps.taxes.urls')),
+    path('api/integrations/', include('apps.integrations.urls')),
+    path('api/assets/', include('apps.assets.urls')),
     # Audit logs
     path('api/audit/', include('apps.audit.urls')),
 ]

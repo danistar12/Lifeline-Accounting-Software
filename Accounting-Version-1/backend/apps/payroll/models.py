@@ -1,64 +1,55 @@
 from django.db import models
 from apps.accounts.models import Company
-from apps.core.models import Customer
+from apps.core.models import Project
 
 class Employee(models.Model):
     employee_id = models.AutoField(primary_key=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.EmailField(max_length=100)
-    phone_number = models.CharField(max_length=20, null=True, blank=True)
-    hire_date = models.DateField()
-    termination_date = models.DateField(null=True, blank=True)
-    is_active = models.BooleanField(default=True)
+    name = models.CharField(max_length=200)
+    email = models.EmailField(max_length=255, null=True, blank=True)
+    hourly_rate = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
+    tax_withholding = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
+    employee_notes = models.TextField(null=True, blank=True)
+    created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'Employees'
 
 class Payroll(models.Model):
     payroll_id = models.AutoField(primary_key=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    run_date = models.DateField()
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     pay_period_start = models.DateField()
     pay_period_end = models.DateField()
+    gross_pay = models.DecimalField(max_digits=18, decimal_places=2)
+    net_pay = models.DecimalField(max_digits=18, decimal_places=2)
+    taxes_withheld = models.DecimalField(max_digits=18, decimal_places=2)
+    payment_date = models.DateField()
+    created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'Payroll'
 
-class Paystub(models.Model):
-    paystub_id = models.AutoField(primary_key=True)
+class PayrollDeduction(models.Model):
+    deduction_id = models.AutoField(primary_key=True)
     payroll = models.ForeignKey(Payroll, on_delete=models.CASCADE)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    gross_pay = models.DecimalField(max_digits=18, decimal_places=2)
-    net_pay = models.DecimalField(max_digits=18, decimal_places=2)
+    deduction_type = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=18, decimal_places=2)
+    created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'Paystubs'
+        db_table = 'PayrollDeductions'
 
-class Tax(models.Model):
-    tax_id = models.AutoField(primary_key=True)
-    paystub = models.ForeignKey(Paystub, on_delete=models.CASCADE)
-    tax_name = models.CharField(max_length=100)
-    tax_amount = models.DecimalField(max_digits=18, decimal_places=2)
-
-    class Meta:
-        db_table = 'Taxes'
-
-class Deduction(models.Model):
-    deduction_id = models.AutoField(primary_key=True)
-    paystub = models.ForeignKey(Paystub, on_delete=models.CASCADE)
-    deduction_name = models.CharField(max_length=100)
-    deduction_amount = models.DecimalField(max_digits=18, decimal_places=2)
+class TimeEntry(models.Model):
+    time_entry_id = models.AutoField(primary_key=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='payroll_time_entries')
+    work_date = models.DateField()
+    hours = models.DecimalField(max_digits=18, decimal_places=2)
+    time_entry_notes = models.TextField(null=True, blank=True)
+    billable = models.BooleanField(default=False)
+    rate = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
+    created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'Deductions'
-
-class Benefit(models.Model):
-    benefit_id = models.AutoField(primary_key=True)
-    paystub = models.ForeignKey(Paystub, on_delete=models.CASCADE)
-    benefit_name = models.CharField(max_length=100)
-    benefit_amount = models.DecimalField(max_digits=18, decimal_places=2)
-
-    class Meta:
-        db_table = 'Benefits'
+        db_table = 'PayrollTimeEntries'

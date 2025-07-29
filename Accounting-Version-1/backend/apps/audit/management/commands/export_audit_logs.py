@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 import csv
+from datetime import timedelta
 
 
 class Command(BaseCommand):
@@ -20,7 +21,7 @@ class Command(BaseCommand):
         parser.add_argument('--user', type=str,
                             help='Only export logs for a specific username')
         parser.add_argument('--action', type=str,
-                            help='Only export logs of a specific action type')
+                            help='Only export logs for a specific action type')
 
     def handle(self, *args, **options):
         output_file = options['output']
@@ -29,10 +30,10 @@ class Command(BaseCommand):
         username = options['user']
         action_type = options['action']
         
-        start_date = timezone.now() - timezone.timedelta(days=days_back)
+        start_date = timezone.now() - timedelta(days=days_back)
         
         # Build query
-        query = AuditLog.objects.filter(timestamp__gte=start_date)
+        query = AuditLog.objects.filter(action_date__gte=start_date)
         
         if company_id:
             query = query.filter(company_id=company_id)
@@ -46,7 +47,7 @@ class Command(BaseCommand):
                 return
                 
         if action_type:
-            query = query.filter(action_type=action_type)
+            query = query.filter(action=action_type)
             
         # Count and inform
         count = query.count()

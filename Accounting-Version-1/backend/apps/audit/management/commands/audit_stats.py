@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.db.models import Count
 import json
 from collections import Counter
+from datetime import timedelta
 
 
 class Command(BaseCommand):
@@ -22,10 +23,10 @@ class Command(BaseCommand):
         company_id = options['company']
         output_file = options.get('output')
         
-        start_date = timezone.now() - timezone.timedelta(days=days_back)
+        start_date = timezone.now() - timedelta(days=days_back)
         
         # Build base query
-        query = AuditLog.objects.filter(timestamp__gte=start_date)
+        query = AuditLog.objects.filter(action_date__gte=start_date)
         if company_id:
             query = query.filter(company_id=company_id)
             company_name = query.first().company.name if query.exists() else f"Company #{company_id}"
@@ -41,11 +42,11 @@ class Command(BaseCommand):
         self.stdout.write(f"Total audit log entries: {total_count}")
         
         # Action type breakdown
-        action_counts = query.values('action_type').annotate(count=Count('id')).order_by('-count')
+        action_counts = query.values('action').annotate(count=Count('id')).order_by('-count')
         self.stdout.write("\nBreakdown by Action Type:")
         for item in action_counts:
             percentage = (item['count'] / total_count) * 100 if total_count else 0
-            self.stdout.write(f"  {item['action_type']:10} : {item['count']:5} ({percentage:.1f}%)")
+            self.stdout.write(f"  {item['action']:10} : {item['count']:5} ({percentage:.1f}%)")
             
         # User activity (top 10)
         user_counts = query.exclude(user__isnull=True).values(

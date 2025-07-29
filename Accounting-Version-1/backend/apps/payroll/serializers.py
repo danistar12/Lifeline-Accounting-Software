@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Employee, Payroll, Paystub, Tax, Deduction, Benefit
+from .models import Employee, Payroll, PayrollDeduction
 
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,22 +11,7 @@ class PayrollSerializer(serializers.ModelSerializer):
         model = Payroll
         fields = '__all__'
 
-class PaystubSerializer(serializers.ModelSerializer):
+class PayrollDeductionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Paystub
-        fields = '__all__'
-
-class TaxSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tax
-        fields = '__all__'
-
-class DeductionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Deduction
-        fields = '__all__'
-
-class BenefitSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Benefit
+        model = PayrollDeduction
         fields = '__all__'

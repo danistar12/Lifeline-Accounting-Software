@@ -7,27 +7,28 @@ class BankAccount(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     account_number = models.CharField(max_length=50)
     bank_name = models.CharField(max_length=100)
+    account_type = models.CharField(max_length=50)
+    bank_acct_notes = models.TextField(null=True, blank=True)
+    currency_code = models.CharField(max_length=3, default='USD')
+    balance = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
     created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'BankAccounts'
 
-class BankStatementLine(models.Model):
-    statement_line_id = models.AutoField(primary_key=True)
+class BankTransaction(models.Model):
+    bank_transaction_id = models.AutoField(primary_key=True)
     bank_account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
-    date = models.DateField()
-    description = models.CharField(max_length=200)
+    transaction_date = models.DateTimeField()
+    transaction_number = models.CharField(max_length=100, null=True, blank=True)
+    description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=18, decimal_places=2)
+    transaction_type = models.CharField(max_length=50)
+    reconciled = models.BooleanField(default=False)
+    general_ledger = models.ForeignKey(GeneralLedger, on_delete=models.SET_NULL, null=True, blank=True)
+    is_imported = models.BooleanField(default=False)
+    match_status = models.CharField(max_length=50, null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'BankStatementLines'
-
-class ReconciliationEntry(models.Model):
-    entry_id = models.AutoField(primary_key=True)
-    statement_line = models.ForeignKey(BankStatementLine, on_delete=models.CASCADE)
-    gl_transaction = models.ForeignKey(GeneralLedger, on_delete=models.CASCADE)
-    reconciled_date = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'ReconciliationEntries'
+        db_table = 'BankTransactions'

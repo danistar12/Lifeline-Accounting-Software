@@ -29,19 +29,25 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'django_filters',
     'apps.accounts',
     'apps.core',
     'apps.subscriptions',
     'apps.documents',
     'apps.importer',
     'apps.payroll',
+    'apps.payments.apps.PaymentsConfig',
     # New modular apps
-    'apps.payments_ar',        # Accounts Receivable (Customer Invoices & Payments)
-    'apps.payments_ap',        # Accounts Payable (Vendor Bills & Payments)
     'apps.banking',            # Bank accounts, statements, reconciliation
     'apps.reports',            # Financial reports (BS, IS, CF)
     'apps.dashboard',          # KPI and Dashboard endpoints
     'apps.audit',              # Audit logging system
+    'apps.inventory',          # Inventory management
+    'apps.projects',           # Projects and time entries
+    'apps.budgets',            # Budget planning
+    'apps.assets',             # Fixed assets
+    'apps.integrations',       # External integrations
+    'apps.taxes',              # Tax rates and transactions
 ]
 
 MIDDLEWARE = [

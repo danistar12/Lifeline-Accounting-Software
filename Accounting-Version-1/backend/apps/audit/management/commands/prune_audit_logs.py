@@ -23,7 +23,7 @@ class Command(BaseCommand):
         cutoff_date = timezone.now() - datetime.timedelta(days=days_old)
         
         # Build query
-        query = AuditLog.objects.filter(timestamp__lt=cutoff_date)
+        query = AuditLog.objects.filter(action_date__lt=cutoff_date)
         if company_id:
             query = query.filter(company_id=company_id)
             
