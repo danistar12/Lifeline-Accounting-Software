@@ -59,7 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.audit.middleware.AuditLogMiddleware',  # Add audit logging
+    'apps.audit.middleware.AuditLogMiddleware',  # Re-enabled with async support
 ]
 
 CORS_ALLOWED_ORIGINS = [

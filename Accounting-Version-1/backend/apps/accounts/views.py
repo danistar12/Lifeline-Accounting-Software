@@ -107,10 +107,24 @@ class LoginView(TokenObtainPairView):
         return response
 
 class LogoutView(APIView):
+    """
+    Logout view that doesn't require authentication
+    (since logout should work even with invalid/expired tokens)
+    """
+    permission_classes = []  # No authentication required
+    
     def post(self, request, *args, **kwargs):
-        response = Response(status=status.HTTP_204_NO_CONTENT)
-        response.delete_cookie(settings.SIMPLE_JWT['ACCESS_TOKEN_COOKIE'])
-        response.delete_cookie(settings.SIMPLE_JWT['REFRESH_TOKEN_COOKIE'])
+        response = Response({'detail': 'Successfully logged out'}, status=status.HTTP_200_OK)
+        
+        # Try to delete JWT cookies if they exist
+        try:
+            if hasattr(settings, 'SIMPLE_JWT'):
+                response.delete_cookie(settings.SIMPLE_JWT.get('ACCESS_TOKEN_COOKIE', 'access_token'))
+                response.delete_cookie(settings.SIMPLE_JWT.get('REFRESH_TOKEN_COOKIE', 'refresh_token'))
+        except Exception:
+            # If cookie deletion fails, still return success
+            pass
+            
         return response
 
 def csrf_token(request):

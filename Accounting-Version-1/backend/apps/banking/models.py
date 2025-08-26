@@ -13,6 +13,9 @@ class BankAccount(models.Model):
     balance = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
     created_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.bank_name} - {self.account_number}"
+
     class Meta:
         db_table = 'BankAccounts'
 
@@ -29,6 +32,9 @@ class BankTransaction(models.Model):
     is_imported = models.BooleanField(default=False)
     match_status = models.CharField(max_length=50, null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.description} - ${self.amount}"
 
     class Meta:
         db_table = 'BankTransactions'

@@ -7,5 +7,6 @@ class AuditConfig(AppConfig):
     verbose_name = 'Audit Logs'
     
     def ready(self):
-        # Import signals
-        import apps.audit.signals
+        # Temporarily disable signals to prevent user creation issues
+        # import apps.audit.signals
+        pass

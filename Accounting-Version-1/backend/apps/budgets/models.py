@@ -14,5 +14,8 @@ class Budget(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.account.account_name} - {self.budget_year}/{self.budget_month:02d}"
+
     class Meta:
         db_table = 'Budgets'

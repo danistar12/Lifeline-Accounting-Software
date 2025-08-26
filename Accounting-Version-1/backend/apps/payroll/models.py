@@ -12,6 +12,9 @@ class Employee(models.Model):
     employee_notes = models.TextField(null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         db_table = 'Employees'
 
@@ -26,6 +29,9 @@ class Payroll(models.Model):
     payment_date = models.DateField()
     created_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"Payroll for {self.employee.name} ({self.pay_period_start} - {self.pay_period_end})"
+
     class Meta:
         db_table = 'Payroll'
 
@@ -36,6 +42,9 @@ class PayrollDeduction(models.Model):
     deduction_type = models.CharField(max_length=100)
     amount = models.DecimalField(max_digits=18, decimal_places=2)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.deduction_type} - {self.employee.name} (${self.amount})"
 
     class Meta:
         db_table = 'PayrollDeductions'
@@ -48,6 +57,9 @@ class TimeEntry(models.Model):
     hours = models.DecimalField(max_digits=18, decimal_places=2)
     time_entry_notes = models.TextField(null=True, blank=True)
     billable = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.employee.name} - {self.work_date} ({self.hours}h)"
     rate = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
 

@@ -13,6 +13,9 @@ class Project(models.Model):
     status = models.CharField(max_length=50)
     created_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.project_name
+
     class Meta:
         db_table = 'Projects'
 
@@ -26,6 +29,9 @@ class TimeEntry(models.Model):
     billable = models.BooleanField(default=False)
     rate = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.employee} - {self.project.project_name} ({self.work_date})"
 
     class Meta:
         db_table = 'ProjectTimeEntries'

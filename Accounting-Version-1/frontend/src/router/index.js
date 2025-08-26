@@ -31,6 +31,7 @@ import Reconciliations from '../views/banking/Reconciliations.vue'
 import BalanceSheet from '../views/reports/BalanceSheet.vue'
 import IncomeStatement from '../views/reports/IncomeStatement.vue'
 import CashFlow from '../views/reports/CashFlow.vue'
+import ProjectsView from '../views/projects/ProjectsView.vue'
 import store from '../store'
 
 const routes = [
@@ -80,6 +81,7 @@ const routes = [
   { path: '/documents', name: 'Documents', component: Documents, meta: { requiresAuth: true } },
   { path: '/importer', name: 'ImportFiles', component: ImportFiles, meta: { requiresAuth: true } },
   { path: '/subscriptions', name: 'Subscriptions', component: Subscriptions, meta: { requiresAuth: true } },
+  { path: '/projects', name: 'Projects', component: ProjectsView, meta: { requiresAuth: true } },
   { path: '/payroll/employees', name: 'Employees', component: Employees, meta: { requiresAuth: true } },
   { path: '/payroll/payrolls', name: 'Payrolls', component: Payrolls, meta: { requiresAuth: true } },
   { path: '/payroll/paystubs', name: 'Paystubs', component: Paystubs, meta: { requiresAuth: true } },

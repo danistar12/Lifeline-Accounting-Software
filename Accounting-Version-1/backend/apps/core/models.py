@@ -12,6 +12,9 @@ class Customer(models.Model):
     customer_notes = models.TextField(null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         db_table = 'Customers'
 
@@ -25,6 +28,9 @@ class Vendor(models.Model):
     payment_terms = models.CharField(max_length=50, null=True, blank=True)
     vendor_notes = models.TextField(null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         db_table = 'Vendors'
@@ -44,6 +50,9 @@ class Invoice(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     subscription = models.ForeignKey('subscriptions.Subscription', on_delete=models.SET_NULL, null=True, blank=True)
 
+    def __str__(self):
+        return f"Invoice {self.invoice_number} - {self.customer.name}"
+
     class Meta:
         db_table = 'Invoices'
 
@@ -61,6 +70,9 @@ class Bill(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def __str__(self):
+        return f"Bill {self.bill_number} - {self.vendor.name}"
+
     class Meta:
         db_table = 'Bills'
 
@@ -72,6 +84,9 @@ class ChartOfAccount(models.Model):
     account_type = models.CharField(max_length=50)
     account_notes = models.TextField(null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.account_code} - {self.account_name}"
     is_active = models.BooleanField(default=True)
 
     class Meta:

@@ -15,6 +15,9 @@ class Inventory(models.Model):
     location = models.ForeignKey('inventory.InventoryLocation', on_delete=models.SET_NULL, null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.product_code} - {self.product_name}"
+
     class Meta:
         db_table = 'Inventory'
 
@@ -23,6 +26,9 @@ class InventoryLocation(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     location_name = models.CharField(max_length=100)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.location_name
 
     class Meta:
         db_table = 'InventoryLocations'
@@ -37,6 +43,9 @@ class InvoiceLineItem(models.Model):
     total_amount = models.DecimalField(max_digits=18, decimal_places=2)
     created_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"Invoice #{self.invoice.invoice_number} - {self.description[:50]}"
+
     class Meta:
         db_table = 'InvoiceLineItems'
 
@@ -49,6 +58,9 @@ class BillLineItem(models.Model):
     unit_price = models.DecimalField(max_digits=18, decimal_places=2)
     total_amount = models.DecimalField(max_digits=18, decimal_places=2)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Bill #{self.bill.bill_number} - {self.description[:50]}"
 
     class Meta:
         db_table = 'BillLineItems'

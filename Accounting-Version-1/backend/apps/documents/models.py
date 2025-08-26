@@ -13,5 +13,8 @@ class Document(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def __str__(self):
+        return self.file_name
+
     class Meta:
         db_table = 'Documents'

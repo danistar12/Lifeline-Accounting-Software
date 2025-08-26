@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from .models import AuditLog
 from .utils import get_object_changes
@@ -73,7 +74,7 @@ def model_post_save(sender, instance, created, **kwargs):
         company=company,
         action_type=action_type,
         action_description=action_description,
-        content_type_id=instance._meta.app_label,
+        content_type=ContentType.objects.get_for_model(instance),
         object_id=str(instance.pk),
         # No user context in signals, system action
         user=None,
@@ -103,7 +104,7 @@ def model_post_delete(sender, instance, **kwargs):
         company=company,
         action_type=AuditLog.DELETE,
         action_description=action_description,
-        content_type_id=instance._meta.app_label,
+        content_type=ContentType.objects.get_for_model(instance),
         object_id=str(instance.pk),
         # No user context in signals, system action
         user=None,

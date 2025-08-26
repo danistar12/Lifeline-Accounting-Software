@@ -10,7 +10,7 @@
         <span></span>
       </button>
       <nav v-if="isLoggedIn" class="main-nav" :class="{ 'mobile-open': mobileNavOpen }">
-        <router-link to="/" class="nav-item dashboard-nav">
+        <router-link to="/" class="nav-item dashboard-nav" @click="closeMobileMenu">
           <div class="nav-icon">📊</div>
           <span class="nav-label">Dashboard</span>
           <div class="nav-highlight"></div>
@@ -23,11 +23,11 @@
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
-            <router-link to="/accounts/companies" class="dropdown-link">
+            <router-link to="/accounts/companies" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">🏢</i>
               <span>Companies</span>
             </router-link>
-            <router-link to="/accounts/user-roles" class="dropdown-link">
+            <router-link to="/accounts/user-roles" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">🔑</i>
               <span>User Roles</span>
             </router-link>
@@ -41,27 +41,27 @@
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
-            <router-link to="/core/bills" class="dropdown-link">
+            <router-link to="/core/bills" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">🧾</i>
               <span>Bills</span>
             </router-link>
-            <router-link to="/core/chart-of-accounts" class="dropdown-link">
+            <router-link to="/core/chart-of-accounts" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">📋</i>
               <span>Chart of Accounts</span>
             </router-link>
-            <router-link to="/core/customers" class="dropdown-link">
+            <router-link to="/core/customers" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">👤</i>
               <span>Customers</span>
             </router-link>
-            <router-link to="/core/general-ledger" class="dropdown-link">
+            <router-link to="/core/general-ledger" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">📖</i>
               <span>General Ledger</span>
             </router-link>
-            <router-link to="/core/invoices" class="dropdown-link">
+            <router-link to="/core/invoices" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">📄</i>
               <span>Invoices</span>
             </router-link>
-            <router-link to="/core/vendors" class="dropdown-link">
+            <router-link to="/core/vendors" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">🏪</i>
               <span>Vendors</span>
             </router-link>
@@ -75,34 +75,34 @@
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
-            <router-link to="/payroll/employees" class="dropdown-link">
+            <router-link to="/payroll/employees" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">👷</i>
               <span>Employees</span>
             </router-link>
-            <router-link to="/payroll/payrolls" class="dropdown-link">
+            <router-link to="/payroll/payrolls" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">💵</i>
               <span>Payrolls</span>
             </router-link>
-            <router-link to="/payroll/paystubs" class="dropdown-link">
+            <router-link to="/payroll/paystubs" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">🧾</i>
               <span>Paystubs</span>
             </router-link>
-            <router-link to="/payroll/taxes" class="dropdown-link">
+            <router-link to="/payroll/taxes" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">🏛️</i>
               <span>Taxes</span>
             </router-link>
-            <router-link to="/payroll/deductions" class="dropdown-link">
+            <router-link to="/payroll/deductions" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">➖</i>
               <span>Deductions</span>
             </router-link>
-            <router-link to="/payroll/benefits" class="dropdown-link">
+            <router-link to="/payroll/benefits" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">🎁</i>
               <span>Benefits</span>
             </router-link>
           </div>
         </div>
 
-        <router-link to="/subscriptions" class="nav-item">
+        <router-link to="/subscriptions" class="nav-item" @click="closeMobileMenu">
           <div class="nav-icon">📦</div>
           <span class="nav-label">Subscriptions</span>
           <div class="nav-highlight"></div>
@@ -115,15 +115,15 @@
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
-            <router-link to="/banking/accounts" class="dropdown-link">
+            <router-link to="/banking/accounts" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">🏛️</i>
               <span>Bank Accounts</span>
             </router-link>
-            <router-link to="/banking/statement-lines" class="dropdown-link">
+            <router-link to="/banking/statement-lines" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">📜</i>
               <span>Statement Lines</span>
             </router-link>
-            <router-link to="/banking/reconciliations" class="dropdown-link">
+            <router-link to="/banking/reconciliations" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">⚖️</i>
               <span>Reconciliations</span>
             </router-link>
@@ -137,15 +137,15 @@
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
-            <router-link to="/reports/balance-sheet" class="dropdown-link">
+            <router-link to="/reports/balance-sheet" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">⚖️</i>
               <span>Balance Sheet</span>
             </router-link>
-            <router-link to="/reports/income-statement" class="dropdown-link">
+            <router-link to="/reports/income-statement" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">💹</i>
               <span>Income Statement</span>
             </router-link>
-            <router-link to="/reports/cash-flow" class="dropdown-link">
+            <router-link to="/reports/cash-flow" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">💰</i>
               <span>Cash Flow</span>
             </router-link>
@@ -160,7 +160,7 @@
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
-            <router-link to="/audit-logs" class="dropdown-link">
+            <router-link to="/audit-logs" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">🔍</i>
               <span>Audit Logs</span>
             </router-link>
@@ -191,15 +191,15 @@
               </div>
             </div>
             <div class="dropdown-divider"></div>
-            <router-link to="/profile" class="dropdown-item">
+            <router-link to="/profile" class="dropdown-item" @click="closeMobileMenu">
               <i class="icon-user"></i>
               My Profile
             </router-link>
-            <router-link to="/settings" class="dropdown-item">
+            <router-link to="/settings" class="dropdown-item" @click="closeMobileMenu">
               <i class="icon-settings"></i>
               Settings
             </router-link>
-            <router-link to="/audit-logs" class="dropdown-item" v-if="isAdmin">
+            <router-link to="/audit-logs" class="dropdown-item" v-if="isAdmin" @click="closeMobileMenu">
               <i class="icon-list"></i>
               Audit Logs
             </router-link>
@@ -279,6 +279,9 @@ export default {
     },
     toggleMobileNav() {
       this.mobileNavOpen = !this.mobileNavOpen;
+    },
+    closeMobileMenu() {
+      this.mobileNavOpen = false;
     },
     toggleDropdown(event) {
       // Handle different types of dropdown toggles

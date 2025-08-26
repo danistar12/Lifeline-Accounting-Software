@@ -8,5 +8,8 @@ class DashboardMetric(models.Model):
     value = models.DecimalField(max_digits=18, decimal_places=2)
     updated_date = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.name}: {self.value}"
+
     class Meta:
         db_table = 'DashboardMetrics'
