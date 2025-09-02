@@ -233,31 +233,420 @@ npm run lint         # Run ESLint
 
 ## 🚀 Production Deployment
 
-### Backend Deployment
+### Linux Server Deployment (02-vuweb01)
 
-1. **Update settings for production:**
-   - Uncomment MSSQL database configuration in `settings.py`
-   - Update `ALLOWED_HOSTS`
-   - Set `DEBUG = False`
+**Server Details:**
+- **Server:** 02-vuweb01
+- **IP:** 10.100.5.61
+- **OS:** Linux with Apache2, MS ODBC driver
+- **SSL:** Forced redirect enabled
+- **Access:** SSH/Putty
 
-2. **Database Migration:**
+#### Step 1: Connect to Server
+
+```bash
+# From Windows Command Line
+ssh ds3297l@10.100.5.61
+# or
+ssh ds3297l@02-vuweb01
+
+# Or use PuTTY with:
+# Host: 10.100.5.61 or 02-vuweb01
+# Username: ds3297l
+# Password: ogpBdtXaBWgY6G9oLS9o3UBN
+```
+
+#### Step 2: Server Preparation
+
+```bash
+# Update system packages
+sudo apt update && sudo apt upgrade -y
+
+# Install Python and dependencies
+sudo apt install -y python3 python3-pip python3-venv python3-dev
+sudo apt install -y build-essential libssl-dev libffi-dev
+sudo apt install -y postgresql-client libpq-dev  # If using PostgreSQL
+sudo apt install -y unixodbc-dev  # For MSSQL connectivity
+
+# Install Node.js for frontend build
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install Git
+sudo apt install -y git
+
+# Configure Apache modules
+sudo a2enmod wsgi
+sudo a2enmod ssl
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+```
+
+#### Step 3: Deploy Application
+
+```bash
+# Create application directory
+sudo mkdir -p /var/www/lifeline-accounting
+sudo chown ds3297l:www-data /var/www/lifeline-accounting
+cd /var/www/lifeline-accounting
+
+# Clone repository (or upload files)
+git clone https://github.com/danistar12/Lifeline-Accounting-Software.git .
+# Or upload via SCP/SFTP
+
+# Set up backend
+cd Accounting-Version-2/backend
+
+# Create Python virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+pip install mod_wsgi  # For Apache integration
+
+# Install additional production packages
+pip install gunicorn  # Alternative to mod_wsgi
+pip install whitenoise  # For static file serving
+```
+
+#### Step 4: Configure Database (MSSQL)
+
+```bash
+# Update settings.py for production
+cd /var/www/lifeline-accounting/Accounting-Version-2/backend
+```
+
+Create `lifeline_backend/settings_production.py`:
+
+```python
+from .settings import *
+
+DEBUG = False
+ALLOWED_HOSTS = ['10.100.5.61', '02-vuweb01', 'localhost']
+
+# MSSQL Database Configuration
+DATABASES = {
+    'default': {
+        'ENGINE': 'mssql',
+        'NAME': 'LifelineAccounting',
+        'USER': 'LLAcct',
+        'PASSWORD': 'SilverMoon#3',
+        'HOST': '10.100.5.27',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'extra_params': 'TrustServerCertificate=yes',
+        },
+    }
+}
+
+# Security Settings
+SECURE_SSL_REDIRECT = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Static Files
+STATIC_ROOT = '/var/www/lifeline-accounting/static/'
+MEDIA_ROOT = '/var/www/lifeline-accounting/media/'
+
+# Add Whitenoise for static files
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+```
+
+#### Step 5: Database Migration
+
+```bash
+# Run migrations on production database
+source venv/bin/activate
+python manage.py migrate --settings=lifeline_backend.settings_production
+
+# Create superuser
+python manage.py createsuperuser --settings=lifeline_backend.settings_production
+
+# Collect static files
+python manage.py collectstatic --settings=lifeline_backend.settings_production
+```
+
+#### Step 6: Build Frontend
+
+```bash
+cd /var/www/lifeline-accounting/Accounting-Version-2/frontend
+
+# Install dependencies
+npm install
+
+# Build for production
+npm run build
+
+# Copy build files to Apache directory
+sudo cp -r dist/* /var/www/html/
+```
+
+#### Step 7: Configure Apache Virtual Host
+
+Create `/etc/apache2/sites-available/lifeline-accounting.conf`:
+
+```apache
+<VirtualHost *:80>
+    ServerName 02-vuweb01
+    ServerAlias 10.100.5.61
+    
+    # Redirect all HTTP to HTTPS
+    Redirect permanent / https://02-vuweb01/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName 02-vuweb01
+    ServerAlias 10.100.5.61
+    
+    # SSL Configuration
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+    
+    # Frontend (Vue.js)
+    DocumentRoot /var/www/html
+    <Directory /var/www/html>
+        Options -Indexes
+        AllowOverride All
+        Require all granted
+        
+        # Handle Vue.js routing
+        RewriteEngine On
+        RewriteBase /
+        RewriteRule ^index\.html$ - [L]
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule . /index.html [L]
+    </Directory>
+    
+    # Backend API (Django)
+    WSGIDaemonProcess lifeline python-path=/var/www/lifeline-accounting/Accounting-Version-2/backend python-home=/var/www/lifeline-accounting/Accounting-Version-2/backend/venv
+    WSGIProcessGroup lifeline
+    WSGIScriptAlias /api /var/www/lifeline-accounting/Accounting-Version-2/backend/lifeline_backend/wsgi.py
+    
+    <Directory /var/www/lifeline-accounting/Accounting-Version-2/backend/lifeline_backend>
+        WSGIProcessGroup lifeline
+        WSGIApplicationGroup %{GLOBAL}
+        Require all granted
+    </Directory>
+    
+    # Static files
+    Alias /static /var/www/lifeline-accounting/static
+    <Directory /var/www/lifeline-accounting/static>
+        Require all granted
+    </Directory>
+    
+    # Media files
+    Alias /media /var/www/lifeline-accounting/media
+    <Directory /var/www/lifeline-accounting/media>
+        Require all granted
+    </Directory>
+    
+    # Logging
+    ErrorLog ${APACHE_LOG_DIR}/lifeline_error.log
+    CustomLog ${APACHE_LOG_DIR}/lifeline_access.log combined
+</VirtualHost>
+```
+
+#### Step 8: Enable Site and Restart Apache
+
+```bash
+# Enable the site
+sudo a2ensite lifeline-accounting.conf
+sudo a2dissite 000-default.conf
+
+# Test Apache configuration
+sudo apache2ctl configtest
+
+# Restart Apache
+sudo systemctl restart apache2
+
+# Check status
+sudo systemctl status apache2
+```
+
+#### Step 9: Set Permissions
+
+```bash
+# Set proper ownership and permissions
+sudo chown -R ds3297l:www-data /var/www/lifeline-accounting/
+sudo chmod -R 755 /var/www/lifeline-accounting/
+sudo chmod -R 775 /var/www/lifeline-accounting/media/
+sudo chmod -R 775 /var/www/lifeline-accounting/static/
+
+# Set executable permission for manage.py
+chmod +x /var/www/lifeline-accounting/Accounting-Version-2/backend/manage.py
+```
+
+#### Step 10: Create WSGI Configuration
+
+Update `/var/www/lifeline-accounting/Accounting-Version-2/backend/lifeline_backend/wsgi.py`:
+
+```python
+import os
+import sys
+from django.core.wsgi import get_wsgi_application
+
+# Add the project directory to the Python path
+sys.path.append('/var/www/lifeline-accounting/Accounting-Version-2/backend')
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lifeline_backend.settings_production')
+
+application = get_wsgi_application()
+```
+
+#### Step 11: Testing Deployment
+
+```bash
+# Test backend API
+curl -k https://02-vuweb01/api/reports/dashboard/
+
+# Check logs
+sudo tail -f /var/log/apache2/lifeline_error.log
+sudo tail -f /var/log/apache2/lifeline_access.log
+
+# Test database connection
+cd /var/www/lifeline-accounting/Accounting-Version-2/backend
+source venv/bin/activate
+python manage.py check --settings=lifeline_backend.settings_production
+```
+
+### Alternative: Gunicorn + Nginx (Recommended)
+
+If you prefer a more robust setup, consider using Gunicorn with Nginx:
+
+```bash
+# Install Gunicorn
+pip install gunicorn
+
+# Create Gunicorn service
+sudo nano /etc/systemd/system/lifeline.service
+```
+
+```ini
+[Unit]
+Description=Lifeline Accounting Gunicorn daemon
+After=network.target
+
+[Service]
+User=ds3297l
+Group=www-data
+WorkingDirectory=/var/www/lifeline-accounting/Accounting-Version-2/backend
+ExecStart=/var/www/lifeline-accounting/Accounting-Version-2/backend/venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/var/www/lifeline-accounting/lifeline.sock \
+          lifeline_backend.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+# Enable and start service
+sudo systemctl daemon-reload
+sudo systemctl start lifeline
+sudo systemctl enable lifeline
+```
+
+### Backup and Maintenance
+
+```bash
+# Create backup script
+sudo nano /usr/local/bin/lifeline-backup.sh
+```
+
+```bash
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/var/backups/lifeline"
+
+mkdir -p $BACKUP_DIR
+
+# Backup application files
+tar -czf $BACKUP_DIR/lifeline_app_$DATE.tar.gz /var/www/lifeline-accounting/
+
+# Backup database (if using local DB)
+# mysqldump or pg_dump commands here
+
+# Keep only last 7 days of backups
+find $BACKUP_DIR -name "lifeline_app_*.tar.gz" -mtime +7 -delete
+```
+
+```bash
+# Make executable and add to cron
+sudo chmod +x /usr/local/bin/lifeline-backup.sh
+sudo crontab -e
+# Add: 0 2 * * * /usr/local/bin/lifeline-backup.sh
+```
+
+### Monitoring and Logging
+
+```bash
+# Set up log rotation
+sudo nano /etc/logrotate.d/lifeline
+```
+
+```
+/var/log/apache2/lifeline_*.log {
+    daily
+    missingok
+    rotate 52
+    compress
+    delaycompress
+    notifempty
+    create 644 root root
+    postrotate
+        systemctl reload apache2
+    endscript
+}
+```
+
+### Security Hardening
+
+```bash
+# Update firewall rules
+sudo ufw allow 22    # SSH
+sudo ufw allow 80    # HTTP
+sudo ufw allow 443   # HTTPS
+sudo ufw enable
+
+# Set up fail2ban for SSH protection
+sudo apt install fail2ban
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
+```
+
+### Troubleshooting Production Issues
+
+**Common Issues:**
+
+1. **Permission Errors:**
    ```bash
-   python manage.py migrate --settings=lifeline_backend.settings_production
+   sudo chown -R ds3297l:www-data /var/www/lifeline-accounting/
+   sudo chmod -R 755 /var/www/lifeline-accounting/
    ```
 
-3. **Static Files:**
+2. **Database Connection Issues:**
    ```bash
-   python manage.py collectstatic
+   # Test MSSQL connection
+   python manage.py check_database_tables --settings=lifeline_backend.settings_production
    ```
 
-### Frontend Deployment
-
-1. **Build for production:**
+3. **Static Files Not Loading:**
    ```bash
-   npm run build
+   python manage.py collectstatic --settings=lifeline_backend.settings_production
+   sudo systemctl restart apache2
    ```
 
-2. **Deploy dist folder** to your web server
+4. **Apache Errors:**
+   ```bash
+   sudo tail -f /var/log/apache2/error.log
+   sudo apache2ctl configtest
+   ```
 
 ## 🔧 Configuration
 
