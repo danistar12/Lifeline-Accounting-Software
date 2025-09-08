@@ -259,7 +259,7 @@ export default {
     async saveProfile() {
       this.saving = true;
       try {
-        const response = await axios.patch('/api/accounts/auth/user/', {
+        await axios.patch('/api/accounts/auth/user/', {
           first_name: this.profileForm.first_name,
           last_name: this.profileForm.last_name,
           email: this.profileForm.email,
@@ -315,7 +315,7 @@ export default {
       formData.append('profile_photo', file);
       
       try {
-        const response = await axios.patch('/api/accounts/auth/user/', formData, {
+        await axios.patch('/api/accounts/auth/user/', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -336,15 +336,12 @@ export default {
     
     async removePhoto() {
       try {
-        const response = await axios.patch('/api/accounts/auth/user/', {
+        await axios.patch('/api/accounts/auth/user/', {
           profile_photo: null
         });
         
         // Update the store with new user data
         await this.me();
-        
-        // Clear the preview
-        this.profilePhoto = null;
         
         console.log('Profile photo removed successfully');
         

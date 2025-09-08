@@ -77,7 +77,16 @@ export default {
         });
     },
     editEmployee(employee) {
-      // Implementation for editing an employee
+      axios.put(`/api/payroll/employees/${employee.employee_id}/`, employee)
+        .then(response => {
+          const index = this.employees.findIndex(e => e.employee_id === employee.employee_id);
+          if (index !== -1) {
+            this.employees.splice(index, 1, response.data);
+          }
+        })
+        .catch(error => {
+          console.error('Error editing employee:', error);
+        });
     },
     deleteEmployee(employeeId) {
       axios.delete(`/api/payroll/employees/${employeeId}/`)

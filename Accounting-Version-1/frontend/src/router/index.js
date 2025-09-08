@@ -1,19 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Dashboard from '../views/Dashboard.vue'
-import Reports from '../views/Reports.vue'
+import ReportsView from '../views/reports/ReportsView.vue'
 import Login from '../components/Login.vue'
 import Profile from '../views/Profile.vue'
 import Settings from '../views/Settings.vue'
-import Payroll from '../views/Payroll.vue'
+import PayrollView from '../views/payroll/PayrollView.vue'
 import AuditLogList from '../views/AuditLogList.vue'
 import Companies from '../views/accounts/Companies.vue'
 import UserRoles from '../views/accounts/UserRoles.vue'
-import Bills from '../views/core/Bills.vue'
-import ChartOfAccounts from '../views/core/ChartOfAccounts.vue'
-import Customers from '../views/core/Customers.vue'
-import GeneralLedger from '../views/core/GeneralLedger.vue'
-import Invoices from '../views/core/Invoices.vue'
-import Vendors from '../views/core/Vendors.vue'
+import GeneralLedger from '../views/reports/GeneralLedger.vue'
 import Documents from '../views/documents/Documents.vue'
 import ImportFiles from '../views/importer/ImportFiles.vue'
 import Subscriptions from '../views/subscriptions/Subscriptions.vue'
@@ -23,8 +18,6 @@ import Paystubs from '../views/payroll/Paystubs.vue'
 import Taxes from '../views/payroll/Taxes.vue'
 import Deductions from '../views/payroll/Deductions.vue'
 import Benefits from '../views/payroll/Benefits.vue'
-import ARPayments from '../views/ar/ARPayments.vue'
-import APPayments from '../views/ap/APPayments.vue'
 import BankAccounts from '../views/banking/BankAccounts.vue'
 import BankStatementLines from '../views/banking/BankStatementLines.vue'
 import Reconciliations from '../views/banking/Reconciliations.vue'
@@ -61,23 +54,18 @@ const routes = [
   {
     path: '/reports',
     name: 'Reports',
-    component: Reports,
+    component: ReportsView,
     meta: { requiresAuth: true }
   },
   {
     path: '/payroll',
     name: 'Payroll',
-    component: Payroll,
+    component: PayrollView,
     meta: { requiresAuth: true }
   },
   { path: '/accounts/companies', name: 'Companies', component: Companies, meta: { requiresAuth: true } },
   { path: '/accounts/user-roles', name: 'UserRoles', component: UserRoles, meta: { requiresAuth: true } },
-  { path: '/core/bills', name: 'Bills', component: Bills, meta: { requiresAuth: true } },
-  { path: '/core/chart-of-accounts', name: 'ChartOfAccounts', component: ChartOfAccounts, meta: { requiresAuth: true } },
-  { path: '/core/customers', name: 'Customers', component: Customers, meta: { requiresAuth: true } },
   { path: '/core/general-ledger', name: 'GeneralLedger', component: GeneralLedger, meta: { requiresAuth: true } },
-  { path: '/core/invoices', name: 'Invoices', component: Invoices, meta: { requiresAuth: true } },
-  { path: '/core/vendors', name: 'Vendors', component: Vendors, meta: { requiresAuth: true } },
   { path: '/documents', name: 'Documents', component: Documents, meta: { requiresAuth: true } },
   { path: '/importer', name: 'ImportFiles', component: ImportFiles, meta: { requiresAuth: true } },
   { path: '/subscriptions', name: 'Subscriptions', component: Subscriptions, meta: { requiresAuth: true } },
@@ -88,8 +76,6 @@ const routes = [
   { path: '/payroll/taxes', name: 'Taxes', component: Taxes, meta: { requiresAuth: true } },
   { path: '/payroll/deductions', name: 'Deductions', component: Deductions, meta: { requiresAuth: true } },
   { path: '/payroll/benefits', name: 'Benefits', component: Benefits, meta: { requiresAuth: true } },
-  { path: '/ar-payments', name: 'ARPayments', component: ARPayments, meta: { requiresAuth: true } },
-  { path: '/ap-payments', name: 'APPayments', component: APPayments, meta: { requiresAuth: true } },
   { path: '/banking/accounts', name: 'BankAccounts', component: BankAccounts, meta: { requiresAuth: true } },
   { path: '/banking/statement-lines', name: 'BankStatementLines', component: BankStatementLines, meta: { requiresAuth: true } },
   { path: '/banking/reconciliations', name: 'Reconciliations', component: Reconciliations, meta: { requiresAuth: true } },

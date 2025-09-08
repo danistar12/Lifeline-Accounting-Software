@@ -69,7 +69,8 @@ export default {
         });
     },
     editPayroll(payroll) {
-      // Implementation for editing a payroll
+      console.log('Editing payroll:', payroll);
+      // Add logic to edit payroll here
     },
     deletePayroll(payrollId) {
       axios.delete(`/api/payroll/payrolls/${payrollId}/`)

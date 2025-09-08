@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 from apps.accounts.models import Company, User
 
 class Customer(models.Model):
@@ -112,10 +113,10 @@ class GeneralLedger(models.Model):
 
 class CustomField(models.Model):
     custom_field_id = models.AutoField(primary_key=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    field_name = models.CharField(max_length=100)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='core_custom_fields')
+    field_name = models.CharField(max_length=255)
     field_type = models.CharField(max_length=50)
-    table_name = models.CharField(max_length=100)
+    table_name = models.CharField(max_length=255)
     created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -123,7 +124,7 @@ class CustomField(models.Model):
 
 class CustomFieldValue(models.Model):
     value_id = models.AutoField(primary_key=True)
-    custom_field = models.ForeignKey(CustomField, on_delete=models.CASCADE)
+    custom_field = models.ForeignKey(CustomField, on_delete=models.CASCADE, related_name='core_custom_field_values')
     record_id = models.IntegerField()
     value = models.TextField()
     created_date = models.DateTimeField(auto_now_add=True)
@@ -133,12 +134,12 @@ class CustomFieldValue(models.Model):
 
 class InvoiceLineItem(models.Model):
     line_item_id = models.AutoField(primary_key=True)
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='core_line_items')
-    inventory = models.ForeignKey('Inventory', on_delete=models.SET_NULL, null=True, blank=True)
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name='core_invoice_line_items')
+    inventory_id = models.IntegerField(default=0)
     description = models.TextField()
-    quantity = models.DecimalField(max_digits=18, decimal_places=2)
-    unit_price = models.DecimalField(max_digits=18, decimal_places=2)
-    total_amount = models.DecimalField(max_digits=18, decimal_places=2)
+    quantity = models.IntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -176,38 +177,75 @@ class BillLineItem(models.Model):
 class InventoryLocation(models.Model):
     location_id = models.AutoField(primary_key=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='core_inventory_locations')
-    location_name = models.CharField(max_length=100)
+    location_name = models.CharField(max_length=255)
     created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'CoreInventoryLocations'
 
+class TimeEntry(models.Model):
+    time_entry_id = models.AutoField(primary_key=True)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='core_time_entries')
+    employee_id = models.IntegerField()
+    work_date = models.DateField()
+    hours = models.DecimalField(max_digits=5, decimal_places=2)
+    time_entry_notes = models.TextField()
+    billable = models.BooleanField()
+    rate = models.DecimalField(max_digits=10, decimal_places=2)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'CoreTimeEntries'
+
 class Project(models.Model):
     project_id = models.AutoField(primary_key=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='core_projects')
-    project_name = models.CharField(max_length=200)
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='core_projects')
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    budget = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
-    project_notes = models.TextField(null=True, blank=True)
-    status = models.CharField(max_length=50)
+    project_name = models.CharField(max_length=255, default='')
+    customer_id = models.IntegerField(default=0)
+    start_date = models.DateField(default=now)
+    end_date = models.DateField(default=now)
+    budget = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
+    project_notes = models.TextField(default='')
+    status = models.CharField(max_length=50, default='')
     created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'CoreProjects'
 
+class AuditLog(models.Model):
+    audit_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='core_audit_logs')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='core_audit_logs')
+    action = models.CharField(max_length=255)
+    table_name = models.CharField(max_length=255)
+    record_id = models.IntegerField()
+    action_date = models.DateTimeField(auto_now_add=True)
+    details = models.TextField()
+
+    class Meta:
+        db_table = 'AuditLogs'
+
+class UserCompanyRole(models.Model):
+    user_company_role_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='core_user_company_roles')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='core_user_company_roles')
+    role = models.CharField(max_length=50)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'UserCompanyRoles'
+
 class Budget(models.Model):
     budget_id = models.AutoField(primary_key=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='core_budgets')
-    account = models.ForeignKey(ChartOfAccount, on_delete=models.CASCADE, related_name='core_budgets')
-    description = models.TextField(null=True, blank=True)
-    budget_year = models.IntegerField()
-    budget_month = models.IntegerField()
-    amount = models.DecimalField(max_digits=18, decimal_places=2)
-    budget_notes = models.TextField(null=True, blank=True)
+    account_id = models.IntegerField(default=0)
+    description = models.TextField(default='')
+    budget_year = models.IntegerField(default=now().year)
+    budget_month = models.IntegerField(default=now().month)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
+    budget_notes = models.TextField(default='')
     created_date = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='core_budgets')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='core_budgets', default=1)
 
     class Meta:
         db_table = 'CoreBudgets'

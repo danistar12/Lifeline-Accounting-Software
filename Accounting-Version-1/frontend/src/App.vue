@@ -31,37 +31,11 @@
               <i class="link-icon">🔑</i>
               <span>User Roles</span>
             </router-link>
-          </div>
-        </div>
-
-        <div class="nav-dropdown" @click="toggleDropdown($event)">
-          <div class="nav-item dropdown-toggle">
-            <div class="nav-icon">⚙️</div>
-            <span class="nav-label">Core</span>
-            <div class="nav-highlight"></div>
-          </div>
-          <div class="dropdown-menu">
-            <router-link to="/core/bills" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">🧾</i>
-              <span>Bills</span>
-            </router-link>
-            <router-link to="/core/chart-of-accounts" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">📋</i>
-              <span>Chart of Accounts</span>
-            </router-link>
-            <router-link to="/core/customers" class="dropdown-link" @click="closeMobileMenu">
+            <router-link to="/accounts/customers" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">👤</i>
               <span>Customers</span>
             </router-link>
-            <router-link to="/core/general-ledger" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">📖</i>
-              <span>General Ledger</span>
-            </router-link>
-            <router-link to="/core/invoices" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">📄</i>
-              <span>Invoices</span>
-            </router-link>
-            <router-link to="/core/vendors" class="dropdown-link" @click="closeMobileMenu">
+            <router-link to="/accounts/vendors" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">🏪</i>
               <span>Vendors</span>
             </router-link>
@@ -132,11 +106,37 @@
 
         <div class="nav-dropdown" @click="toggleDropdown($event)">
           <div class="nav-item dropdown-toggle">
+            <div class="nav-icon">💳</div>
+            <span class="nav-label">Payments</span>
+            <div class="nav-highlight"></div>
+          </div>
+          <div class="dropdown-menu">
+            <router-link to="/payments/bills" class="dropdown-link" @click="closeMobileMenu">
+              <i class="link-icon">🧾</i>
+              <span>Bills</span>
+            </router-link>
+            <router-link to="/payments/invoices" class="dropdown-link" @click="closeMobileMenu">
+              <i class="link-icon">📄</i>
+              <span>Invoices</span>
+            </router-link>
+          </div>
+        </div>
+
+        <div class="nav-dropdown" @click="toggleDropdown($event)">
+          <div class="nav-item dropdown-toggle">
             <div class="nav-icon">📊</div>
             <span class="nav-label">Reports</span>
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
+            <router-link to="/reports/chart-of-accounts" class="dropdown-link" @click="closeMobileMenu">
+              <i class="link-icon">📋</i>
+              <span>Chart of Accounts</span>
+            </router-link>
+            <router-link to="/reports/general-ledger" class="dropdown-link" @click="closeMobileMenu">
+              <i class="link-icon">📖</i>
+              <span>General Ledger</span>
+            </router-link>
             <router-link to="/reports/balance-sheet" class="dropdown-link" @click="closeMobileMenu">
               <i class="link-icon">⚖️</i>
               <span>Balance Sheet</span>

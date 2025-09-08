@@ -81,7 +81,16 @@ export default {
         });
     },
     editDeduction(deduction) {
-      // Implementation for editing a deduction
+      axios.put(`/api/payroll/deductions/${deduction.deduction_id}/`, deduction)
+        .then(response => {
+          const index = this.deductions.findIndex(d => d.deduction_id === deduction.deduction_id);
+          if (index !== -1) {
+            this.deductions.splice(index, 1, response.data);
+          }
+        })
+        .catch(error => {
+          console.error('Error editing deduction:', error);
+        });
     },
     deleteDeduction(deductionId) {
       axios.delete(`/api/payroll/deductions/${deductionId}/`)

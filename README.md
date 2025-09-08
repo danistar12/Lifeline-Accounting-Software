@@ -1,10 +1,10 @@
 # Lifeline Accounting Software
 
-A comprehensive accounting software solution with multiple versions and implementations.
+A comprehensive accounting software solution.
 
 ## Repository Structure
 
-This repository contains the complete Lifeline Accounting Software project with the following structure:
+This repository contains the Lifeline Accounting Software project with the following structure:
 
 ```
 ├── Accounting-Version-1/          # First version implementation
@@ -13,9 +13,6 @@ This repository contains the complete Lifeline Accounting Software project with 
 │   │   └── frontend/              # Vue.js frontend
 │   ├── docs/                      # Version 1 documentation
 │   └── screenshots/               # Version 1 screenshots
-├── Accounting-Version-2/          # Second version implementation
-│   ├── backend/                   # Django backend (updated)
-│   └── frontend/                  # Vue.js frontend (updated)
 ├── Alex Docs/                     # Additional documentation
 ├── Diagrams/                      # System diagrams and flowcharts
 ├── Lifeline Accounting Application Development Document.docx
@@ -45,12 +42,6 @@ This repository contains the complete Lifeline Accounting Software project with 
 - Complete accounting modules
 - Rich UI components
 
-### Version 2
-- Simplified structure
-- Enhanced inventory management
-- Updated frontend with Vite
-- Improved performance
-
 ## Getting Started
 
 ### Prerequisites
@@ -75,24 +66,6 @@ This repository contains the complete Lifeline Accounting Software project with 
    cd Accounting-Version-1/lifeline_accounting/frontend
    npm install
    npm run serve
-   ```
-
-### Setup Version 2
-
-1. **Backend Setup:**
-   ```bash
-   cd Accounting-Version-2/backend
-   .\backend_env\Scripts\activate  # Windows
-   pip install -r requirements.txt
-   python manage.py migrate
-   python manage.py runserver
-   ```
-
-2. **Frontend Setup:**
-   ```bash
-   cd Accounting-Version-2/frontend
-   npm install
-   npm run dev
    ```
 
 ## Features

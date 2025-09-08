@@ -81,7 +81,8 @@ export default {
         });
     },
     editTax(tax) {
-      // Implementation for editing a tax
+      console.log('Editing tax:', tax);
+      // Add logic to edit tax here
     },
     deleteTax(taxId) {
       axios.delete(`/api/payroll/taxes/${taxId}/`)

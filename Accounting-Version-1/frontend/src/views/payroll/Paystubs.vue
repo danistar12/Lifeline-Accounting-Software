@@ -97,7 +97,8 @@ export default {
         });
     },
     editPaystub(paystub) {
-      // Implementation for editing a paystub
+      console.log('Editing paystub:', paystub);
+      // Add logic to edit paystub here
     },
     deletePaystub(paystubId) {
       axios.delete(`/api/payroll/paystubs/${paystubId}/`)

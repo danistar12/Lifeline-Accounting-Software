@@ -81,7 +81,16 @@ export default {
         });
     },
     editBenefit(benefit) {
-      // Implementation for editing a benefit
+      axios.put(`/api/payroll/benefits/${benefit.benefit_id}/`, benefit)
+        .then(response => {
+          const index = this.benefits.findIndex(b => b.benefit_id === benefit.benefit_id);
+          if (index !== -1) {
+            this.benefits.splice(index, 1, response.data);
+          }
+        })
+        .catch(error => {
+          console.error('Error editing benefit:', error);
+        });
     },
     deleteBenefit(benefitId) {
       axios.delete(`/api/payroll/benefits/${benefitId}/`)

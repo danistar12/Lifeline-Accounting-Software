@@ -39,44 +39,21 @@ This document guides you through setting up the Lifeline Accounting backend and 
    Start-Service redis
    ```
 
-7. Start Celery worker:
-   ```powershell
-   celery -A lifeline_backend worker --loglevel=info
-   ```
-
-8. Run the Django development server:
-   ```powershell
-   python manage.py runserver
-   ```
-
 ## Frontend Setup
 
-1. Navigate to the `frontend` folder:
+1. Navigate to the frontend folder:
    ```powershell
-   cd ../frontend
+   cd lifeline_accounting/frontend
    ```
 
-2. Install Node dependencies:
+2. Install Node.js dependencies:
    ```powershell
    npm install
    ```
 
-3. Run the development server:
+3. Start the development server:
    ```powershell
    npm run serve
    ```
 
-4. Open your browser at `http://localhost:8080`.  
-
-## Creating a Superuser
-
-```powershell
-python manage.py createsuperuser
-```  
-Use these credentials at `http://localhost:8000/admin/`.
-
-user name: testuser
-password: testpass123
-
-user name: admin
-password: admin123
+The application will be available at `http://localhost:8080/`.
