@@ -94,14 +94,28 @@ WSGI_APPLICATION = 'lifeline_backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
+#using sqlite for dev and testing
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
+# Example SQL Server connection (uncomment and edit to use)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mssql',
+#         'NAME': 'LLAcctTemp',
+#         'USER': 'LLAcct',
+#         'PASSWORD': 'SilverMoon#3',
+#         'HOST': '10.100.5.27',
+#         'PORT': '1433',
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 18 for SQL Server',
+#             'extra_params': 'TrustServerCertificate=yes;Encrypt=no',
+#         },
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators

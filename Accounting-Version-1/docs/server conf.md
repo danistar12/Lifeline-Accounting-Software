@@ -76,7 +76,7 @@ Create `lifeline_backend/settings_production.py`:
 from .settings import *
 
 DEBUG = False
-ALLOWED_HOSTS = ['10.100.5.61', '02-vuweb01', 'your-domain.com']
+ALLOWED_HOSTS = ['10.100.5.61', '02-vuweb01', 'lifelinedatacenters.com']
 
 # Connect to existing MSSQL database with your schema
 DATABASES = {
