@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from .models import ImportFile
 from .serializers import ImportFileSerializer
 from .tasks import process_import_file_task
+from ..accounts.models import UserCompanyRole
 
 class ImportFileViewSet(viewsets.ModelViewSet):
     queryset = ImportFile.objects.all()
@@ -11,7 +12,8 @@ class ImportFileViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Limit to companies the user belongs to
-        return ImportFile.objects.filter(company__in=self.request.user.companies.all())
+        user_companies = UserCompanyRole.objects.filter(UserID=self.request.user).values_list('CompanyID', flat=True)
+        return ImportFile.objects.filter(CompanyID__in=user_companies)
 
     def perform_create(self, serializer):
         # Associate and save with pending status

@@ -6,6 +6,7 @@ from django.db.models import Sum, F, ExpressionWrapper, DecimalField, Q, Value, 
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from apps.accounting.models import GeneralLedger, ChartOfAccount
+from apps.accounts.models import UserCompanyRole
 from decimal import Decimal
 from .serializers import (
     ReportPeriodSerializer, 
@@ -32,24 +33,46 @@ class BalanceSheetView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
             
-        company = request.user.company
+        company_id = request.query_params.get('company_id')
+        if not company_id:
+            # Get the first company the user has access to
+            user_company_role = UserCompanyRole.objects.filter(UserID=request.user).first()
+            if not user_company_role:
+                return Response(
+                    {"error": "User has no company access"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            company = user_company_role.CompanyID
+        else:
+            # Verify user has access to the requested company
+            try:
+                user_company_role = UserCompanyRole.objects.get(
+                    UserID=request.user,
+                    CompanyID=company_id
+                )
+                company = user_company_role.CompanyID
+            except UserCompanyRole.DoesNotExist:
+                return Response(
+                    {"error": "Access denied to requested company"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
         
         # Get asset accounts
         asset_accounts = ChartOfAccount.objects.filter(
-            company=company,
-            account_type__in=['ASSET', 'CURRENT_ASSET', 'FIXED_ASSET']
+            CompanyID=company,
+            AccountType__in=['ASSET', 'CURRENT_ASSET', 'FIXED_ASSET']
         )
         
         # Get liability accounts
         liability_accounts = ChartOfAccount.objects.filter(
-            company=company,
-            account_type__in=['LIABILITY', 'CURRENT_LIABILITY', 'LONG_TERM_LIABILITY']
+            CompanyID=company,
+            AccountType__in=['LIABILITY', 'CURRENT_LIABILITY', 'LONG_TERM_LIABILITY']
         )
         
         # Get equity accounts
         equity_accounts = ChartOfAccount.objects.filter(
-            company=company,
-            account_type__in=['EQUITY', 'RETAINED_EARNINGS']
+            CompanyID=company,
+            AccountType__in=['EQUITY', 'RETAINED_EARNINGS']
         )
         
         # Calculate balances for each account type
@@ -65,8 +88,8 @@ class BalanceSheetView(APIView):
         for account in asset_accounts:
             balance = self._calculate_account_balance(account, end_date)
             asset_items.append({
-                'account_type': account.account_type,
-                'account_name': account.account_name,
+                'account_type': account.AccountType,
+                'account_name': account.AccountName,
                 'balance': balance
             })
             total_assets += balance
@@ -75,8 +98,8 @@ class BalanceSheetView(APIView):
         for account in liability_accounts:
             balance = self._calculate_account_balance(account, end_date)
             liability_items.append({
-                'account_type': account.account_type,
-                'account_name': account.account_name,
+                'account_type': account.AccountType,
+                'account_name': account.AccountName,
                 'balance': balance
             })
             total_liabilities += balance
@@ -85,8 +108,8 @@ class BalanceSheetView(APIView):
         for account in equity_accounts:
             balance = self._calculate_account_balance(account, end_date)
             equity_items.append({
-                'account_type': account.account_type,
-                'account_name': account.account_name,
+                'account_type': account.AccountType,
+                'account_name': account.AccountName,
                 'balance': balance
             })
             total_equity += balance
@@ -107,14 +130,14 @@ class BalanceSheetView(APIView):
     def _calculate_account_balance(self, account, end_date):
         """Helper method to calculate account balance up to a specific date"""
         gl_entries = GeneralLedger.objects.filter(
-            account=account,
-            transaction_date__lte=end_date
+            AccountID=account,
+            TransactionDate__lte=end_date
         )
         
-        debits = gl_entries.aggregate(total=Coalesce(Sum('debit_amount'), Value(0)))['total']
-        credits = gl_entries.aggregate(total=Coalesce(Sum('credit_amount'), Value(0)))['total']
+        debits = gl_entries.aggregate(total=Coalesce(Sum('DebitAmount'), Value(Decimal('0'), output_field=DecimalField())))['total']
+        credits = gl_entries.aggregate(total=Coalesce(Sum('CreditAmount'), Value(Decimal('0'), output_field=DecimalField())))['total']
         
-        if account.account_type in ['ASSET', 'CURRENT_ASSET', 'FIXED_ASSET', 'EXPENSE']:
+        if account.AccountType in ['ASSET', 'CURRENT_ASSET', 'FIXED_ASSET', 'EXPENSE']:
             # Debit accounts: debit increases, credit decreases
             balance = debits - credits
         else:
@@ -128,26 +151,59 @@ class IncomeStatementView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Get date parameters
-        serializer = ReportPeriodSerializer(data=request.query_params)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Get date parameters with defaults
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
         
-        start_date = serializer.validated_data['start_date']
-        end_date = serializer.validated_data['end_date']
+        if not start_date_str or not end_date_str:
+            # Default to current month
+            today = timezone.now().date()
+            start_date = today.replace(day=1)
+            end_date = today
+        else:
+            try:
+                start_date = datetime.fromisoformat(start_date_str).date()
+                end_date = datetime.fromisoformat(end_date_str).date()
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use ISO format (YYYY-MM-DD)"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
-        company = request.user.company
+        company_id = request.query_params.get('company_id')
+        if not company_id:
+            # Get the first company the user has access to
+            user_company_role = UserCompanyRole.objects.filter(UserID=request.user).first()
+            if not user_company_role:
+                return Response(
+                    {"error": "User has no company access"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            company = user_company_role.CompanyID
+        else:
+            # Verify user has access to the requested company
+            try:
+                user_company_role = UserCompanyRole.objects.get(
+                    UserID=request.user,
+                    CompanyID=company_id
+                )
+                company = user_company_role.CompanyID
+            except UserCompanyRole.DoesNotExist:
+                return Response(
+                    {"error": "Access denied to requested company"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
         
         # Get revenue accounts
         revenue_accounts = ChartOfAccount.objects.filter(
-            company=company,
-            account_type='REVENUE'
+            CompanyID=company,
+            AccountType='REVENUE'
         )
         
         # Get expense accounts
         expense_accounts = ChartOfAccount.objects.filter(
-            company=company,
-            account_type='EXPENSE'
+            CompanyID=company,
+            AccountType='EXPENSE'
         )
         
         # Calculate balances for each account type
@@ -161,8 +217,8 @@ class IncomeStatementView(APIView):
         for account in revenue_accounts:
             balance = self._calculate_account_balance(account, start_date, end_date)
             revenue_items.append({
-                'account_type': account.account_type,
-                'account_name': account.account_name,
+                'account_type': account.AccountType,
+                'account_name': account.AccountName,
                 'balance': balance
             })
             total_revenue += balance
@@ -171,8 +227,8 @@ class IncomeStatementView(APIView):
         for account in expense_accounts:
             balance = self._calculate_account_balance(account, start_date, end_date)
             expense_items.append({
-                'account_type': account.account_type,
-                'account_name': account.account_name,
+                'account_type': account.AccountType,
+                'account_name': account.AccountName,
                 'balance': balance
             })
             total_expenses += balance
@@ -195,15 +251,15 @@ class IncomeStatementView(APIView):
     def _calculate_account_balance(self, account, start_date, end_date):
         """Helper method to calculate account balance between dates"""
         gl_entries = GeneralLedger.objects.filter(
-            account=account,
-            transaction_date__gte=start_date,
-            transaction_date__lte=end_date
+            AccountID=account,
+            TransactionDate__gte=start_date,
+            TransactionDate__lte=end_date
         )
         
-        debits = gl_entries.aggregate(total=Coalesce(Sum('debit_amount'), Value(0)))['total']
-        credits = gl_entries.aggregate(total=Coalesce(Sum('credit_amount'), Value(0)))['total']
+        debits = gl_entries.aggregate(total=Coalesce(Sum('DebitAmount'), Value(Decimal('0'), output_field=DecimalField())))['total']
+        credits = gl_entries.aggregate(total=Coalesce(Sum('CreditAmount'), Value(Decimal('0'), output_field=DecimalField())))['total']
         
-        if account.account_type == 'REVENUE':
+        if account.AccountType == 'REVENUE':
             # Revenue is a credit account
             balance = credits - debits
         else:
@@ -217,21 +273,54 @@ class CashFlowView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Get date parameters
-        serializer = ReportPeriodSerializer(data=request.query_params)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Get date parameters with defaults
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
         
-        start_date = serializer.validated_data['start_date']
-        end_date = serializer.validated_data['end_date']
+        if not start_date_str or not end_date_str:
+            # Default to current month
+            today = timezone.now().date()
+            start_date = today.replace(day=1)
+            end_date = today
+        else:
+            try:
+                start_date = datetime.fromisoformat(start_date_str).date()
+                end_date = datetime.fromisoformat(end_date_str).date()
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use ISO format (YYYY-MM-DD)"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
-        company = request.user.company
+        company_id = request.query_params.get('company_id')
+        if not company_id:
+            # Get the first company the user has access to
+            user_company_role = UserCompanyRole.objects.filter(UserID=request.user).first()
+            if not user_company_role:
+                return Response(
+                    {"error": "User has no company access"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            company = user_company_role.CompanyID
+        else:
+            # Verify user has access to the requested company
+            try:
+                user_company_role = UserCompanyRole.objects.get(
+                    UserID=request.user,
+                    CompanyID=company_id
+                )
+                company = user_company_role.CompanyID
+            except UserCompanyRole.DoesNotExist:
+                return Response(
+                    {"error": "Access denied to requested company"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
         
         # Get cash accounts
         cash_accounts = ChartOfAccount.objects.filter(
-            company=company,
-            account_type='CURRENT_ASSET',
-            account_name__icontains='cash'
+            CompanyID=company,
+            AccountType='CURRENT_ASSET',
+            AccountName__icontains='cash'
         )
         
         if not cash_accounts.exists():
@@ -283,16 +372,16 @@ class CashFlowView(APIView):
     
     def _calculate_account_balance(self, account, start_date=None, end_date=None):
         """Helper method to calculate account balance between dates"""
-        gl_entries = GeneralLedger.objects.filter(account=account)
+        gl_entries = GeneralLedger.objects.filter(AccountID=account)
         
         if start_date:
-            gl_entries = gl_entries.filter(transaction_date__gte=start_date)
+            gl_entries = gl_entries.filter(TransactionDate__gte=start_date)
             
         if end_date:
-            gl_entries = gl_entries.filter(transaction_date__lte=end_date)
+            gl_entries = gl_entries.filter(TransactionDate__lte=end_date)
         
-        debits = gl_entries.aggregate(total=Coalesce(Sum('debit_amount'), Value(0)))['total']
-        credits = gl_entries.aggregate(total=Coalesce(Sum('credit_amount'), Value(0)))['total']
+        debits = gl_entries.aggregate(total=Coalesce(Sum('DebitAmount'), Value(Decimal('0'), output_field=DecimalField())))['total']
+        credits = gl_entries.aggregate(total=Coalesce(Sum('CreditAmount'), Value(Decimal('0'), output_field=DecimalField())))['total']
         
         # Cash is an asset account
         balance = debits - credits
@@ -302,35 +391,35 @@ class CashFlowView(APIView):
         """Helper method to calculate net income for the period"""
         # Get revenue entries
         revenue_accounts = ChartOfAccount.objects.filter(
-            company=company,
-            account_type='REVENUE'
+            CompanyID=company,
+            AccountType='REVENUE'
         )
         
         revenue_entries = GeneralLedger.objects.filter(
-            account__in=revenue_accounts,
-            transaction_date__gte=start_date,
-            transaction_date__lte=end_date
+            AccountID__in=revenue_accounts,
+            TransactionDate__gte=start_date,
+            TransactionDate__lte=end_date
         )
         
         # Get expense entries
         expense_accounts = ChartOfAccount.objects.filter(
-            company=company,
-            account_type='EXPENSE'
+            CompanyID=company,
+            AccountType='EXPENSE'
         )
         
         expense_entries = GeneralLedger.objects.filter(
-            account__in=expense_accounts,
-            transaction_date__gte=start_date,
-            transaction_date__lte=end_date
+            AccountID__in=expense_accounts,
+            TransactionDate__gte=start_date,
+            TransactionDate__lte=end_date
         )
         
         # Calculate net income
         revenue = revenue_entries.aggregate(
-            total=Coalesce(Sum(F('credit_amount') - F('debit_amount')), Value(0))
+            total=Coalesce(Sum(F('CreditAmount') - F('DebitAmount')), Value(Decimal('0'), output_field=DecimalField()))
         )['total']
         
         expenses = expense_entries.aggregate(
-            total=Coalesce(Sum(F('debit_amount') - F('credit_amount')), Value(0))
+            total=Coalesce(Sum(F('DebitAmount') - F('CreditAmount')), Value(Decimal('0'), output_field=DecimalField()))
         )['total']
         
         return revenue - expenses

@@ -9,7 +9,9 @@ class BankAccountViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         company_id = self.request.headers.get('X-Company-ID')
-        return BankAccount.objects.filter(company_id=company_id)
+        if company_id:
+            return BankAccount.objects.filter(CompanyID=company_id)
+        return BankAccount.objects.none()
 
 class BankStatementLineViewSet(viewsets.ModelViewSet):
     queryset = BankStatementLine.objects.all()
@@ -18,7 +20,9 @@ class BankStatementLineViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         company_id = self.request.headers.get('X-Company-ID')
-        return BankStatementLine.objects.filter(bank_account__company_id=company_id)
+        if company_id:
+            return BankStatementLine.objects.filter(BankAccountID__CompanyID=company_id)
+        return BankStatementLine.objects.none()
 
 class ReconciliationEntryViewSet(viewsets.ModelViewSet):
     queryset = ReconciliationEntry.objects.all()
@@ -27,4 +31,6 @@ class ReconciliationEntryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         company_id = self.request.headers.get('X-Company-ID')
-        return ReconciliationEntry.objects.filter(statement_line__bank_account__company_id=company_id)
+        if company_id:
+            return ReconciliationEntry.objects.filter(BankStatementLineID__BankAccountID__CompanyID=company_id)
+        return ReconciliationEntry.objects.none()

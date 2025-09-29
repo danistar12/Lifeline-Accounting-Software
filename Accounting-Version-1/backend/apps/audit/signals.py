@@ -71,13 +71,13 @@ def model_post_save(sender, instance, created, **kwargs):
         
     # Create audit log
     AuditLog.objects.create(
-        company=company,
-        action_type=action_type,
-        action_description=action_description,
-        content_type=ContentType.objects.get_for_model(instance),
-        object_id=str(instance.pk),
+        CompanyID=company,
+        ActionType=action_type,
+        ActionDescription=action_description,
+        ContentType=ContentType.objects.get_for_model(instance),
+        ObjectID=str(instance.pk),
         # No user context in signals, system action
-        user=None,
+        UserID=None,
     )
 
 
@@ -101,11 +101,11 @@ def model_post_delete(sender, instance, **kwargs):
     
     # Create audit log
     AuditLog.objects.create(
-        company=company,
-        action_type=AuditLog.DELETE,
-        action_description=action_description,
-        content_type=ContentType.objects.get_for_model(instance),
-        object_id=str(instance.pk),
+        CompanyID=company,
+        ActionType=AuditLog.DELETE,
+        ActionDescription=action_description,
+        ContentType=ContentType.objects.get_for_model(instance),
+        ObjectID=str(instance.pk),
         # No user context in signals, system action
-        user=None,
+        UserID=None,
     )

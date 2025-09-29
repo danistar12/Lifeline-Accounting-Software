@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 from apps.accounts.models import Company
 from apps.accounting.models import GeneralLedger
 
@@ -10,7 +11,7 @@ class BankAccount(models.Model):
     AccountType = models.CharField(max_length=50)
     BankAcctNotes = models.TextField(null=True, blank=True)
     CurrencyCode = models.CharField(max_length=3, default='USD')
-    Balance = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    Balance = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal('0.00'))
     CreatedDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -19,8 +20,8 @@ class BankAccount(models.Model):
     class Meta:
         db_table = 'BankAccounts'
 
-class BankTransaction(models.Model):
-    BankTransactionID = models.AutoField(primary_key=True)
+class BankStatementLine(models.Model):
+    BankStatementLineID = models.AutoField(primary_key=True)
     BankAccountID = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
     TransactionDate = models.DateTimeField()
     TransactionNumber = models.CharField(max_length=100, null=True, blank=True)
@@ -37,4 +38,18 @@ class BankTransaction(models.Model):
         return f"{self.Description} - ${self.Amount}"
 
     class Meta:
-        db_table = 'BankTransactions'
+        db_table = 'BankStatementLines'
+
+class ReconciliationEntry(models.Model):
+    ReconciliationEntryID = models.AutoField(primary_key=True)
+    BankStatementLineID = models.ForeignKey(BankStatementLine, on_delete=models.CASCADE)
+    GeneralLedgerID = models.ForeignKey(GeneralLedger, on_delete=models.CASCADE)
+    ReconciledAmount = models.DecimalField(max_digits=18, decimal_places=2)
+    ReconciledDate = models.DateTimeField(auto_now_add=True)
+    Notes = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Reconciliation: {self.BankStatementLineID} - {self.GeneralLedgerID}"
+
+    class Meta:
+        db_table = 'ReconciliationEntries'

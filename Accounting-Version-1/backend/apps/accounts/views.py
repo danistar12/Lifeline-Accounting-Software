@@ -24,17 +24,17 @@ def current_user(request):
     if request.method == 'GET':
         # Get user data
         user_data = UserSerializer(user).data
-        
+
         # Get their company roles
-        user_company_roles = UserCompanyRole.objects.filter(user=user)
+        user_company_roles = UserCompanyRole.objects.filter(UserID=user)
         roles_data = UserCompanyRoleSerializer(user_company_roles, many=True).data
-        
+
         # Combine the data
         response_data = {
             'user': user_data,
             'company_roles': roles_data
         }
-        
+
         return Response(response_data)
     
     elif request.method == 'PATCH':
@@ -44,7 +44,7 @@ def current_user(request):
             serializer.save()
             
             # Return updated user data with company roles
-            user_company_roles = UserCompanyRole.objects.filter(user=user)
+            user_company_roles = UserCompanyRole.objects.filter(UserID=user)
             roles_data = UserCompanyRoleSerializer(user_company_roles, many=True).data
             
             response_data = {
@@ -73,7 +73,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
         # Correctly filter companies based on the UserCompanyRole intermediate model
-        return Company.objects.filter(usercompanyrole__user=user)
+        return Company.objects.filter(usercompanyrole__UserID=user)
 
 class UserCompanyRoleViewSet(viewsets.ModelViewSet):
     queryset = UserCompanyRole.objects.all()
@@ -81,7 +81,7 @@ class UserCompanyRoleViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return UserCompanyRole.objects.filter(user=self.request.user)
+        return UserCompanyRole.objects.filter(UserID=self.request.user)
 
 class LoginView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
@@ -138,7 +138,7 @@ def dashboard_metrics(request):
     Get dashboard financial metrics for the current user's companies
     """
     user = request.user
-    companies = Company.objects.filter(usercompanyrole__user=user)
+    companies = Company.objects.filter(usercompanyrole__UserID=user)
     
     # Import here to avoid circular imports
     from apps.accounting.models import GeneralLedger, ChartOfAccount
@@ -151,54 +151,54 @@ def dashboard_metrics(request):
     
     # Get revenue accounts (income/revenue type accounts)
     revenue_accounts = ChartOfAccount.objects.filter(
-        company__in=companies,
-        account_type__icontains='revenue'
+        CompanyID__in=companies,
+        AccountType__icontains='revenue'
     )
     
     # Get expense accounts
     expense_accounts = ChartOfAccount.objects.filter(
-        company__in=companies,
-        account_type__icontains='expense'
+        CompanyID__in=companies,
+        AccountType__icontains='expense'
     )
     
     # Calculate current month revenue
     current_month_revenue = GeneralLedger.objects.filter(
-        company__in=companies,
-        account__in=revenue_accounts,
-        transaction_date__gte=current_month_start,
-        transaction_date__lt=today
+        CompanyID__in=companies,
+        AccountID__in=revenue_accounts,
+        TransactionDate__gte=current_month_start,
+        TransactionDate__lt=today
     ).aggregate(
-        total=Sum('credit_amount') - Sum('debit_amount')
+        total=Sum('CreditAmount') - Sum('DebitAmount')
     )['total'] or Decimal('0.00')
     
     # Calculate last month revenue for comparison
     last_month_revenue = GeneralLedger.objects.filter(
-        company__in=companies,
-        account__in=revenue_accounts,
-        transaction_date__gte=last_month_start,
-        transaction_date__lt=current_month_start
+        CompanyID__in=companies,
+        AccountID__in=revenue_accounts,
+        TransactionDate__gte=last_month_start,
+        TransactionDate__lt=current_month_start
     ).aggregate(
-        total=Sum('credit_amount') - Sum('debit_amount')
+        total=Sum('CreditAmount') - Sum('DebitAmount')
     )['total'] or Decimal('0.00')
     
     # Calculate current month expenses
     current_month_expenses = GeneralLedger.objects.filter(
-        company__in=companies,
-        account__in=expense_accounts,
-        transaction_date__gte=current_month_start,
-        transaction_date__lt=today
+        CompanyID__in=companies,
+        AccountID__in=expense_accounts,
+        TransactionDate__gte=current_month_start,
+        TransactionDate__lt=today
     ).aggregate(
-        total=Sum('debit_amount') - Sum('credit_amount')
+        total=Sum('DebitAmount') - Sum('CreditAmount')
     )['total'] or Decimal('0.00')
     
     # Calculate last month expenses for comparison
     last_month_expenses = GeneralLedger.objects.filter(
-        company__in=companies,
-        account__in=expense_accounts,
-        transaction_date__gte=last_month_start,
-        transaction_date__lt=current_month_start
+        CompanyID__in=companies,
+        AccountID__in=expense_accounts,
+        TransactionDate__gte=last_month_start,
+        TransactionDate__lt=current_month_start
     ).aggregate(
-        total=Sum('debit_amount') - Sum('credit_amount')
+        total=Sum('DebitAmount') - Sum('CreditAmount')
     )['total'] or Decimal('0.00')
     
     # Calculate profit
@@ -207,11 +207,11 @@ def dashboard_metrics(request):
     
     # Calculate year-to-date cash flow (simplified)
     ytd_cash_flow = GeneralLedger.objects.filter(
-        company__in=companies,
-        transaction_date__gte=current_year_start,
-        transaction_date__lt=today
+        CompanyID__in=companies,
+        TransactionDate__gte=current_year_start,
+        TransactionDate__lt=today
     ).aggregate(
-        total=Sum('debit_amount') - Sum('credit_amount')
+        total=Sum('DebitAmount') - Sum('CreditAmount')
     )['total'] or Decimal('0.00')
     
     # Calculate percentage changes
@@ -254,29 +254,29 @@ def dashboard_activity(request):
     Get recent activity for dashboard
     """
     user = request.user
-    companies = Company.objects.filter(usercompanyrole__user=user)
+    companies = Company.objects.filter(usercompanyrole__UserID=user)
     
     # Import here to avoid circular imports
     from apps.accounting.models import GeneralLedger
     
     # Get recent transactions (last 10)
     recent_transactions = GeneralLedger.objects.filter(
-        company__in=companies
-    ).select_related('account').order_by('-created_date')[:10]
+        CompanyID__in=companies
+    ).select_related('AccountID').order_by('-CreatedDate')[:10]
     
     activities = []
     for transaction in recent_transactions:
-        activity_type = 'income' if transaction.credit_amount > transaction.debit_amount else 'expense'
-        amount = transaction.credit_amount if activity_type == 'income' else transaction.debit_amount
-        
+        activity_type = 'income' if transaction.CreditAmount > transaction.DebitAmount else 'expense'
+        amount = transaction.CreditAmount if activity_type == 'income' else transaction.DebitAmount
+
         activities.append({
-            'id': transaction.transaction_id,
+            'id': transaction.TransactionID,
             'type': activity_type,
-            'title': transaction.description or f'{transaction.account.account_name} Transaction',
-            'details': f'Account: {transaction.account.account_name}',
+            'title': transaction.Description or f'{transaction.AccountID.AccountName} Transaction',
+            'details': f'Account: {transaction.AccountID.AccountName}',
             'amount': float(amount),
-            'time': transaction.created_date.strftime('%Y-%m-%d %H:%M'),
-            'account': transaction.account.account_name
+            'time': transaction.CreatedDate.strftime('%Y-%m-%d %H:%M'),
+            'account': transaction.AccountID.AccountName
         })
     
     return Response(activities)
@@ -288,7 +288,7 @@ def dashboard_pending(request):
     Get pending items for dashboard
     """
     user = request.user
-    companies = Company.objects.filter(usercompanyrole__user=user)
+    companies = Company.objects.filter(usercompanyrole__UserID=user)
     
     # Import here to avoid circular imports
     from apps.invoices.models import Invoice
@@ -297,24 +297,24 @@ def dashboard_pending(request):
     pending_items = []
     
     # Get pending invoices (this is simplified - you'd need status fields)
-    invoices = Invoice.objects.filter(company__in=companies)[:5]
+    invoices = Invoice.objects.filter(CompanyID__in=companies)[:5]
     for invoice in invoices:
         pending_items.append({
-            'id': f'invoice-{invoice.invoice_id}',
+            'id': f'invoice-{invoice.InvoiceID}',
             'type': 'invoice',
-            'title': f'Invoice #{invoice.invoice_id}',
-            'subtitle': f'Customer: {invoice.customer.customer_name}',
+            'title': f'Invoice #{invoice.InvoiceNumber}',
+            'subtitle': f'Customer: {invoice.CustomerID.Name}',
             'urgent': True  # Simplified - would check due dates
         })
     
     # Get pending bills
-    bills = Bill.objects.filter(company__in=companies)[:5]
+    bills = Bill.objects.filter(CompanyID__in=companies)[:5]
     for bill in bills:
         pending_items.append({
-            'id': f'bill-{bill.bill_id}',
+            'id': f'bill-{bill.BillID}',
             'type': 'bill',
-            'title': f'Bill #{bill.bill_id}',
-            'subtitle': f'Vendor: {bill.vendor.vendor_name}',
+            'title': f'Bill #{bill.BillNumber}',
+            'subtitle': f'Vendor: {bill.VendorID.Name}',
             'urgent': False
         })
     
@@ -327,7 +327,7 @@ def dashboard_financial_health(request):
     Calculate financial health score and metrics
     """
     user = request.user
-    companies = Company.objects.filter(usercompanyrole__user=user)
+    companies = Company.objects.filter(usercompanyrole__UserID=user)
     
     # Import here to avoid circular imports
     from apps.accounting.models import GeneralLedger, ChartOfAccount
@@ -339,44 +339,44 @@ def dashboard_financial_health(request):
     
     # Get account types
     revenue_accounts = ChartOfAccount.objects.filter(
-        company__in=companies,
-        account_type__icontains='revenue'
+        CompanyID__in=companies,
+        AccountType__icontains='revenue'
     )
     expense_accounts = ChartOfAccount.objects.filter(
-        company__in=companies,
-        account_type__icontains='expense'
+        CompanyID__in=companies,
+        AccountType__icontains='expense'
     )
     asset_accounts = ChartOfAccount.objects.filter(
-        company__in=companies,
-        account_type__icontains='asset'
+        CompanyID__in=companies,
+        AccountType__icontains='asset'
     )
     liability_accounts = ChartOfAccount.objects.filter(
-        company__in=companies,
-        account_type__icontains='liability'
+        CompanyID__in=companies,
+        AccountType__icontains='liability'
     )
     
     # Calculate metrics
     total_revenue = GeneralLedger.objects.filter(
-        company__in=companies,
-        account__in=revenue_accounts,
-        transaction_date__gte=current_year_start
-    ).aggregate(total=Sum('credit_amount'))['total'] or Decimal('0.00')
+        CompanyID__in=companies,
+        AccountID__in=revenue_accounts,
+        TransactionDate__gte=current_year_start
+    ).aggregate(total=Sum('CreditAmount'))['total'] or Decimal('0.00')
     
     total_expenses = GeneralLedger.objects.filter(
-        company__in=companies,
-        account__in=expense_accounts,
-        transaction_date__gte=current_year_start
-    ).aggregate(total=Sum('debit_amount'))['total'] or Decimal('0.00')
+        CompanyID__in=companies,
+        AccountID__in=expense_accounts,
+        TransactionDate__gte=current_year_start
+    ).aggregate(total=Sum('DebitAmount'))['total'] or Decimal('0.00')
     
     total_assets = GeneralLedger.objects.filter(
-        company__in=companies,
-        account__in=asset_accounts
-    ).aggregate(total=Sum('debit_amount') - Sum('credit_amount'))['total'] or Decimal('0.00')
+        CompanyID__in=companies,
+        AccountID__in=asset_accounts
+    ).aggregate(total=Sum('DebitAmount') - Sum('CreditAmount'))['total'] or Decimal('0.00')
     
     total_liabilities = GeneralLedger.objects.filter(
-        company__in=companies,
-        account__in=liability_accounts
-    ).aggregate(total=Sum('credit_amount') - Sum('debit_amount'))['total'] or Decimal('0.00')
+        CompanyID__in=companies,
+        AccountID__in=liability_accounts
+    ).aggregate(total=Sum('CreditAmount') - Sum('DebitAmount'))['total'] or Decimal('0.00')
     
     # Calculate health score (simplified algorithm)
     profit_margin = float((total_revenue - total_expenses) / total_revenue * 100) if total_revenue > 0 else 0
@@ -427,7 +427,7 @@ def dashboard_charts(request):
     Get chart data for dashboard
     """
     user = request.user
-    companies = Company.objects.filter(usercompanyrole__user=user)
+    companies = Company.objects.filter(usercompanyrole__UserID=user)
     
     # Import here to avoid circular imports
     from apps.accounting.models import GeneralLedger, ChartOfAccount
@@ -441,17 +441,17 @@ def dashboard_charts(request):
         month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
         
         revenue_accounts = ChartOfAccount.objects.filter(
-            company__in=companies,
-            account_type__icontains='revenue'
+            CompanyID__in=companies,
+            AccountType__icontains='revenue'
         )
         
         month_revenue = GeneralLedger.objects.filter(
-            company__in=companies,
-            account__in=revenue_accounts,
-            transaction_date__gte=month_start,
-            transaction_date__lte=month_end
+            CompanyID__in=companies,
+            AccountID__in=revenue_accounts,
+            TransactionDate__gte=month_start,
+            TransactionDate__lte=month_end
         ).aggregate(
-            total=Sum('credit_amount') - Sum('debit_amount')
+            total=Sum('CreditAmount') - Sum('DebitAmount')
         )['total'] or Decimal('0.00')
         
         revenue_data.insert(0, {
@@ -461,25 +461,25 @@ def dashboard_charts(request):
     
     # Get expense breakdown by account type
     expense_accounts = ChartOfAccount.objects.filter(
-        company__in=companies,
-        account_type__icontains='expense'
+        CompanyID__in=companies,
+        AccountType__icontains='expense'
     )
     
     expense_breakdown = []
     for account in expense_accounts[:5]:  # Top 5 expense accounts
         total = GeneralLedger.objects.filter(
-            company__in=companies,
-            account=account,
-            transaction_date__gte=today.replace(day=1)
+            CompanyID__in=companies,
+            AccountID=account,
+            TransactionDate__gte=today.replace(day=1)
         ).aggregate(
-            total=Sum('debit_amount') - Sum('credit_amount')
+            total=Sum('DebitAmount') - Sum('CreditAmount')
         )['total'] or Decimal('0.00')
-        
+
         if total > 0:
             expense_breakdown.append({
-                'label': account.account_name,
+                'label': account.AccountName,
                 'value': float(total),
-                'color': f'#{"".join([f"{hash(account.account_name) % 16:x}" for _ in range(6)])}'[:7]
+                'color': f'#{"".join([f"{hash(account.AccountName) % 16:x}" for _ in range(6)])}'[:7]
             })
     
     return Response({

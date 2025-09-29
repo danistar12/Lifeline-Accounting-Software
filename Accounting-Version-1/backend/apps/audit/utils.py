@@ -77,19 +77,19 @@ def log_action(request, company, action_type, action_description, obj=None, data
     """
     # Initialize audit log data
     audit_data = {
-        'company': company,
-        'action_type': action_type,
-        'action_description': action_description,
-        'details': details,
-        'data_before': data_before,
-        'data_after': data_after,
+        'CompanyID': company,
+        'ActionType': action_type,
+        'ActionDescription': action_description,
+        'Details': details,
+        'DataBefore': data_before,
+        'DataAfter': data_after,
     }
     
     # Set user information if a request was provided
     if request:
         # Set user if authenticated
         if request.user and request.user.is_authenticated:
-            audit_data['user'] = request.user
+            audit_data['UserID'] = request.user
         
         # Get IP address
         client_ip, is_routable = get_client_ip(request)
@@ -97,12 +97,12 @@ def log_action(request, company, action_type, action_description, obj=None, data
         # Get user agent
         user_agent = request.META.get('HTTP_USER_AGENT')
         if user_agent:
-            audit_data['user_agent'] = user_agent
+            audit_data['UserAgent'] = user_agent
     
     # Set content object if provided
     if obj:
-        audit_data['content_type'] = ContentType.objects.get_for_model(obj)
-        audit_data['object_id'] = str(obj.pk)
+        audit_data['ContentType'] = ContentType.objects.get_for_model(obj)
+        audit_data['ObjectID'] = str(obj.pk)
     
     # Create and return the audit log entry
     return AuditLog.objects.create(**audit_data)

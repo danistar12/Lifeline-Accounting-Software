@@ -26,39 +26,39 @@ class ContentTypeSerializer(serializers.ModelSerializer):
 class AuditLogSerializer(serializers.ModelSerializer):
     """Serializer for listing audit logs."""
     
-    user = UserMinSerializer(read_only=True)
-    content_type = ContentTypeSerializer(read_only=True)
+    UserID = UserMinSerializer(read_only=True)
+    ContentType = ContentTypeSerializer(read_only=True)
     model_name = serializers.SerializerMethodField()
     user_name = serializers.SerializerMethodField()
     
     class Meta:
         model = AuditLog
         fields = [
-            'id', 'user', 'company', 'action_type', 'action_description',
-            'timestamp', 'content_type', 'object_id', 'ip_address',
+            'AuditID', 'UserID', 'CompanyID', 'ActionType', 'ActionDescription',
+            'ActionDate', 'ContentType', 'ObjectID', 'IPAddress',
             'model_name', 'user_name'
         ]
     
     def get_model_name(self, obj):
         """Get the human-readable model name."""
-        if obj.content_type:
-            return obj.content_type.model.replace('_', ' ').title()
+        if obj.ContentType:
+            return obj.ContentType.model.replace('_', ' ').title()
         return None
     
     def get_user_name(self, obj):
         """Get the full name of the user."""
-        if obj.user:
-            if obj.user.first_name or obj.user.last_name:
-                return f"{obj.user.first_name} {obj.user.last_name}".strip()
-            return obj.user.username
+        if obj.UserID:
+            if obj.UserID.first_name or obj.UserID.last_name:
+                return f"{obj.UserID.first_name} {obj.UserID.last_name}".strip()
+            return obj.UserID.username
         return "System"
 
 
 class AuditLogDetailSerializer(serializers.ModelSerializer):
     """Detailed serializer for a single audit log."""
     
-    user = UserMinSerializer(read_only=True)
-    content_type = ContentTypeSerializer(read_only=True)
+    UserID = UserMinSerializer(read_only=True)
+    ContentType = ContentTypeSerializer(read_only=True)
     model_name = serializers.SerializerMethodField()
     user_name = serializers.SerializerMethodField()
     changes = serializers.SerializerMethodField()
@@ -66,24 +66,24 @@ class AuditLogDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditLog
         fields = [
-            'id', 'user', 'user_name', 'company', 'action_type', 
-            'action_description', 'timestamp', 'content_type', 
-            'object_id', 'data_before', 'data_after', 'details', 
-            'ip_address', 'user_agent', 'model_name', 'changes'
+            'AuditID', 'UserID', 'user_name', 'CompanyID', 'ActionType', 
+            'ActionDescription', 'ActionDate', 'ContentType', 
+            'ObjectID', 'DataBefore', 'DataAfter', 'Details', 
+            'IPAddress', 'UserAgent', 'model_name', 'changes'
         ]
     
     def get_model_name(self, obj):
         """Get the human-readable model name."""
-        if obj.content_type:
-            return obj.content_type.model.replace('_', ' ').title()
+        if obj.ContentType:
+            return obj.ContentType.model.replace('_', ' ').title()
         return None
     
     def get_user_name(self, obj):
         """Get the full name of the user."""
-        if obj.user:
-            if obj.user.first_name or obj.user.last_name:
-                return f"{obj.user.first_name} {obj.user.last_name}".strip()
-            return obj.user.username
+        if obj.UserID:
+            if obj.UserID.first_name or obj.UserID.last_name:
+                return f"{obj.UserID.first_name} {obj.UserID.last_name}".strip()
+            return obj.UserID.username
         return "System"
     
     def get_changes(self, obj):
@@ -93,15 +93,15 @@ class AuditLogDetailSerializer(serializers.ModelSerializer):
         """
         changes = []
         
-        if not obj.data_before or not obj.data_after:
+        if not obj.DataBefore or not obj.DataAfter:
             return changes
             
-        # Find all keys that are in either data_before or data_after
-        all_keys = set(obj.data_before.keys()) | set(obj.data_after.keys())
+        # Find all keys that are in either DataBefore or DataAfter
+        all_keys = set(obj.DataBefore.keys()) | set(obj.DataAfter.keys())
         
         for key in all_keys:
-            before_value = obj.data_before.get(key, None)
-            after_value = obj.data_after.get(key, None)
+            before_value = obj.DataBefore.get(key, None)
+            after_value = obj.DataAfter.get(key, None)
             
             # Only include if there's actually a change
             if before_value != after_value:
