@@ -5,7 +5,7 @@ from rest_framework import status
 from django.db.models import Sum, F, ExpressionWrapper, DecimalField, Q, Value, CharField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
-from apps.core.models import GeneralLedger, ChartOfAccount
+from apps.accounting.models import GeneralLedger, ChartOfAccount
 from decimal import Decimal
 from .serializers import (
     ReportPeriodSerializer, 

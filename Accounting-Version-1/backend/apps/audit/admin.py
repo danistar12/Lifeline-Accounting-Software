@@ -4,14 +4,14 @@ from .models import AuditLog
 
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
-    list_display = ('action_date', 'user', 'company', 'action', 'table_name', 'record_id')
-    list_filter = ('action', 'company', 'action_date', 'user')
-    search_fields = ('details', 'user__username', 'user__email', 'table_name')
+    list_display = ('ActionDate', 'UserID', 'CompanyID', 'Action', 'TableName', 'RecordID')
+    list_filter = ('Action', 'CompanyID', 'ActionDate', 'UserID')
+    search_fields = ('Details', 'UserID__username', 'UserID__email', 'TableName')
     readonly_fields = (
-        'user', 'company', 'action', 'table_name', 'record_id',
-        'action_date', 'details'
+        'UserID', 'CompanyID', 'Action', 'TableName', 'RecordID',
+        'ActionDate', 'Details'
     )
-    date_hierarchy = 'action_date'
+    date_hierarchy = 'ActionDate'
     
     def has_add_permission(self, request):
         # Audit logs should only be created through the application

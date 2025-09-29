@@ -1,6 +1,10 @@
 import csv, os
 from .models import ImportFile
-from apps.core.models import ChartOfAccount, Customer, Vendor, Invoice, Bill
+from apps.accounting.models import ChartOfAccount
+from apps.customers.models import Customer
+from apps.vendors.models import Vendor
+from apps.invoices.models import Invoice
+from apps.bills.models import Bill
 from django.conf import settings
 
 def process_import_file(import_file: ImportFile):

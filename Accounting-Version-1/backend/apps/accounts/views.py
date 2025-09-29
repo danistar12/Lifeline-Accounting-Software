@@ -141,7 +141,7 @@ def dashboard_metrics(request):
     companies = Company.objects.filter(usercompanyrole__user=user)
     
     # Import here to avoid circular imports
-    from apps.core.models import GeneralLedger, ChartOfAccount
+    from apps.accounting.models import GeneralLedger, ChartOfAccount
     
     # Calculate date ranges
     today = timezone.now().date()
@@ -257,7 +257,7 @@ def dashboard_activity(request):
     companies = Company.objects.filter(usercompanyrole__user=user)
     
     # Import here to avoid circular imports
-    from apps.core.models import GeneralLedger
+    from apps.accounting.models import GeneralLedger
     
     # Get recent transactions (last 10)
     recent_transactions = GeneralLedger.objects.filter(
@@ -291,7 +291,8 @@ def dashboard_pending(request):
     companies = Company.objects.filter(usercompanyrole__user=user)
     
     # Import here to avoid circular imports
-    from apps.core.models import Invoice, Bill
+    from apps.invoices.models import Invoice
+    from apps.bills.models import Bill
     
     pending_items = []
     
@@ -329,7 +330,7 @@ def dashboard_financial_health(request):
     companies = Company.objects.filter(usercompanyrole__user=user)
     
     # Import here to avoid circular imports
-    from apps.core.models import GeneralLedger, ChartOfAccount
+    from apps.accounting.models import GeneralLedger, ChartOfAccount
     
     # Calculate various financial health indicators
     today = timezone.now().date()
@@ -429,7 +430,7 @@ def dashboard_charts(request):
     companies = Company.objects.filter(usercompanyrole__user=user)
     
     # Import here to avoid circular imports
-    from apps.core.models import GeneralLedger, ChartOfAccount
+    from apps.accounting.models import GeneralLedger, ChartOfAccount
     
     # Get last 6 months of revenue data
     today = timezone.now().date()

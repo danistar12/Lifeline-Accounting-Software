@@ -3,35 +3,35 @@ from django.db import models
 from django.conf import settings
 
 class User(AbstractUser):
-    user_notes = models.TextField(null=True, blank=True)
+    UserNotes = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'Users'
 
 class Company(models.Model):
-    company_id = models.AutoField(primary_key=True)
-    company_name = models.CharField(max_length=100)
-    company_notes = models.TextField(null=True, blank=True)
-    admin_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='administered_companies')
-    created_date = models.DateTimeField(auto_now_add=True)
+    CompanyID = models.AutoField(primary_key=True)
+    CompanyName = models.CharField(max_length=100)
+    CompanyNotes = models.TextField(null=True, blank=True)
+    AdminUserID = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='administered_companies')
+    CreatedDate = models.DateTimeField(auto_now_add=True)
     users = models.ManyToManyField(User, through='UserCompanyRole', related_name='companies')
 
     def __str__(self):
-        return self.company_name
+        return self.CompanyName
 
     class Meta:
         db_table = 'Companies'
 
 class UserCompanyRole(models.Model):
-    user_company_role_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    role = models.CharField(max_length=50)
-    created_date = models.DateTimeField(auto_now_add=True)
+    UserCompanyRoleID = models.AutoField(primary_key=True)
+    UserID = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    CompanyID = models.ForeignKey(Company, on_delete=models.CASCADE)
+    Role = models.CharField(max_length=50)
+    CreatedDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user.username} - {self.company.company_name}'
+        return f'{self.UserID.username} - {self.CompanyID.CompanyName}'
 
     class Meta:
         db_table = 'UserCompanyRole'
-        unique_together = (('user', 'company'),)
+        unique_together = (('UserID', 'CompanyID'),)

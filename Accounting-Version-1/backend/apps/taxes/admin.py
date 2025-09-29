@@ -3,12 +3,12 @@ from .models import TaxRate, TaxTransaction
 
 @admin.register(TaxRate)
 class TaxRateAdmin(admin.ModelAdmin):
-    list_display = ('tax_name', 'company', 'rate', 'region', 'effective_date')
-    search_fields = ('tax_name', 'region', 'tax_regime')
-    list_filter = ('effective_date',)
+    list_display = ('TaxRateID', 'CompanyID', 'TaxName', 'Rate', 'Region', 'TaxRegime', 'EffectiveDate', 'CreatedDate')
+    search_fields = ('TaxName', 'Region', 'TaxRegime')
+    list_filter = ('EffectiveDate',)
 
 @admin.register(TaxTransaction)
 class TaxTransactionAdmin(admin.ModelAdmin):
-    list_display = ('tax_transaction_id', 'company', 'tax_rate', 'tax_amount', 'transaction_date')
-    search_fields = ('tax_transaction_id',)
-    list_filter = ('transaction_date',)
+    list_display = ('TaxTransactionID', 'CompanyID', 'InvoiceID', 'BillID', 'TaxRateID', 'TaxAmount', 'TransactionDate', 'CreatedDate')
+    search_fields = ('TaxTransactionID',)
+    list_filter = ('TransactionDate',)

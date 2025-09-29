@@ -183,7 +183,9 @@
   </div>
 </template>
 
+
 <script>
+import axios from 'axios';
 export default {
   name: 'SettingsView',
   data() {
@@ -200,7 +202,8 @@ export default {
         email_notifications: true,
         desktop_notifications: false,
         auto_save: true
-      }
+      },
+      userSettings: {},
     };
   },
   computed: {
@@ -211,21 +214,28 @@ export default {
       return userData.is_staff || userData.is_superuser || (userData.role && userData.role.toLowerCase().includes('admin'));
     }
   },
+  mounted() {
+    this.fetchUserSettings();
+  },
   methods: {
+    async fetchUserSettings() {
+      try {
+        const res = await axios.get('/api/settings/settings/user/');
+        this.userSettings = res.data;
+        // Optionally map backend settings to preferences here
+      } catch (error) {
+        console.error('Failed to fetch user settings:', error);
+      }
+    },
     async changePassword() {
       if (this.passwordForm.new_password !== this.passwordForm.confirm_password) {
         alert('New passwords do not match!');
         return;
       }
-      
       this.changingPassword = true;
       try {
-        // This would connect to a password change API endpoint
-        console.log('Changing password...', this.passwordForm);
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
+        // Replace with your actual password change endpoint if different
+        await axios.post('/api/accounts/change-password/', this.passwordForm);
         alert('Password changed successfully!');
         this.passwordForm = {
           current_password: '',
@@ -239,16 +249,11 @@ export default {
         this.changingPassword = false;
       }
     },
-    
     async savePreferences() {
       this.savingPreferences = true;
       try {
-        // This would connect to a preferences API endpoint
-        console.log('Saving preferences...', this.preferences);
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        // Update user settings/preferences
+        await axios.post('/api/settings/settings/update_user/', this.preferences);
         alert('Preferences saved successfully!');
       } catch (error) {
         console.error('Failed to save preferences:', error);
@@ -257,16 +262,18 @@ export default {
         this.savingPreferences = false;
       }
     },
-    
     async exportData() {
       this.exporting = true;
       try {
-        // This would connect to a data export API endpoint
-        console.log('Exporting data...');
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
+        // Example: download user data (implement backend as needed)
+        const res = await axios.get('/api/settings/settings/user/', { responseType: 'blob' });
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'user_data.json');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
         alert('Data export completed! Check your downloads folder.');
       } catch (error) {
         console.error('Failed to export data:', error);
@@ -275,29 +282,26 @@ export default {
         this.exporting = false;
       }
     },
-    
     confirmDeleteAccount() {
       const confirmed = confirm(
         'Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your data.'
       );
-      
       if (confirmed) {
         const doubleConfirmed = confirm(
           'This is your final warning. Deleting your account will remove all companies, transactions, and data associated with your account. Are you absolutely sure?'
         );
-        
         if (doubleConfirmed) {
           this.deleteAccount();
         }
       }
     },
-    
     async deleteAccount() {
       try {
-        // This would connect to an account deletion API endpoint
-        console.log('Deleting account...');
-        
-        alert('Account deletion functionality would be implemented here.');
+        // Implement account deletion endpoint as needed
+        await axios.post('/api/accounts/delete/', {});
+        alert('Account deleted. Logging out...');
+        // Optionally redirect or log out user
+        window.location.href = '/login';
       } catch (error) {
         console.error('Failed to delete account:', error);
         alert('Failed to delete account. Please contact support.');

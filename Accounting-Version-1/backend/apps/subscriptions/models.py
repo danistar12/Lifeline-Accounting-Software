@@ -1,18 +1,19 @@
 from django.db import models
-from apps.core.models import Company, Customer
+from apps.accounts.models import Company
+from apps.customers.models import Customer
 
 class Subscription(models.Model):
-    subscription_id = models.AutoField(primary_key=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    plan_name = models.CharField(max_length=100)
-    billing_cycle = models.CharField(max_length=50)
-    renewal_date = models.DateField()
-    status = models.CharField(max_length=20, default='Active')
-    created_date = models.DateTimeField(auto_now_add=True)
+    SubscriptionID = models.AutoField(primary_key=True)
+    CompanyID = models.ForeignKey(Company, on_delete=models.CASCADE)
+    CustomerID = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    PlanName = models.CharField(max_length=100)
+    BillingCycle = models.CharField(max_length=50)
+    RenewalDate = models.DateField()
+    Status = models.CharField(max_length=20, default='Active')
+    CreatedDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.customer.name} - {self.plan_name}"
+        return f"{self.CustomerID.Name} - {self.PlanName}"
 
     class Meta:
         db_table = 'Subscriptions'

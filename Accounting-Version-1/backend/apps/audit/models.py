@@ -27,38 +27,38 @@ class AuditLog(models.Model):
         (OTHER, 'Other'),
     ]
     
-    audit_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    action_type = models.CharField(max_length=50, choices=ACTION_CHOICES, default=OTHER)
-    action_description = models.CharField(max_length=255)
+    AuditID = models.AutoField(primary_key=True)
+    UserID = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    CompanyID = models.ForeignKey(Company, on_delete=models.CASCADE)
+    ActionType = models.CharField(max_length=50, choices=ACTION_CHOICES, default=OTHER)
+    ActionDescription = models.CharField(max_length=255)
     
     # Content type fields for generic relations
-    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, blank=True)
-    object_id = models.CharField(max_length=255, null=True, blank=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
+    ContentType = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, blank=True)
+    ObjectID = models.CharField(max_length=255, null=True, blank=True)
+    ContentObject = GenericForeignKey('ContentType', 'ObjectID')
     
     # Legacy fields for backward compatibility
-    action = models.CharField(max_length=255, null=True, blank=True)
-    table_name = models.CharField(max_length=100, null=True, blank=True, default="Unknown")
-    record_id = models.IntegerField(null=True, blank=True, default=0)
+    Action = models.CharField(max_length=255, null=True, blank=True)
+    TableName = models.CharField(max_length=100, null=True, blank=True, default="Unknown")
+    RecordID = models.IntegerField(null=True, blank=True, default=0)
     
     # Data fields
-    data_before = models.JSONField(null=True, blank=True)
-    data_after = models.JSONField(null=True, blank=True)
-    details = models.TextField(null=True, blank=True)
+    DataBefore = models.JSONField(null=True, blank=True)
+    DataAfter = models.JSONField(null=True, blank=True)
+    Details = models.TextField(null=True, blank=True)
     
     # Request data
-    ip_address = models.CharField(max_length=45, null=True, blank=True)
-    user_agent = models.TextField(null=True, blank=True)
+    IPAddress = models.CharField(max_length=45, null=True, blank=True)
+    UserAgent = models.TextField(null=True, blank=True)
     
     # Timestamps
-    action_date = models.DateTimeField(default=now)
+    ActionDate = models.DateTimeField(default=now)
     
     class Meta:
         db_table = 'AuditLog'
-        ordering = ['-action_date']
+        ordering = ['-ActionDate']
 
     def __str__(self):
-        username = self.user.username if self.user else 'System'
-        return f'{self.action_date} - {username} - {self.action_description}'
+        username = self.UserID.username if self.UserID else 'System'
+        return f'{self.ActionDate} - {username} - {self.ActionDescription}'

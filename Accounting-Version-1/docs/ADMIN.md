@@ -17,9 +17,9 @@ python manage.py createsuperuser
 ```
 
 You will be prompted to enter:
-- **Username** (e.g. `admin`)
-- **Email address** (e.g. `admin@example.com`)
-- **Password** (choose a strong password)
+- **Username** admin
+- **Email address** (e.g. `admin@lifelinedatacenters.com)
+- **Password** Password#123
 
 Once created, use these credentials to log in at `/admin/`.
 

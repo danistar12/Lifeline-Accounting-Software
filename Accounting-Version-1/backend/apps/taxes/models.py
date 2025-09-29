@@ -1,39 +1,41 @@
 from django.db import models
-from apps.core.models import Company, Invoice, Bill
+from apps.accounts.models import Company
+from apps.invoices.models import Invoice
+from apps.bills.models import Bill
 
 class TaxRate(models.Model):
-    tax_rate_id = models.AutoField(primary_key=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    tax_name = models.CharField(max_length=100)
-    rate = models.DecimalField(max_digits=10, decimal_places=4)
-    region = models.CharField(max_length=100, null=True, blank=True)
-    tax_regime = models.CharField(max_length=100, null=True, blank=True)
-    effective_date = models.DateField()
-    created_date = models.DateTimeField(auto_now_add=True)
+    TaxRateID = models.AutoField(primary_key=True)
+    CompanyID = models.ForeignKey(Company, on_delete=models.CASCADE)
+    TaxName = models.CharField(max_length=100)
+    Rate = models.DecimalField(max_digits=10, decimal_places=4)
+    Region = models.CharField(max_length=100, null=True, blank=True)
+    TaxRegime = models.CharField(max_length=100, null=True, blank=True)
+    EffectiveDate = models.DateField()
+    CreatedDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.tax_name} ({self.rate}%)"
+        return f"{self.TaxName} ({self.Rate}%)"
 
     class Meta:
         db_table = 'TaxRates'
 
 class TaxTransaction(models.Model):
-    tax_transaction_id = models.AutoField(primary_key=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    invoice = models.ForeignKey(Invoice, on_delete=models.SET_NULL, null=True, blank=True)
-    bill = models.ForeignKey(Bill, on_delete=models.SET_NULL, null=True, blank=True)
-    tax_rate = models.ForeignKey(TaxRate, on_delete=models.CASCADE)
-    tax_amount = models.DecimalField(max_digits=18, decimal_places=2)
-    transaction_date = models.DateTimeField()
-    created_date = models.DateTimeField(auto_now_add=True)
+    TaxTransactionID = models.AutoField(primary_key=True)
+    CompanyID = models.ForeignKey(Company, on_delete=models.CASCADE)
+    InvoiceID = models.ForeignKey(Invoice, on_delete=models.SET_NULL, null=True, blank=True)
+    BillID = models.ForeignKey(Bill, on_delete=models.SET_NULL, null=True, blank=True)
+    TaxRateID = models.ForeignKey(TaxRate, on_delete=models.CASCADE)
+    TaxAmount = models.DecimalField(max_digits=18, decimal_places=2)
+    TransactionDate = models.DateTimeField()
+    CreatedDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        if self.invoice:
-            return f"Tax on Invoice #{self.invoice.invoice_number} - ${self.tax_amount}"
-        elif self.bill:
-            return f"Tax on Bill #{self.bill.bill_number} - ${self.tax_amount}"
+        if self.InvoiceID:
+            return f"Tax on Invoice #{self.InvoiceID.InvoiceNumber} - ${self.TaxAmount}"
+        elif self.BillID:
+            return f"Tax on Bill #{self.BillID.BillNumber} - ${self.TaxAmount}"
         else:
-            return f"Tax Transaction - ${self.tax_amount}"
+            return f"Tax Transaction - ${self.TaxAmount}"
 
     class Meta:
         db_table = 'TaxTransactions'

@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'apps.accounts',
-    'apps.core',
     'apps.subscriptions',
     'apps.documents',
     'apps.importer',
@@ -48,6 +47,13 @@ INSTALLED_APPS = [
     'apps.assets',             # Fixed assets
     'apps.integrations',       # External integrations
     'apps.taxes',              # Tax rates and transactions
+    # Core app replacement - dedicated entity apps
+    'apps.customers',          # Customer management
+    'apps.vendors',            # Vendor management
+    'apps.invoices',           # Invoice processing
+    'apps.bills',              # Bill management
+    'apps.accounting',         # Chart of accounts & general ledger
+    'apps.customfields',       # Custom field functionality
 ]
 
 MIDDLEWARE = [
