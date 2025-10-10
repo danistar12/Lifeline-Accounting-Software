@@ -49,7 +49,7 @@ source ~/.bashrc
 cd /var/www
 sudo git clone <repository_url> lifeline-accounting
 sudo chown -R ds3297l:www-data lifeline-accounting
-cd lifeline-accounting/Accounting-Version-1
+cd lifeline-accounting
 ```
 
 ### Backend Setup
@@ -82,16 +82,15 @@ ALLOWED_HOSTS = ['10.100.5.61', '02-vuweb01', 'lifelinedatacenters.com']
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'LifelineAccounting',  # Your existing database
-        'USER': 'your_db_user',        # Replace with actual username
-        'PASSWORD': 'your_db_password', # Replace with actual password
-        'HOST': '10.100.5.27',         # Your existing MSSQL server
+        'NAME': 'LLAcctTemp',
+        'USER': 'LLAcct',
+        'PASSWORD': 'SilverMoon#3',
+        'HOST': '10.100.5.27',
         'PORT': '1433',
         'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'trusted_connection': 'no',  # Use SQL Server authentication
-            'timeout': 20,
-        },
+            'driver': 'ODBC Driver 18 for SQL Server',
+            'extra_params': 'TrustServerCertificate=yes;Encrypt=no',
+        }
     }
 }
 
@@ -162,11 +161,11 @@ Create `/etc/apache2/sites-available/lifeline-accounting.conf`:
     SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
     
     # Django Backend API
-    WSGIDaemonProcess lifeline python-path=/var/www/lifeline-accounting/Accounting-Version-1/backend python-home=/var/www/lifeline-accounting/Accounting-Version-1/backend/venv
+    WSGIDaemonProcess lifeline python-path=/var/www/lifeline-accounting/backend python-home=/var/www/lifeline-accounting/backend/venv
     WSGIProcessGroup lifeline
-    WSGIScriptAlias /api /var/www/lifeline-accounting/Accounting-Version-1/backend/lifeline_backend/wsgi.py
+    WSGIScriptAlias /api /var/www/lifeline-accounting/backend/lifeline_backend/wsgi.py
     
-    <Directory /var/www/lifeline-accounting/Accounting-Version-1/backend/lifeline_backend>
+    <Directory /var/www/lifeline-accounting/backend/lifeline_backend>
         WSGIApplicationGroup %{GLOBAL}
         Require all granted
     </Directory>

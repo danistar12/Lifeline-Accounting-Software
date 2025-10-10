@@ -362,6 +362,8 @@ export default {
     },
     
     getCompanyInitials(name) {
+      if (!name) return 'CN'; // Company Name
+      
       return name.split(' ')
         .map(word => word.charAt(0))
         .join('')

@@ -880,11 +880,26 @@ export default {
     },
 
     getCompanyInitials(name) {
-      return name.split(' ')
-        .map(word => word.charAt(0))
-        .join('')
-        .toUpperCase()
-        .substring(0, 2);
+      if (!name || typeof name !== 'string') {
+        return 'NA';
+      }
+
+      const trimmedName = name.trim();
+      if (!trimmedName) {
+        return 'NA';
+      }
+
+      const parts = trimmedName.split(/\s+/).filter(Boolean);
+      const initials = parts
+        .slice(0, 2)
+        .map(part => part.charAt(0).toUpperCase())
+        .join('');
+
+      if (initials) {
+        return initials;
+      }
+
+      return trimmedName.substring(0, 2).toUpperCase();
     },
 
     formatAddress(company) {

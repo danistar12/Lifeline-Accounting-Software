@@ -10,17 +10,17 @@ class Payment(models.Model):
         ('AR', 'Accounts Receivable'),
     ]
 
-    PaymentID = models.AutoField(primary_key=True)
-    CompanyID = models.ForeignKey(Company, on_delete=models.CASCADE)
-    InvoiceID = models.ForeignKey('invoices.Invoice', on_delete=models.SET_NULL, null=True, blank=True)
-    BillID = models.ForeignKey('bills.Bill', on_delete=models.SET_NULL, null=True, blank=True)
-    PaymentDate = models.DateField()
-    Amount = models.DecimalField(max_digits=18, decimal_places=2)
-    PaymentMethod = models.CharField(max_length=50, null=True, blank=True)
-    PaymentNotes = models.TextField(null=True, blank=True)
-    CurrencyCode = models.CharField(max_length=3, default='USD')
-    CreatedDate = models.DateTimeField(auto_now_add=True)
-    UserID = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True)
+    PaymentID = models.AutoField(primary_key=True, verbose_name="Payment ID")
+    CompanyID = models.ForeignKey(Company, on_delete=models.CASCADE, verbose_name="Company")
+    InvoiceID = models.ForeignKey('invoices.Invoice', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Invoice")
+    BillID = models.ForeignKey('bills.Bill', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Bill")
+    PaymentDate = models.DateField(verbose_name="Payment Date")
+    Amount = models.DecimalField(max_digits=18, decimal_places=2, verbose_name="Amount")
+    PaymentMethod = models.CharField(max_length=50, null=True, blank=True, verbose_name="Payment Method")
+    PaymentNotes = models.TextField(null=True, blank=True, verbose_name="Payment Notes")
+    CurrencyCode = models.CharField(max_length=3, default='USD', verbose_name="Currency Code")
+    CreatedDate = models.DateTimeField(auto_now_add=True, verbose_name="Created Date")
+    UserID = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="User")
 
     class Meta:
         db_table = 'Payments'

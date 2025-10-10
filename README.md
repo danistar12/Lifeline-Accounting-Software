@@ -7,12 +7,10 @@ A comprehensive accounting software solution.
 This repository contains the Lifeline Accounting Software project with the following structure:
 
 ```
-├── Accounting-Version-1/          # First version implementation
-│   ├── lifeline_accounting/
-│   │   ├── backend/               # Django backend
-│   │   └── frontend/              # Vue.js frontend
-│   ├── docs/                      # Version 1 documentation
-│   └── screenshots/               # Version 1 screenshots
+├── backend/               # Django backend
+├── frontend/              # Vue.js frontend
+├── docs/                  # Documentation
+├── screenshots/           # Screenshots
 ├── Alex Docs/                     # Additional documentation
 ├── Diagrams/                      # System diagrams and flowcharts
 ├── Lifeline Accounting Application Development Document.docx
@@ -49,11 +47,11 @@ This repository contains the Lifeline Accounting Software project with the follo
 - Node.js 16+
 - npm or yarn
 
-### Setup Version 1
+### Setup
 
 1. **Backend Setup:**
    ```bash
-   cd Accounting-Version-1/lifeline_accounting/backend
+   cd backend
    python -m venv env
    .\env\Scripts\activate  # Windows
    pip install -r requirements.txt
@@ -63,7 +61,7 @@ This repository contains the Lifeline Accounting Software project with the follo
 
 2. **Frontend Setup:**
    ```bash
-   cd Accounting-Version-1/lifeline_accounting/frontend
+   cd frontend
    npm install
    npm run serve
    ```
