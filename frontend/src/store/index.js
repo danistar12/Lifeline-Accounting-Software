@@ -125,6 +125,18 @@ export default createStore({
         const response = await axios.get('/api/accounts/companies/');
         console.log('Companies loaded:', response.data);
         commit('setUserCompanies', response.data);
+        // If no company is currently selected, pick the first available company
+        const currentSelected = localStorage.getItem('selectedCompanyId');
+        if (!currentSelected && Array.isArray(response.data) && response.data.length) {
+          const first = response.data[0];
+          const firstId = first.CompanyID ?? first.company_id ?? null;
+          if (firstId) {
+            commit('setSelectedCompany', firstId);
+            // also set axios default so apiClient and existing code paths pick it up
+            axios.defaults.headers.common['X-Company-ID'] = firstId;
+            console.log('Auto-selected company:', firstId);
+          }
+        }
         return response.data;
       } catch (error) {
         console.error('Failed to load companies:', error);

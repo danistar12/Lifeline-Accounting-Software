@@ -7,6 +7,8 @@ import Settings from '../views/Settings.vue'
 import PayrollView from '../views/payroll/PayrollView.vue'
 import AuditLogList from '../views/AuditLogList.vue'
 import Companies from '../views/accounts/Companies.vue'
+import Customers from '../views/accounts/Customers.vue'
+import Vendors from '../views/accounts/Vendors.vue'
 import UserRoles from '../views/accounts/UserRoles.vue'
 import GeneralLedger from '../views/reports/GeneralLedger.vue'
 import Documents from '../views/documents/Documents.vue'
@@ -66,6 +68,8 @@ const routes = [
     meta: { requiresAuth: true }
   },
   { path: '/accounts/companies', name: 'Companies', component: Companies, meta: { requiresAuth: true } },
+  { path: '/accounts/customers', name: 'Customers', component: Customers, meta: { requiresAuth: true } },
+  { path: '/accounts/vendors', name: 'Vendors', component: Vendors, meta: { requiresAuth: true } },
   { path: '/accounts/user-roles', name: 'UserRoles', component: UserRoles, meta: { requiresAuth: true } },
   { path: '/reports/general-ledger', name: 'GeneralLedger', component: GeneralLedger, meta: { requiresAuth: true } },
   { path: '/documents', name: 'Documents', component: Documents, meta: { requiresAuth: true } },
@@ -84,6 +88,7 @@ const routes = [
   { path: '/payments/invoices', name: 'Invoices', component: Invoices, meta: { requiresAuth: true } },
   { path: '/payments/bills', name: 'Bills', component: Bills, meta: { requiresAuth: true } },
   { path: '/reports/balance-sheet', name: 'BalanceSheet', component: BalanceSheet, meta: { requiresAuth: true } },
+  { path: '/reports/chart-of-accounts', name: 'ChartOfAccounts', component: () => import('../views/accounts/ChartOfAccounts.vue'), meta: { requiresAuth: true } },
   { path: '/reports/income-statement', name: 'IncomeStatement', component: IncomeStatement, meta: { requiresAuth: true } },
   { path: '/reports/cash-flow', name: 'CashFlow', component: CashFlow, meta: { requiresAuth: true } },
   { path: '/audit-logs', name: 'AuditLogs', component: AuditLogList, meta: { requiresAuth: true, adminOnly: true } }

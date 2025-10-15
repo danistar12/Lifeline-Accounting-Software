@@ -21,7 +21,7 @@ def get_client_ip(request):
     # Check if IP is private/non-routable
     is_routable = True
     private_ips = [
-        '0.0.0.0', '127.0.0.1',  # localhost
+    '0.0.0.0', 'localhost',  # localhost
         '10.0.0.0/8',            # Class A private network
         '172.16.0.0/12',         # Class B private networks
         '192.168.0.0/16',        # Class C private networks

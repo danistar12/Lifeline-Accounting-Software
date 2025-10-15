@@ -148,14 +148,14 @@
                   Manage Companies
                 </router-link>
               </div>
-              <div v-for="role in companyRoles" :key="role.user_company_role_id" class="company-role-card">
+              <div v-for="role in companyRoles" :key="role.UserCompanyRoleID || role.user_company_role_id" class="company-role-card">
                 <div class="company-avatar">
-                  {{ getCompanyInitials(role.company.company_name) }}
+                  {{ getCompanyInitials(role.Company?.CompanyName || role.company?.company_name) }}
                 </div>
                 <div class="company-details">
-                  <h4>{{ role.company.company_name }}</h4>
-                  <p class="role">{{ role.role }}</p>
-                  <small class="join-date">Joined {{ formatDate(role.created_date) }}</small>
+                  <h4>{{ role.Company?.CompanyName || role.company?.company_name }}</h4>
+                  <p class="role">{{ role.Role || role.role }}</p>
+                  <small class="join-date">Joined {{ formatDate(role.CreatedDate || role.created_date) }}</small>
                 </div>
               </div>
             </div>

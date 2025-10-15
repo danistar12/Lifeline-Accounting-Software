@@ -64,8 +64,8 @@
               <td>{{ formatDate(invoice.DueDate) }}</td>
               <td class="amount">{{ formatCurrency(invoice.TotalAmount) }}</td>
               <td>
-                <span :class="`status-badge status-${invoice.Status.toLowerCase()}`">
-                  {{ invoice.Status }}
+                <span :class="`status-badge status-${(invoice.Status || invoice.status || '').toString().toLowerCase()}`">
+                  {{ invoice.Status || invoice.status || 'Unknown' }}
                 </span>
               </td>
               <td class="actions-col">
@@ -143,6 +143,7 @@
 
 <script>
 import axios from 'axios';
+import { normalizeArray } from '@/services/normalizeApi';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
@@ -198,7 +199,20 @@ export default {
       this.error = '';
       try {
         const response = await axios.get('/api/invoices/');
-        this.invoices = response.data || [];
+        let payload = response.data;
+
+        // handle paginated or nested responses: { results: [...] } or { data: [...] }
+        if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+          if (Array.isArray(payload.results)) payload = payload.results;
+          else if (Array.isArray(payload.data)) payload = payload.data;
+        }
+
+        if (!Array.isArray(payload)) {
+          // if it's a single object, wrap it; otherwise ensure it's an array
+          payload = payload ? [payload] : [];
+        }
+
+        this.invoices = normalizeArray(payload);
         this.filteredInvoices = [...this.invoices];
       } catch (error) {
         console.error('Error fetching invoices:', error);
@@ -210,24 +224,31 @@ export default {
     async fetchCustomers() {
       try {
         const response = await axios.get('/api/customers/');
-        this.customers = response.data || [];
+        let payload = response.data;
+        if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+          if (Array.isArray(payload.results)) payload = payload.results;
+          else if (Array.isArray(payload.data)) payload = payload.data;
+        }
+        if (!Array.isArray(payload)) payload = payload ? [payload] : [];
+        this.customers = normalizeArray(payload);
       } catch (error) {
         console.error('Error fetching customers:', error);
       }
     },
     filterInvoices() {
-      let filtered = [...this.invoices];
+      let filtered = Array.isArray(this.invoices) ? [...this.invoices] : [];
 
       if (this.statusFilter) {
-        filtered = filtered.filter(invoice => invoice.Status === this.statusFilter);
+        filtered = filtered.filter(invoice => (invoice.Status || '').toString() === this.statusFilter);
       }
 
       if (this.searchTerm) {
         const term = this.searchTerm.toLowerCase();
-        filtered = filtered.filter(invoice =>
-          invoice.InvoiceNumber.toLowerCase().includes(term) ||
-          invoice.CustomerName.toLowerCase().includes(term)
-        );
+        filtered = filtered.filter((invoice) => {
+          const invNum = (invoice.InvoiceNumber || invoice.invoice_number || '')?.toString().toLowerCase();
+          const cust = (invoice.CustomerName || invoice.customer_name || '')?.toString().toLowerCase();
+          return invNum.includes(term) || cust.includes(term);
+        });
       }
 
       this.filteredInvoices = filtered;

@@ -420,28 +420,34 @@ export default {
     displayName() {
       if (!this.user) return 'User';
       const userData = this.user.user || this.user;
-      if (userData.first_name && userData.last_name) {
-        return `${userData.first_name} ${userData.last_name}`;
-      } else if (userData.first_name) {
-        return userData.first_name;
-      } else {
-        return userData.username || 'User';
+      const first = userData?.FirstName ?? userData?.first_name;
+      const last = userData?.LastName ?? userData?.last_name;
+      if (first && last) {
+        return `${first} ${last}`;
       }
+      if (first) {
+        return first;
+      }
+      return userData?.username || 'User';
     },
     profilePhotoUrl() {
-      return this.user?.profile_photo || this.user?.user?.profile_photo || '';
+      const userData = this.user?.user || this.user;
+      return userData?.ProfilePhoto || userData?.profile_photo || '';
     },
     userInitials() {
       const userData = this.user?.user || this.user;
-      if (userData?.first_name && userData?.last_name) {
-        return `${userData.first_name.charAt(0)}${userData.last_name.charAt(0)}`.toUpperCase();
-      } else if (userData?.first_name) {
-        return userData.first_name.charAt(0).toUpperCase();
-      } else if (userData?.username) {
-        return userData.username.charAt(0).toUpperCase();
-      } else {
-        return 'U';
+      const first = userData?.FirstName ?? userData?.first_name;
+      const last = userData?.LastName ?? userData?.last_name;
+      if (first && last) {
+        return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
       }
+      if (first) {
+        return first.charAt(0).toUpperCase();
+      }
+      if (userData?.username) {
+        return userData.username.charAt(0).toUpperCase();
+      }
+      return 'U';
     },
     timeOfDay() {
       const hour = new Date().getHours();
@@ -450,10 +456,24 @@ export default {
       return 'evening';
     },
     companyName() {
-      if (this.user && this.user.company_roles && this.user.company_roles.length > 0) {
-        return this.user.company_roles[0].company.name
+      const roles = this.user?.company_roles || [];
+      if (roles.length) {
+        const primaryRole = roles[0];
+        const company = primaryRole.Company || primaryRole.company;
+        return company?.CompanyName || company?.company_name || 'Your Company';
       }
       return 'Your Company'
+    }
+  },
+  watch: {
+    isLoggedIn(value) {
+      if (value) {
+        this.loadDashboardData();
+      } else {
+        this.loading = false;
+        this.recentActivities = [];
+        this.pendingItems = [];
+      }
     }
   },
   methods: {
@@ -635,7 +655,11 @@ export default {
   },
   
   async mounted() {
-    await this.loadDashboardData();
+    if (this.isLoggedIn) {
+      await this.loadDashboardData();
+    } else {
+      this.loading = false;
+    }
   }
 };
 </script>

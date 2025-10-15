@@ -16,6 +16,8 @@ from .serializers import (
     FinancialReportItemSerializer
 )
 from datetime import datetime
+from rest_framework.pagination import PageNumberPagination
+from apps.accounting.serializers import GeneralLedgerSerializer
 
 
 class BalanceSheetView(APIView):
@@ -423,3 +425,41 @@ class CashFlowView(APIView):
         )['total']
         
         return revenue - expenses
+
+
+class GeneralLedgerReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Optional date filters
+            start_date = request.query_params.get('start_date')
+            end_date = request.query_params.get('end_date')
+
+            entries = GeneralLedger.objects.filter(CompanyID__usercompanyrole__UserID=request.user)
+
+            if start_date:
+                try:
+                    start_date = datetime.fromisoformat(start_date).date()
+                    entries = entries.filter(TransactionDate__gte=start_date)
+                except ValueError:
+                    return Response({'error': 'Invalid start_date format'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if end_date:
+                try:
+                    end_date = datetime.fromisoformat(end_date).date()
+                    entries = entries.filter(TransactionDate__lte=end_date)
+                except ValueError:
+                    return Response({'error': 'Invalid end_date format'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Paginate
+            paginator = PageNumberPagination()
+            paginator.page_size = 50
+            page = paginator.paginate_queryset(entries.order_by('-TransactionDate'), request)
+            serializer = GeneralLedgerSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        except Exception as exc:
+            import traceback
+            tb = traceback.format_exc()
+            # Return traceback in JSON for easier local debugging (do not enable in production)
+            return Response({'error': str(exc), 'traceback': tb}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,7 +15,7 @@ SECRET_KEY = 'django-insecure-your-secret-key'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -71,10 +72,31 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
-    "http://127.0.0.1:8080",
 ]
 
+# Allow cookies/credentials to be included in CORS requests from the frontend
 CORS_SUPPORTS_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow the frontend to send the custom X-Company-ID header in preflight requests
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'x-company-id',
+]
+
+# Development-friendly cookie settings
+# Note: For local development it's easiest to run the frontend on the same host (localhost)
+# to avoid cross-origin cookie issues. The settings below relax SameSite so cookies can be
+# included in cross-site requests during local testing. Do NOT use these in production.
+SESSION_COOKIE_SAMESITE = None
+CSRF_COOKIE_SAMESITE = None
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+
+# If you want to scope cookies to a specific domain, set SESSION_COOKIE_DOMAIN accordingly.
+# For local testing we leave it unset so cookies are host-only.
+# SESSION_COOKIE_DOMAIN = None
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -114,6 +136,13 @@ DATABASES = {
         }
     }
 }
+
+# Use an isolated SQLite database when running the Django test suite
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'test_db.sqlite3',
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -175,6 +204,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        # Allow Authorization: Bearer <token> as a fallback during local development
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'apps.accounts.authentication.JWTCookieAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
@@ -200,6 +231,11 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_COOKIE_SECURE': False, # Should be True in production
     'REFRESH_TOKEN_COOKIE_SECURE': False, # Should be True in production
 }
+
+# For local development allow JWT cookies to be sent in cross-site (frontend at different host)
+# Set SameSite=None for dev so cookies are attached when using withCredentials
+SIMPLE_JWT['ACCESS_TOKEN_COOKIE_SAMESITE'] = None
+SIMPLE_JWT['REFRESH_TOKEN_COOKIE_SAMESITE'] = None
 
 # Celery configuration
 CELERY_BROKER_URL = 'redis://localhost:6379/0'

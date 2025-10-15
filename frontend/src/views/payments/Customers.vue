@@ -43,13 +43,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="customer in filteredCustomers" :key="customer.id">
+            <tr v-for="customer in filteredCustomers" :key="customer.CustomerID">
               <td>
-                <div class="customer-name">{{ customer.Name || customer.name }}</div>
+                <div class="customer-name">{{ customer.Name }}</div>
               </td>
-              <td>{{ customer.Email || customer.email || '—' }}</td>
-              <td>{{ customer.Phone || customer.phone || '—' }}</td>
-              <td>{{ customer.Address || customer.address || '—' }}</td>
+              <td>{{ customer.Email || '—' }}</td>
+              <td>{{ customer.Phone || '—' }}</td>
+              <td>{{ customer.Address || '—' }}</td>
               <td class="actions-col">
                 <UiButton size="sm" variant="ghost" @click="viewCustomer(customer)">
                   View
@@ -57,7 +57,7 @@
                 <UiButton size="sm" variant="ghost" @click="editCustomer(customer)">
                   Edit
                 </UiButton>
-                <UiButton size="sm" variant="danger" @click="deleteCustomer(customer.id)">
+                <UiButton size="sm" variant="danger" @click="deleteCustomer(customer.CustomerID)">
                   Delete
                 </UiButton>
               </td>
@@ -78,23 +78,23 @@
       <form class="modal-form" @submit.prevent>
         <div class="form-grid">
           <UiFormField label="Name" required>
-            <input v-model="form.name" required />
+            <input v-model="form.Name" required />
           </UiFormField>
           <UiFormField label="Email">
-            <input v-model="form.email" type="email" />
+            <input v-model="form.Email" type="email" />
           </UiFormField>
           <UiFormField label="Phone">
-            <input v-model="form.phone" type="tel" />
+            <input v-model="form.Phone" type="tel" />
           </UiFormField>
           <UiFormField label="Payment Terms">
-            <input v-model="form.payment_terms" placeholder="e.g., Net 30" />
+            <input v-model="form.PaymentTerms" placeholder="e.g., Net 30" />
           </UiFormField>
         </div>
         <UiFormField label="Address">
-          <textarea v-model="form.address" rows="2" placeholder="Street address..." />
+          <textarea v-model="form.Address" rows="2" placeholder="Street address..." />
         </UiFormField>
         <UiFormField label="Notes">
-          <textarea v-model="form.notes" rows="3" placeholder="Additional notes..." />
+          <textarea v-model="form.CustomerNotes" rows="3" placeholder="Additional notes..." />
         </UiFormField>
       </form>
     </UiModal>
@@ -103,10 +103,12 @@
 
 <script>
 import axios from 'axios';
+import { mapGetters } from 'vuex';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
 import UiModal from '@/components/ui/UiModal.vue';
+import { normalizeArray } from '@/services/normalizeApi';
 
 export default {
   name: 'CustomersView',
@@ -129,8 +131,9 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['selectedCompanyId']),
     modalTitle() {
-      return this.form.id ? 'Edit customer' : 'New customer';
+      return this.form.CustomerID ? 'Edit customer' : 'New customer';
     },
   },
   mounted() {
@@ -138,14 +141,16 @@ export default {
   },
   methods: {
     defaultForm() {
+      const companyId = this.selectedCompanyId ? Number(this.selectedCompanyId) : null;
       return {
-        id: null,
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
-        payment_terms: '',
-        notes: '',
+        CustomerID: null,
+        CompanyID: companyId,
+        Name: '',
+        Email: '',
+        Phone: '',
+        Address: '',
+        PaymentTerms: '',
+        CustomerNotes: '',
       };
     },
     async fetchCustomers() {
@@ -154,18 +159,7 @@ export default {
       try {
         const response = await axios.get('/api/customers/');
         const payload = response.data || [];
-        this.customers = payload.map((c) => {
-          const normalized = { ...c };
-          normalized.CustomerID = c.CustomerID ?? c.id;
-          normalized.CompanyID = c.CompanyID ?? c.company_id;
-          normalized.Name = c.Name ?? c.name;
-          normalized.Email = c.Email ?? c.email;
-          normalized.Phone = c.Phone ?? c.phone;
-          normalized.Address = c.Address ?? c.address;
-          normalized.PaymentTerms = c.PaymentTerms ?? c.payment_terms;
-          normalized.CustomerNotes = c.CustomerNotes ?? c.notes;
-          return normalized;
-        });
+        this.customers = normalizeArray(payload);
         this.filteredCustomers = [...this.customers];
       } catch (error) {
         console.error('Error fetching customers:', error);
@@ -180,8 +174,8 @@ export default {
       if (this.searchTerm) {
         const term = this.searchTerm.toLowerCase();
         filtered = filtered.filter(customer =>
-          customer.name.toLowerCase().includes(term) ||
-          (customer.email && customer.email.toLowerCase().includes(term))
+          (customer.Name || '').toString().toLowerCase().includes(term) ||
+          (customer.Email || '').toString().toLowerCase().includes(term)
         );
       }
 
@@ -189,20 +183,32 @@ export default {
     },
     openCreate() {
       this.form = this.defaultForm();
+      if (!this.form.CompanyID && this.customers.length) {
+        this.form.CompanyID = this.customers[0].CompanyID ?? null;
+      }
       this.showModal = true;
     },
     editCustomer(customer) {
-      this.form = { ...customer };
+      this.form = {
+        CustomerID: customer.CustomerID ?? null,
+  CompanyID: customer.CompanyID ?? (this.selectedCompanyId ? Number(this.selectedCompanyId) : null),
+        Name: customer.Name || '',
+        Email: customer.Email || '',
+        Phone: customer.Phone || '',
+        Address: customer.Address || '',
+        PaymentTerms: customer.PaymentTerms || '',
+        CustomerNotes: customer.CustomerNotes || '',
+      };
       this.showModal = true;
     },
     viewCustomer(customer) {
       // TODO: Navigate to customer detail view
       console.log('View customer:', customer);
     },
-    async deleteCustomer(id) {
+    async deleteCustomer(customerId) {
       if (!confirm('Are you sure you want to delete this customer?')) return;
       try {
-        await axios.delete(`/api/customers/${id}/`);
+        await axios.delete(`/api/customers/${customerId}/`);
         this.fetchCustomers();
       } catch (error) {
         console.error('Error deleting customer:', error);
@@ -212,10 +218,20 @@ export default {
     async save() {
       this.saving = true;
       try {
-        if (this.form.id) {
-          await axios.put(`/api/customers/${this.form.id}/`, this.form);
+        const payload = {
+          ...this.form,
+        };
+
+        if (!payload.CompanyID && this.selectedCompanyId) {
+          payload.CompanyID = Number(this.selectedCompanyId);
+        }
+
+        const { CustomerID, ...body } = payload;
+
+        if (CustomerID) {
+          await axios.put(`/api/customers/${CustomerID}/`, body);
         } else {
-          await axios.post('/api/customers/', this.form);
+          await axios.post('/api/customers/', body);
         }
         this.showModal = false;
         this.fetchCustomers();

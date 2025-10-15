@@ -89,6 +89,9 @@ class UserCompanyRoleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return UserCompanyRole.objects.filter(UserID=self.request.user)
 
+    def perform_create(self, serializer):
+        serializer.save(UserID=self.request.user)
+
 class LoginView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
@@ -149,11 +152,12 @@ def dashboard_metrics(request):
     # Import here to avoid circular imports
     from apps.accounting.models import GeneralLedger, ChartOfAccount
     
-    # Calculate date ranges
-    today = timezone.now().date()
-    current_month_start = today.replace(day=1)
+    # Calculate date ranges using timezone-aware datetimes
+    now = timezone.localtime()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    current_month_start = today_start.replace(day=1)
     last_month_start = (current_month_start - timedelta(days=1)).replace(day=1)
-    current_year_start = today.replace(month=1, day=1)
+    current_year_start = today_start.replace(month=1, day=1)
     
     # Get revenue accounts (income/revenue type accounts)
     revenue_accounts = ChartOfAccount.objects.filter(
@@ -171,8 +175,8 @@ def dashboard_metrics(request):
     current_month_revenue = GeneralLedger.objects.filter(
         CompanyID__in=companies,
         AccountID__in=revenue_accounts,
-        TransactionDate__gte=current_month_start,
-        TransactionDate__lt=today
+    TransactionDate__gte=current_month_start,
+    TransactionDate__lt=today_start
     ).aggregate(
         total=Sum('CreditAmount') - Sum('DebitAmount')
     )['total'] or Decimal('0.00')
@@ -181,8 +185,8 @@ def dashboard_metrics(request):
     last_month_revenue = GeneralLedger.objects.filter(
         CompanyID__in=companies,
         AccountID__in=revenue_accounts,
-        TransactionDate__gte=last_month_start,
-        TransactionDate__lt=current_month_start
+    TransactionDate__gte=last_month_start,
+    TransactionDate__lt=current_month_start
     ).aggregate(
         total=Sum('CreditAmount') - Sum('DebitAmount')
     )['total'] or Decimal('0.00')
@@ -191,8 +195,8 @@ def dashboard_metrics(request):
     current_month_expenses = GeneralLedger.objects.filter(
         CompanyID__in=companies,
         AccountID__in=expense_accounts,
-        TransactionDate__gte=current_month_start,
-        TransactionDate__lt=today
+    TransactionDate__gte=current_month_start,
+    TransactionDate__lt=today_start
     ).aggregate(
         total=Sum('DebitAmount') - Sum('CreditAmount')
     )['total'] or Decimal('0.00')
@@ -201,8 +205,8 @@ def dashboard_metrics(request):
     last_month_expenses = GeneralLedger.objects.filter(
         CompanyID__in=companies,
         AccountID__in=expense_accounts,
-        TransactionDate__gte=last_month_start,
-        TransactionDate__lt=current_month_start
+    TransactionDate__gte=last_month_start,
+    TransactionDate__lt=current_month_start
     ).aggregate(
         total=Sum('DebitAmount') - Sum('CreditAmount')
     )['total'] or Decimal('0.00')
@@ -214,8 +218,8 @@ def dashboard_metrics(request):
     # Calculate year-to-date cash flow (simplified)
     ytd_cash_flow = GeneralLedger.objects.filter(
         CompanyID__in=companies,
-        TransactionDate__gte=current_year_start,
-        TransactionDate__lt=today
+    TransactionDate__gte=current_year_start,
+    TransactionDate__lt=today_start
     ).aggregate(
         total=Sum('DebitAmount') - Sum('CreditAmount')
     )['total'] or Decimal('0.00')
@@ -339,9 +343,9 @@ def dashboard_financial_health(request):
     from apps.accounting.models import GeneralLedger, ChartOfAccount
     
     # Calculate various financial health indicators
-    today = timezone.now().date()
-    current_month_start = today.replace(day=1)
-    current_year_start = today.replace(month=1, day=1)
+    now = timezone.localtime()
+    current_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    current_year_start = current_month_start.replace(month=1, day=1)
     
     # Get account types
     revenue_accounts = ChartOfAccount.objects.filter(
@@ -439,12 +443,12 @@ def dashboard_charts(request):
     from apps.accounting.models import GeneralLedger, ChartOfAccount
     
     # Get last 6 months of revenue data
-    today = timezone.now().date()
+    reference_month_start = timezone.localtime().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     revenue_data = []
     
     for i in range(6):
-        month_start = (today.replace(day=1) - timedelta(days=i*30)).replace(day=1)
-        month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+        month_start = (reference_month_start - timedelta(days=i * 30)).replace(day=1)
+        next_month_start = (month_start + timedelta(days=32)).replace(day=1)
         
         revenue_accounts = ChartOfAccount.objects.filter(
             CompanyID__in=companies,
@@ -455,7 +459,7 @@ def dashboard_charts(request):
             CompanyID__in=companies,
             AccountID__in=revenue_accounts,
             TransactionDate__gte=month_start,
-            TransactionDate__lte=month_end
+            TransactionDate__lt=next_month_start
         ).aggregate(
             total=Sum('CreditAmount') - Sum('DebitAmount')
         )['total'] or Decimal('0.00')
@@ -476,7 +480,7 @@ def dashboard_charts(request):
         total = GeneralLedger.objects.filter(
             CompanyID__in=companies,
             AccountID=account,
-            TransactionDate__gte=today.replace(day=1)
+            TransactionDate__gte=reference_month_start
         ).aggregate(
             total=Sum('DebitAmount') - Sum('CreditAmount')
         )['total'] or Decimal('0.00')
