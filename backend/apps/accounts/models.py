@@ -4,6 +4,7 @@ from django.conf import settings
 
 class User(AbstractUser):
     UserNotes = models.TextField(null=True, blank=True, verbose_name="User Notes")
+    profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True, verbose_name="Profile Photo")
 
     class Meta:
         db_table = 'Users'

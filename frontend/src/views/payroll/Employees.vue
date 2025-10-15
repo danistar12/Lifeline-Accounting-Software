@@ -52,24 +52,24 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="employee in filteredEmployees" :key="employee.id">
-              <td>
-                <div class="employee-name">{{ employee.first_name }} {{ employee.last_name }}</div>
-                <div class="employee-meta">{{ employee.employee_id }}</div>
-              </td>
-              <td>{{ employee.email }}</td>
-              <td>{{ employee.phone_number || '—' }}</td>
-              <td>{{ formatDate(employee.hire_date) }}</td>
-              <td>{{ employee.department || '—' }}</td>
-              <td class="actions-col">
-                <UiButton size="sm" variant="ghost" @click="editEmployee(employee)">
-                  Edit
-                </UiButton>
-                <UiButton size="sm" variant="danger" @click="deleteEmployee(employee.id)">
-                  Delete
-                </UiButton>
-              </td>
-            </tr>
+              <tr v-for="employee in filteredEmployees" :key="employee.id">
+                <td>
+                  <div class="employee-name">{{ employee.EmployeeName || `${employee.FirstName || employee.first_name || ''} ${employee.LastName || employee.last_name || ''}`.trim() }}</div>
+                  <div class="employee-meta">{{ employee.EmployeeID || employee.employee_id }}</div>
+                </td>
+                <td>{{ employee.Email || employee.email }}</td>
+                <td>{{ employee.PhoneNumber || employee.phone_number || '—' }}</td>
+                <td>{{ formatDate(employee.HireDate || employee.hire_date) }}</td>
+                <td>{{ employee.Department || employee.department || '—' }}</td>
+                <td class="actions-col">
+                  <UiButton size="sm" variant="ghost" @click="editEmployee(employee)">
+                    Edit
+                  </UiButton>
+                  <UiButton size="sm" variant="danger" @click="deleteEmployee(employee.id)">
+                    Delete
+                  </UiButton>
+                </td>
+              </tr>
           </tbody>
         </table>
       </div>
@@ -86,22 +86,22 @@
       <form class="modal-form" @submit.prevent>
         <div class="form-grid">
           <UiFormField label="First name" required>
-            <input v-model="form.first_name" required />
+            <input v-model="form.FirstName" required />
           </UiFormField>
           <UiFormField label="Last name" required>
-            <input v-model="form.last_name" required />
+            <input v-model="form.LastName" required />
           </UiFormField>
           <UiFormField label="Email" required>
             <input v-model="form.email" type="email" required />
           </UiFormField>
           <UiFormField label="Phone number">
-            <input v-model="form.phone_number" type="tel" />
+            <input v-model="form.PhoneNumber" type="tel" />
           </UiFormField>
           <UiFormField label="Hire date" required>
-            <input v-model="form.hire_date" type="date" required />
+            <input v-model="form.HireDate" type="date" required />
           </UiFormField>
           <UiFormField label="Department">
-            <select v-model="form.department">
+            <select v-model="form.Department">
               <option value="">Select department</option>
               <option value="Engineering">Engineering</option>
               <option value="Sales">Sales</option>
@@ -113,7 +113,7 @@
           </UiFormField>
         </div>
         <UiFormField label="Notes">
-          <textarea v-model="form.notes" rows="3" placeholder="Additional notes..." />
+          <textarea v-model="form.Notes" rows="3" placeholder="Additional notes..." />
         </UiFormField>
       </form>
     </UiModal>
@@ -161,13 +161,13 @@ export default {
     defaultForm() {
       return {
         id: null,
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone_number: '',
-        hire_date: '',
-        department: '',
-        notes: '',
+        FirstName: '',
+        LastName: '',
+        Email: '',
+        PhoneNumber: '',
+        HireDate: '',
+        Department: '',
+        Notes: '',
       };
     },
     async fetchEmployees() {
@@ -176,10 +176,23 @@ export default {
       try {
         const response = await apiClient.get('/payroll/employees/');
         const payload = Array.isArray(response.data) ? response.data : [];
-        this.employees = payload.map((employee) => ({
-          ...employee,
-          id: employee.id ?? employee.employee_id,
-        }));
+          this.employees = payload.map((employee) => {
+          const normalized = { ...employee };
+          normalized.id = employee.id ?? employee.employee_id ?? employee.EmployeeID;
+          // prefer DB Name -> keep EmployeeName if present, otherwise build from First/Last
+          if (!normalized.EmployeeName) {
+            if (employee.Name) normalized.EmployeeName = employee.Name;
+            else normalized.EmployeeName = `${employee.first_name || employee.FirstName || ''} ${employee.last_name || employee.LastName || ''}`.trim();
+          }
+          normalized.EmployeeID = employee.EmployeeID ?? employee.employee_id;
+          normalized.FirstName = employee.FirstName ?? employee.first_name ?? '';
+          normalized.LastName = employee.LastName ?? employee.last_name ?? '';
+          normalized.Email = employee.Email ?? employee.email ?? '';
+          normalized.PhoneNumber = employee.PhoneNumber ?? employee.phone_number ?? '';
+          normalized.HireDate = employee.HireDate ?? employee.hire_date ?? '';
+          normalized.Department = employee.Department ?? employee.department ?? '';
+            return normalized;
+          });
         this.filteredEmployees = [...this.employees];
       } catch (error) {
         console.error('Error fetching employees:', error);
@@ -217,13 +230,13 @@ export default {
     editEmployee(employee) {
       this.form = {
         id: employee.id,
-        first_name: employee.first_name || '',
-        last_name: employee.last_name || '',
-        email: employee.email || '',
-        phone_number: employee.phone_number || '',
-        hire_date: employee.hire_date || '',
-        department: employee.department || '',
-        notes: employee.notes || '',
+        FirstName: employee.FirstName || employee.first_name || '',
+        LastName: employee.LastName || employee.last_name || '',
+        Email: employee.Email || employee.email || '',
+        PhoneNumber: employee.PhoneNumber || employee.phone_number || '',
+        HireDate: employee.HireDate || employee.hire_date || '',
+        Department: employee.Department || employee.department || '',
+        Notes: employee.Notes || employee.notes || '',
       };
       this.showModal = true;
     },
@@ -248,14 +261,23 @@ export default {
       }
 
       this.saving = true;
+      // send both canonical CamelCase and legacy snake_case for transition safety
       const payload = {
-        first_name: this.form.first_name,
-        last_name: this.form.last_name,
-        email: this.form.email,
-        phone_number: this.form.phone_number || undefined,
-        hire_date: this.form.hire_date,
-        department: this.form.department || undefined,
-        notes: this.form.notes || undefined,
+        FirstName: this.form.FirstName,
+        LastName: this.form.LastName,
+        Email: this.form.Email,
+        PhoneNumber: this.form.PhoneNumber || undefined,
+        HireDate: this.form.HireDate,
+        Department: this.form.Department || undefined,
+        Notes: this.form.Notes || undefined,
+        // legacy keys
+        first_name: this.form.FirstName,
+        last_name: this.form.LastName,
+        email: this.form.Email,
+        phone_number: this.form.PhoneNumber || undefined,
+        hire_date: this.form.HireDate,
+        department: this.form.Department || undefined,
+        notes: this.form.Notes || undefined,
       };
 
       try {

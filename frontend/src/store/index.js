@@ -105,6 +105,7 @@ export default createStore({
         console.log('Loading current user...');
         const response = await axios.get('/api/accounts/auth/user/');
         console.log('User data received:', response.data);
+        console.log('Profile photo URL:', response.data?.user?.profile_photo || response.data?.profile_photo);
         commit('setUser', response.data);
         
         // Load companies after getting user data

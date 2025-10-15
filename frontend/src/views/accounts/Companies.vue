@@ -48,18 +48,18 @@
     <div v-else-if="!error && companies.length > 0" class="companies-grid">
       <div 
         v-for="company in companies" 
-        :key="company.company_id"
+        :key="company.CompanyID"
         class="company-card"
-        :class="{ 'selected': selectedCompanyId === company.company_id }"
+        :class="{ 'selected': selectedCompanyId === company.CompanyID }"
         @click="selectCompany(company)"
       >
         <div class="company-card-header">
           <div class="company-avatar">
-            {{ getCompanyInitials(company.company_name) }}
+            {{ getCompanyInitials(company.CompanyName) }}
           </div>
           <div class="company-basic-info">
-            <h3 class="company-name">{{ company.company_name }}</h3>
-            <p class="company-location">{{ company.city }}, {{ company.state }}</p>
+            <h3 class="company-name">{{ company.CompanyName }}</h3>
+            <p class="company-location">{{ company.City }}, {{ company.State }}</p>
           </div>
           <div class="company-status">
             <span class="status-badge active">Active</span>
@@ -70,11 +70,11 @@
           <div class="company-details">
             <div class="detail-item">
               <i class="icon-mail"></i>
-              <span>{{ company.email || 'No email provided' }}</span>
+              <span>{{ company.Email || 'No email provided' }}</span>
             </div>
             <div class="detail-item">
               <i class="icon-phone"></i>
-              <span>{{ company.phone || 'No phone provided' }}</span>
+              <span>{{ company.Phone || 'No phone provided' }}</span>
             </div>
             <div class="detail-item">
               <i class="icon-location"></i>
@@ -112,7 +112,7 @@
     <!-- Selected Company Details Panel -->
     <div v-if="selectedCompany" class="company-details-panel">
       <div class="panel-header">
-        <h2>{{ selectedCompany.company_name }} - Details</h2>
+  <h2>{{ selectedCompany.CompanyName }} - Details</h2>
         <button class="btn btn-ghost" @click="closeDetailsPanel">
           <i class="icon-close"></i>
         </button>
@@ -126,30 +126,30 @@
             <div class="detail-group">
               <div class="detail-row">
                 <label>Company Name:</label>
-                <span>{{ selectedCompany.company_name }}</span>
+                <span>{{ selectedCompany.CompanyName }}</span>
               </div>
               <div class="detail-row">
                 <label>Contact Person:</label>
-                <span>{{ selectedCompany.contact_person || 'Not provided' }}</span>
+                <span>{{ selectedCompany.ContactPerson || 'Not provided' }}</span>
               </div>
               <div class="detail-row">
                 <label>Email:</label>
-                <span>{{ selectedCompany.email || 'Not provided' }}</span>
+                <span>{{ selectedCompany.Email || 'Not provided' }}</span>
               </div>
               <div class="detail-row">
                 <label>Phone:</label>
-                <span>{{ selectedCompany.phone || 'Not provided' }}</span>
+                <span>{{ selectedCompany.Phone || 'Not provided' }}</span>
               </div>
               <div class="detail-row">
                 <label>Website:</label>
-                <span v-if="selectedCompany.website">
-                  <a :href="selectedCompany.website" target="_blank" class="link">{{ selectedCompany.website }}</a>
+                <span v-if="selectedCompany.Website">
+                  <a :href="selectedCompany.Website" target="_blank" class="link">{{ selectedCompany.Website }}</a>
                 </span>
                 <span v-else>Not provided</span>
               </div>
               <div class="detail-row">
                 <label>Tax ID:</label>
-                <span>{{ selectedCompany.tax_id || 'Not provided' }}</span>
+                <span>{{ selectedCompany.TaxID || 'Not provided' }}</span>
               </div>
             </div>
           </div>
@@ -160,23 +160,23 @@
             <div class="detail-group">
               <div class="detail-row">
                 <label>Street Address:</label>
-                <span>{{ selectedCompany.address || 'Not provided' }}</span>
+                <span>{{ selectedCompany.Address || 'Not provided' }}</span>
               </div>
               <div class="detail-row">
                 <label>City:</label>
-                <span>{{ selectedCompany.city || 'Not provided' }}</span>
+                <span>{{ selectedCompany.City || 'Not provided' }}</span>
               </div>
               <div class="detail-row">
                 <label>State:</label>
-                <span>{{ selectedCompany.state || 'Not provided' }}</span>
+                <span>{{ selectedCompany.State || 'Not provided' }}</span>
               </div>
               <div class="detail-row">
                 <label>ZIP Code:</label>
-                <span>{{ selectedCompany.zip_code || 'Not provided' }}</span>
+                <span>{{ selectedCompany.ZipCode || 'Not provided' }}</span>
               </div>
               <div class="detail-row">
                 <label>Country:</label>
-                <span>{{ selectedCompany.country || 'United States' }}</span>
+                <span>{{ selectedCompany.Country || 'United States' }}</span>
               </div>
             </div>
           </div>
@@ -226,7 +226,7 @@
     <div v-if="activeCompany" class="active-company-banner">
       <div class="banner-content">
         <i class="icon-check-circle"></i>
-        <span>Currently working in: <strong>{{ activeCompany.company_name }}</strong></span>
+  <span>Currently working in: <strong>{{ activeCompany?.CompanyName || 'No company selected' }}</strong></span>
       </div>
       <button class="btn btn-ghost btn-sm" @click="clearActiveCompany">
         Change Company
@@ -249,7 +249,7 @@
               <label for="editCompanyName">Company Name *</label>
               <input 
                 id="editCompanyName"
-                v-model="editForm.company_name" 
+                v-model="editForm.CompanyName" 
                 type="text" 
                 class="form-control" 
                 required
@@ -261,7 +261,7 @@
               <label for="editCompanyNotes">Company Notes</label>
               <textarea 
                 id="editCompanyNotes"
-                v-model="editForm.company_notes" 
+                v-model="editForm.CompanyNotes" 
                 class="form-control" 
                 rows="3"
                 placeholder="Optional notes about the company"
@@ -277,7 +277,7 @@
                 <label for="editContactPerson">Contact Person</label>
                 <input 
                   id="editContactPerson"
-                  v-model="editForm.contact_person" 
+                  v-model="editForm.ContactPerson" 
                   type="text" 
                   class="form-control" 
                   placeholder="Primary contact name"
@@ -287,7 +287,7 @@
                 <label for="editEmail">Email</label>
                 <input 
                   id="editEmail"
-                  v-model="editForm.email" 
+                  v-model="editForm.Email" 
                   type="email" 
                   class="form-control" 
                   placeholder="company@example.com"
@@ -300,7 +300,7 @@
                 <label for="editPhone">Phone</label>
                 <input 
                   id="editPhone"
-                  v-model="editForm.phone" 
+                  v-model="editForm.Phone" 
                   type="tel" 
                   class="form-control" 
                   placeholder="(555) 123-4567"
@@ -310,7 +310,7 @@
                 <label for="editWebsite">Website</label>
                 <input 
                   id="editWebsite"
-                  v-model="editForm.website" 
+                  v-model="editForm.Website" 
                   type="url" 
                   class="form-control" 
                   placeholder="https://www.company.com"
@@ -326,7 +326,7 @@
               <label for="editAddress">Street Address</label>
               <input 
                 id="editAddress"
-                v-model="editForm.address" 
+                v-model="editForm.Address" 
                 type="text" 
                 class="form-control" 
                 placeholder="123 Main Street"
@@ -338,7 +338,7 @@
                 <label for="editCity">City</label>
                 <input 
                   id="editCity"
-                  v-model="editForm.city" 
+                  v-model="editForm.City" 
                   type="text" 
                   class="form-control" 
                   placeholder="City"
@@ -348,7 +348,7 @@
                 <label for="editState">State</label>
                 <input 
                   id="editState"
-                  v-model="editForm.state" 
+                  v-model="editForm.State" 
                   type="text" 
                   class="form-control" 
                   placeholder="State"
@@ -358,7 +358,7 @@
                 <label for="editZipCode">ZIP Code</label>
                 <input 
                   id="editZipCode"
-                  v-model="editForm.zip_code" 
+                  v-model="editForm.ZipCode" 
                   type="text" 
                   class="form-control" 
                   placeholder="12345"
@@ -370,7 +370,7 @@
               <label for="editCountry">Country</label>
               <input 
                 id="editCountry"
-                v-model="editForm.country" 
+                v-model="editForm.Country" 
                 type="text" 
                 class="form-control" 
                 placeholder="United States"
@@ -385,7 +385,7 @@
               <label for="editTaxId">Tax ID / EIN</label>
               <input 
                 id="editTaxId"
-                v-model="editForm.tax_id" 
+                v-model="editForm.TaxID" 
                 type="text" 
                 class="form-control" 
                 placeholder="12-3456789"
@@ -422,7 +422,7 @@
               <label for="newCompanyName">Company Name *</label>
               <input 
                 id="newCompanyName"
-                v-model="addForm.company_name" 
+                v-model="addForm.CompanyName" 
                 type="text" 
                 class="form-control" 
                 required
@@ -434,7 +434,7 @@
               <label for="newCompanyNotes">Company Notes</label>
               <textarea 
                 id="newCompanyNotes"
-                v-model="addForm.company_notes" 
+                v-model="addForm.CompanyNotes" 
                 class="form-control" 
                 rows="3"
                 placeholder="Optional notes about the company"
@@ -450,7 +450,7 @@
                 <label for="newContactPerson">Contact Person</label>
                 <input 
                   id="newContactPerson"
-                  v-model="addForm.contact_person" 
+                  v-model="addForm.ContactPerson" 
                   type="text" 
                   class="form-control" 
                   placeholder="Primary contact name"
@@ -460,7 +460,7 @@
                 <label for="newEmail">Email</label>
                 <input 
                   id="newEmail"
-                  v-model="addForm.email" 
+                  v-model="addForm.Email" 
                   type="email" 
                   class="form-control" 
                   placeholder="company@example.com"
@@ -473,7 +473,7 @@
                 <label for="newPhone">Phone</label>
                 <input 
                   id="newPhone"
-                  v-model="addForm.phone" 
+                  v-model="addForm.Phone" 
                   type="tel" 
                   class="form-control" 
                   placeholder="(555) 123-4567"
@@ -483,7 +483,7 @@
                 <label for="newWebsite">Website</label>
                 <input 
                   id="newWebsite"
-                  v-model="addForm.website" 
+                  v-model="addForm.Website" 
                   type="url" 
                   class="form-control" 
                   placeholder="https://www.company.com"
@@ -499,7 +499,7 @@
               <label for="newAddress">Street Address</label>
               <input 
                 id="newAddress"
-                v-model="addForm.address" 
+                v-model="addForm.Address" 
                 type="text" 
                 class="form-control" 
                 placeholder="123 Main Street"
@@ -511,7 +511,7 @@
                 <label for="newCity">City</label>
                 <input 
                   id="newCity"
-                  v-model="addForm.city" 
+                  v-model="addForm.City" 
                   type="text" 
                   class="form-control" 
                   placeholder="City"
@@ -521,7 +521,7 @@
                 <label for="newState">State</label>
                 <input 
                   id="newState"
-                  v-model="addForm.state" 
+                  v-model="addForm.State" 
                   type="text" 
                   class="form-control" 
                   placeholder="State"
@@ -531,7 +531,7 @@
                 <label for="newZipCode">ZIP Code</label>
                 <input 
                   id="newZipCode"
-                  v-model="addForm.zip_code" 
+                  v-model="addForm.ZipCode" 
                   type="text" 
                   class="form-control" 
                   placeholder="12345"
@@ -543,7 +543,7 @@
               <label for="newCountry">Country</label>
               <input 
                 id="newCountry"
-                v-model="addForm.country" 
+                v-model="addForm.Country" 
                 type="text" 
                 class="form-control" 
                 placeholder="United States"
@@ -559,7 +559,7 @@
                 <label for="newTaxId">Tax ID / EIN</label>
                 <input 
                   id="newTaxId"
-                  v-model="addForm.tax_id" 
+                  v-model="addForm.TaxID" 
                   type="text" 
                   class="form-control" 
                   placeholder="12-3456789"
@@ -567,7 +567,7 @@
               </div>
               <div class="form-group">
                 <label for="newUserRole">Your Role</label>
-                <select id="newUserRole" v-model="addForm.role" class="form-control">
+                <select id="newUserRole" v-model="addForm.Role" class="form-control">
                   <option value="Admin">Admin</option>
                   <option value="Manager">Manager</option>
                   <option value="Accountant">Accountant</option>
@@ -612,34 +612,36 @@ export default {
       editLoading: false,
       addLoading: false,
       editForm: {
-        company_id: null,
-        company_name: '',
-        company_notes: '',
-        contact_person: '',
-        email: '',
-        phone: '',
-        website: '',
-        address: '',
-        city: '',
-        state: '',
-        zip_code: '',
-        country: 'United States',
-        tax_id: ''
+        CompanyID: null,
+        CompanyName: '',
+        CompanyNotes: '',
+        ContactPerson: '',
+        Email: '',
+        Phone: '',
+        Website: '',
+        Address: '',
+        City: '',
+        State: '',
+        ZipCode: '',
+        Country: 'United States',
+        TaxID: '',
+        AdminUserID: null,
       },
       addForm: {
-        company_name: '',
-        company_notes: '',
-        contact_person: '',
-        email: '',
-        phone: '',
-        website: '',
-        address: '',
-        city: '',
-        state: '',
-        zip_code: '',
-        country: 'United States',
-        tax_id: '',
-        role: 'Admin'
+        CompanyName: '',
+        CompanyNotes: '',
+        ContactPerson: '',
+        Email: '',
+        Phone: '',
+        Website: '',
+        Address: '',
+        City: '',
+        State: '',
+        ZipCode: '',
+        Country: 'United States',
+        TaxID: '',
+        AdminUserID: null,
+        Role: 'Admin'
       }
     };
   },
@@ -663,7 +665,7 @@ export default {
         // Load active company from localStorage
         const savedCompanyId = localStorage.getItem('selectedCompanyId');
         if (savedCompanyId) {
-          const savedCompany = this.companies.find(c => c.company_id == savedCompanyId);
+          const savedCompany = this.companies.find(c => `${c.CompanyID}` === `${savedCompanyId}`);
           if (savedCompany) {
             this.activeCompany = savedCompany;
             console.log('Restored active company:', savedCompany);
@@ -690,11 +692,11 @@ export default {
 
     selectCompany(company) {
       this.selectedCompany = company;
-      this.selectedCompanyId = company.company_id;
-      this.loadCompanyStats(company);
+      this.selectedCompanyId = company.CompanyID;
+      this.loadCompanyStats();
     },
 
-    async loadCompanyStats(company) {
+    async loadCompanyStats() {
       // Mock stats for now - you can implement real API calls later
       this.companyStats = {
         totalUsers: Math.floor(Math.random() * 50) + 1,
@@ -705,19 +707,19 @@ export default {
 
     setActiveCompany(company) {
       this.activeCompany = company;
-      localStorage.setItem('selectedCompanyId', company.company_id);
+      localStorage.setItem('selectedCompanyId', company.CompanyID);
       
       // Set axios header for API requests
-      axios.defaults.headers.common['X-Company-ID'] = company.company_id;
+      axios.defaults.headers.common['X-Company-ID'] = company.CompanyID;
       
       // Update store
-      this.setSelectedCompany(company.company_id);
+      this.setSelectedCompany(company.CompanyID);
       
       // Show success message
       this.$notify({
         type: 'success',
         title: 'Company Selected',
-        message: `${company.company_name} is now your active company`
+        message: `${company.CompanyName} is now your active company`
       });
     },
 
@@ -736,19 +738,19 @@ export default {
     editCompany(company) {
       // Populate edit form and show modal
       this.editForm = {
-        company_id: company.company_id,
-        company_name: company.company_name,
-        company_notes: company.company_notes || '',
-        contact_person: company.contact_person || '',
-        email: company.email || '',
-        phone: company.phone || '',
-        website: company.website || '',
-        address: company.address || '',
-        city: company.city || '',
-        state: company.state || '',
-        zip_code: company.zip_code || '',
-        country: company.country || 'United States',
-        tax_id: company.tax_id || ''
+        CompanyID: company.CompanyID,
+        CompanyName: company.CompanyName,
+        CompanyNotes: company.CompanyNotes || '',
+        ContactPerson: company.ContactPerson || '',
+        Email: company.Email || '',
+        Phone: company.Phone || '',
+        Website: company.Website || '',
+        Address: company.Address || '',
+        City: company.City || '',
+        State: company.State || '',
+        ZipCode: company.ZipCode || '',
+        Country: company.Country || 'United States',
+        TaxID: company.TaxID || ''
       };
       this.showEditModal = true;
     },
@@ -756,67 +758,60 @@ export default {
     closeEditModal() {
       this.showEditModal = false;
       this.editForm = {
-        company_id: null,
-        company_name: '',
-        company_notes: '',
-        contact_person: '',
-        email: '',
-        phone: '',
-        website: '',
-        address: '',
-        city: '',
-        state: '',
-        zip_code: '',
-        country: 'United States',
-        tax_id: ''
+        CompanyID: null,
+        CompanyName: '',
+        CompanyNotes: '',
+        ContactPerson: '',
+        Email: '',
+        Phone: '',
+        Website: '',
+        Address: '',
+        City: '',
+        State: '',
+        ZipCode: '',
+        Country: 'United States',
+        TaxID: ''
       };
     },
 
     closeAddModal() {
       this.showAddCompanyModal = false;
       this.addForm = {
-        company_name: '',
-        company_notes: '',
-        contact_person: '',
-        email: '',
-        phone: '',
-        website: '',
-        address: '',
-        city: '',
-        state: '',
-        zip_code: '',
-        country: 'United States',
-        tax_id: '',
-        role: 'Admin'
+        CompanyName: '',
+        CompanyNotes: '',
+        ContactPerson: '',
+        Email: '',
+        Phone: '',
+        Website: '',
+        Address: '',
+        City: '',
+        State: '',
+        ZipCode: '',
+        Country: 'United States',
+        TaxID: '',
+        Role: 'Admin'
       };
     },
 
     async saveCompanyEdit() {
       this.editLoading = true;
       try {
-        const response = await axios.put(`/api/accounts/companies/${this.editForm.company_id}/`, {
-          company_name: this.editForm.company_name,
-          company_notes: this.editForm.company_notes,
-          contact_person: this.editForm.contact_person,
-          email: this.editForm.email,
-          phone: this.editForm.phone,
-          website: this.editForm.website,
-          address: this.editForm.address,
-          city: this.editForm.city,
-          state: this.editForm.state,
-          zip_code: this.editForm.zip_code,
-          country: this.editForm.country,
-          tax_id: this.editForm.tax_id
-        });
+        const payload = {
+          CompanyName: this.editForm.CompanyName,
+          CompanyNotes: this.editForm.CompanyNotes,
+          AdminUserID: this.editForm.AdminUserID ?? null,
+        };
+
+        const response = await axios.put(`/api/accounts/companies/${this.editForm.CompanyID}/`, payload);
         
         // Update the company in the local array
-        const index = this.companies.findIndex(c => c.company_id === this.editForm.company_id);
+        const index = this.companies.findIndex(c => c.CompanyID === this.editForm.CompanyID);
         if (index !== -1) {
           this.companies[index] = response.data;
         }
         
         // Update selected company if it's the one being edited
-        if (this.selectedCompany && this.selectedCompany.company_id === this.editForm.company_id) {
+        if (this.selectedCompany && this.selectedCompany.CompanyID === this.editForm.CompanyID) {
           this.selectedCompany = response.data;
         }
         
@@ -833,28 +828,21 @@ export default {
     async saveNewCompany() {
       this.addLoading = true;
       try {
-        const response = await axios.post('/api/accounts/companies/', {
-          company_name: this.addForm.company_name,
-          company_notes: this.addForm.company_notes,
-          contact_person: this.addForm.contact_person,
-          email: this.addForm.email,
-          phone: this.addForm.phone,
-          website: this.addForm.website,
-          address: this.addForm.address,
-          city: this.addForm.city,
-          state: this.addForm.state,
-          zip_code: this.addForm.zip_code,
-          country: this.addForm.country,
-          tax_id: this.addForm.tax_id
-        });
+        const payload = {
+          CompanyName: this.addForm.CompanyName,
+          CompanyNotes: this.addForm.CompanyNotes,
+          AdminUserID: this.addForm.AdminUserID ?? null,
+        };
+
+        const response = await axios.post('/api/accounts/companies/', payload);
         
         // Add the new company to the list
         this.companies.push(response.data);
         
         // Create user-company role
         await axios.post('/api/accounts/user-company-roles/', {
-          company: response.data.company_id,
-          role: this.addForm.role
+          CompanyID: response.data.CompanyID,
+          Role: this.addForm.Role
         });
         
         this.closeAddModal();
@@ -875,7 +863,7 @@ export default {
       // Navigate to reports for this company
       this.$router.push({
         path: '/reports/balance-sheet',
-        query: { company: company.company_id }
+        query: { company: company.CompanyID }
       });
     },
 
@@ -903,7 +891,7 @@ export default {
     },
 
     formatAddress(company) {
-      const parts = [company.address, company.city, company.state, company.zip_code];
+      const parts = [company.Address, company.City, company.State, company.ZipCode];
       return parts.filter(part => part).join(', ') || 'No address provided';
     }
   },
@@ -960,19 +948,19 @@ export default {
 }
 
 /* Icons */
-.icon-building::before { content: '🏢'; }
-.icon-plus::before { content: '➕'; }
-.icon-refresh::before { content: '🔄'; }
-.icon-login::before { content: '🔑'; }
-.icon-mail::before { content: '📧'; }
-.icon-phone::before { content: '📞'; }
-.icon-location::before { content: '📍'; }
-.icon-edit::before { content: '✏️'; }
-.icon-eye::before { content: '👁️'; }
-.icon-close::before { content: '✖️'; }
-.icon-check::before { content: '✅'; }
-.icon-chart::before { content: '📊'; }
-.icon-check-circle::before { content: '✅'; }
+.icon-building::before { content: ''; }
+.icon-plus::before { content: ''; }
+.icon-refresh::before { content: ''; }
+.icon-login::before { content: ''; }
+.icon-mail::before { content: ''; }
+.icon-phone::before { content: ''; }
+.icon-location::before { content: ''; }
+.icon-edit::before { content: ''; }
+.icon-eye::before { content: ''; }
+.icon-close::before { content: ''; }
+.icon-check::before { content: ''; }
+.icon-chart::before { content: ''; }
+.icon-check-circle::before { content: ''; }
 
 /* Buttons */
 .btn {

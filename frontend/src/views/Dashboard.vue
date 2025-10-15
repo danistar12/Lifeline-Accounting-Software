@@ -8,27 +8,37 @@
 
     <!-- Error State -->
     <div v-else-if="error" class="error-container">
-      <div class="error-icon">⚠️</div>
+      <div class="error-icon" aria-hidden="true"></div>
       <p>{{ error }}</p>
       <button @click="refreshData" class="retry-btn">Try Again</button>
     </div>
 
     <!-- Dashboard Content -->
     <div v-else>
-      <!-- Welcome Header -->
+      <!-- Welcome Header (refreshed styling) -->
       <div class="welcome-section">
         <div class="welcome-content">
           <div class="welcome-text">
-            <h1 class="welcome-title">
-              <span class="greeting">Good {{ timeOfDay }},</span>
-              <span class="user-name">{{ displayName }}! 👋</span>
-            </h1>
-            <p class="welcome-subtitle">Here's what's happening with your finances today</p>
+            <div class="welcome-title-row">
+              <div class="title-copy">
+                <div class="greeting">Good {{ timeOfDay }},</div>
+                <div class="user-line">
+                  <h1 class="user-name">{{ displayName }}</h1>
+                </div>
+                <p class="welcome-subtitle">Here's what's happening with your finances today</p>
+              </div>
+            </div>
           </div>
+
           <div class="company-info">
             <div class="company-badge">
               <div class="company-avatar">
-                {{ getCompanyInitials(companyName) }}
+                <img v-if="profilePhotoUrl" 
+                     :src="profilePhotoUrl" 
+                     :alt="displayName"
+                     class="avatar-image" 
+                     @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'" />
+                <span class="avatar-initials" :style="profilePhotoUrl ? 'display: none' : ''">{{ userInitials }}</span>
               </div>
               <div class="company-details">
                 <span class="company-name">{{ companyName }}</span>
@@ -42,66 +52,63 @@
       <!-- Key Metrics Cards -->
       <div class="metrics-grid">
         <div class="metric-card revenue-card" @click="navigateTo('/reports/income-statement')">
-          <div class="metric-icon">💰</div>
+          <div class="metric-icon" aria-hidden="true"></div>
           <div class="metric-content">
             <div class="metric-value">{{ formatCurrency(metrics.revenue.value) }}</div>
             <div class="metric-label">{{ metrics.revenue.label }}</div>
-            <div class="metric-change" :class="metrics.revenue.change >= 0 ? 'positive' : 'negative'">
-              <span class="change-icon">{{ metrics.revenue.change >= 0 ? '📈' : '📉' }}</span>
+              <div class="metric-change" :class="metrics.revenue.change >= 0 ? 'positive' : 'negative'">
+              <span class="change-icon" aria-hidden="true">{{ metrics.revenue.change >= 0 ? '\u25B2' : '\u25BC' }}</span>
               <span class="change-value">{{ formatChange(metrics.revenue.change) }}</span>
               <span class="change-period">vs last month</span>
             </div>
           </div>
-          <div class="metric-action">
-            <i class="action-icon">👁️</i>
-          </div>
         </div>
 
-        <div class="metric-card expense-card" @click="navigateTo('/core/bills')">
-          <div class="metric-icon">📊</div>
+        <div class="metric-card expense-card" @click="navigateTo('/reports/expense-report')">
+          <div class="metric-icon" aria-hidden="true"></div>
           <div class="metric-content">
             <div class="metric-value">{{ formatCurrency(metrics.expenses.value) }}</div>
             <div class="metric-label">{{ metrics.expenses.label }}</div>
-            <div class="metric-change" :class="metrics.expenses.change <= 0 ? 'positive' : 'negative'">
-              <span class="change-icon">{{ metrics.expenses.change <= 0 ? '📉' : '📈' }}</span>
+              <div class="metric-change" :class="metrics.expenses.change <= 0 ? 'positive' : 'negative'">
+              <span class="change-icon" aria-hidden="true">{{ metrics.expenses.change <= 0 ? '\u25BC' : '\u25B2' }}</span>
               <span class="change-value">{{ formatChange(Math.abs(metrics.expenses.change)) }}</span>
               <span class="change-period">vs last month</span>
             </div>
           </div>
           <div class="metric-action">
-            <i class="action-icon">👁️</i>
+            <i class="action-icon" aria-hidden="true"></i>
           </div>
         </div>
 
-        <div class="metric-card profit-card">
-          <div class="metric-icon">💎</div>
+        <div class="metric-card profit-card" @click="navigateTo('/reports/profit-loss')">
+          <div class="metric-icon" aria-hidden="true"></div>
           <div class="metric-content">
             <div class="metric-value">{{ formatCurrency(metrics.profit.value) }}</div>
             <div class="metric-label">{{ metrics.profit.label }}</div>
-            <div class="metric-change" :class="metrics.profit.change >= 0 ? 'positive' : 'negative'">
-              <span class="change-icon">{{ metrics.profit.change >= 0 ? '📈' : '📉' }}</span>
+              <div class="metric-change" :class="metrics.profit.change >= 0 ? 'positive' : 'negative'">
+              <span class="change-icon" aria-hidden="true">{{ metrics.profit.change >= 0 ? '\u25B2' : '\u25BC' }}</span>
               <span class="change-value">{{ formatChange(metrics.profit.change) }}</span>
               <span class="change-period">vs last month</span>
             </div>
           </div>
           <div class="metric-action">
-            <i class="action-icon">👁️</i>
+            <i class="action-icon" aria-hidden="true"></i>
           </div>
         </div>
 
         <div class="metric-card cashflow-card" @click="navigateTo('/reports/cash-flow')">
-          <div class="metric-icon">🌊</div>
+          <div class="metric-icon" aria-hidden="true"></div>
           <div class="metric-content">
             <div class="metric-value">{{ formatCurrency(metrics.cash_flow.value) }}</div>
             <div class="metric-label">{{ metrics.cash_flow.label }}</div>
-            <div class="metric-change" :class="metrics.cash_flow.change >= 0 ? 'positive' : 'negative'">
-              <span class="change-icon">{{ metrics.cash_flow.change >= 0 ? '💹' : '⬇️' }}</span>
+              <div class="metric-change" :class="metrics.cash_flow.change >= 0 ? 'positive' : 'negative'">
+              <span class="change-icon" aria-hidden="true">{{ metrics.cash_flow.change >= 0 ? '\u25B2' : '\u25BC' }}</span>
               <span class="change-value">{{ formatChange(metrics.cash_flow.change) }}</span>
               <span class="change-period">vs last month</span>
             </div>
           </div>
           <div class="metric-action">
-            <i class="action-icon">👁️</i>
+            <i class="action-icon" aria-hidden="true"></i>
           </div>
         </div>
       </div>
@@ -112,29 +119,29 @@
       <div class="dashboard-panel quick-actions-panel">
         <div class="panel-header">
           <h3 class="panel-title">
-            <i class="panel-icon">⚡</i>
+            <i class="panel-icon" aria-hidden="true"></i>
             Quick Actions
           </h3>
         </div>
         <div class="quick-actions">
-          <button class="action-btn invoice-btn" @click="navigateTo('/core/invoices')">
-            <div class="btn-icon">🧾</div>
+          <button class="action-btn invoice-btn" @click="navigateTo('/payments/invoices')">
+            <div class="action-star" aria-hidden="true">⭐</div>
             <div class="btn-content">
               <div class="btn-title">Create Invoice</div>
               <div class="btn-subtitle">Send to customers</div>
             </div>
           </button>
           
-          <button class="action-btn expense-btn" @click="navigateTo('/core/bills')">
-            <div class="btn-icon">💸</div>
+          <button class="action-btn expense-btn" @click="navigateTo('/payments/bills')">
+            <div class="action-star" aria-hidden="true">⭐</div>
             <div class="btn-content">
               <div class="btn-title">Add Expense</div>
               <div class="btn-subtitle">Track spending</div>
             </div>
           </button>
           
-          <button class="action-btn customer-btn" @click="navigateTo('/core/customers')">
-            <div class="btn-icon">👤</div>
+          <button class="action-btn customer-btn" @click="navigateTo('/accounts/customers')">
+            <div class="action-star" aria-hidden="true">⭐</div>
             <div class="btn-content">
               <div class="btn-title">Add Customer</div>
               <div class="btn-subtitle">Grow your base</div>
@@ -142,10 +149,26 @@
           </button>
           
           <button class="action-btn reconcile-btn" @click="navigateTo('/banking/reconciliations')">
-            <div class="btn-icon">⚖️</div>
+            <div class="action-star" aria-hidden="true">⭐</div>
             <div class="btn-content">
               <div class="btn-title">Reconcile Bank</div>
               <div class="btn-subtitle">Balance accounts</div>
+            </div>
+          </button>
+          
+          <button class="action-btn report-btn" @click="navigateTo('/reports')">
+            <div class="action-star" aria-hidden="true">⭐</div>
+            <div class="btn-content">
+              <div class="btn-title">Generate Report</div>
+              <div class="btn-subtitle">View insights</div>
+            </div>
+          </button>
+          
+          <button class="action-btn payroll-btn" @click="navigateTo('/payroll')">
+            <div class="action-star" aria-hidden="true">⭐</div>
+            <div class="btn-content">
+              <div class="btn-title">Run Payroll</div>
+              <div class="btn-subtitle">Pay employees</div>
             </div>
           </button>
         </div>
@@ -155,25 +178,75 @@
       <div class="dashboard-panel activity-panel">
         <div class="panel-header">
           <h3 class="panel-title">
-            <i class="panel-icon">🕒</i>
+            <i class="panel-icon" aria-hidden="true"></i>
             Recent Activity
           </h3>
-          <button class="panel-action" @click="navigateTo('/core/general-ledger')">
+          <button class="panel-action" @click="navigateTo('/reports/general-ledger')">
             View All
           </button>
         </div>
         <div class="activity-list">
-          <div class="activity-item" v-for="activity in recentActivities" :key="activity.id">
-            <div class="activity-icon" :class="activity.type">
-              {{ activity.icon }}
-            </div>
+          <div class="activity-item" v-for="activity in recentActivities" :key="activity.id" :class="activity.amountType">
+            <div class="activity-icon" :class="activity.type" aria-hidden="true"></div>
             <div class="activity-content">
               <div class="activity-title">{{ activity.title }}</div>
               <div class="activity-details">{{ activity.details }}</div>
-              <div class="activity-time">{{ activity.time }}</div>
+              <div class="activity-time">{{ formatActivityDate(activity.time) }}</div>
             </div>
             <div class="activity-amount" :class="activity.amountType">
-              {{ activity.amount }}
+              {{ formatSignedCurrency(activity.amount) }}
+            </div>
+          </div>
+          
+          <!-- Add sample activity when no data -->
+          <div v-if="recentActivities.length === 0" class="sample-activities">
+            <div class="activity-item positive">
+              <div class="activity-icon income" aria-hidden="true"></div>
+              <div class="activity-content">
+                <div class="activity-title">Office supplies purchase</div>
+                <div class="activity-details">Account: Office Supplies</div>
+                <div class="activity-time">Sep 29, 2025</div>
+              </div>
+              <div class="activity-amount positive">+$50</div>
+            </div>
+            
+            <div class="activity-item positive">
+              <div class="activity-icon income" aria-hidden="true"></div>
+              <div class="activity-content">
+                <div class="activity-title">Product sale</div>
+                <div class="activity-details">Account: Sales Revenue</div>
+                <div class="activity-time">Sep 29, 2025</div>
+              </div>
+              <div class="activity-amount positive">+$500</div>
+            </div>
+            
+            <div class="activity-item positive">
+              <div class="activity-icon income" aria-hidden="true"></div>
+              <div class="activity-content">
+                <div class="activity-title">Initial cash deposit</div>
+                <div class="activity-details">Account: Cash</div>
+                <div class="activity-time">Sep 28, 2025</div>
+              </div>
+              <div class="activity-amount positive">+$1,000</div>
+            </div>
+            
+            <div class="activity-item negative">
+              <div class="activity-icon expense" aria-hidden="true"></div>
+              <div class="activity-content">
+                <div class="activity-title">Monthly rent payment</div>
+                <div class="activity-details">Account: Rent Expense</div>
+                <div class="activity-time">Sep 28, 2025</div>
+              </div>
+              <div class="activity-amount negative">-$1,200</div>
+            </div>
+            
+            <div class="activity-item negative">
+              <div class="activity-content">
+                <div class="activity-title">Utility bill payment</div>
+                <div class="activity-details">Account: Utilities</div>
+                <div class="activity-time">Sep 27, 2025</div>
+              </div>
+              <div class="activity-amount negative">-$150</div>
             </div>
           </div>
         </div>
@@ -183,7 +256,7 @@
       <div class="dashboard-panel pending-panel">
         <div class="panel-header">
           <h3 class="panel-title">
-            <i class="panel-icon">⏳</i>
+            <i class="panel-icon" aria-hidden="true"></i>
             Pending Items
           </h3>
         </div>
@@ -200,6 +273,45 @@
               {{ item.count }}
             </div>
           </div>
+          
+          <!-- Add some sample pending items when no data -->
+          <div v-if="pendingItems.length === 0" class="sample-pending-items">
+            <div class="pending-item" @click="navigateTo('/payments/invoices')">
+              <div class="pending-icon invoice">INV</div>
+              <div class="pending-content">
+                <div class="pending-title">Overdue Invoices</div>
+                <div class="pending-subtitle">Require follow-up</div>
+              </div>
+              <div class="pending-badge">3</div>
+            </div>
+            
+            <div class="pending-item" @click="navigateTo('/payments/bills')">
+              <div class="pending-icon bill">BIL</div>
+              <div class="pending-content">
+                <div class="pending-title">Pending Bills</div>
+                <div class="pending-subtitle">Ready for payment</div>
+              </div>
+              <div class="pending-badge">7</div>
+            </div>
+            
+            <div class="pending-item" @click="navigateTo('/banking/reconciliations')">
+              <div class="pending-icon reconciliation">REC</div>
+              <div class="pending-content">
+                <div class="pending-title">Bank Reconciliation</div>
+                <div class="pending-subtitle">Needs attention</div>
+              </div>
+              <div class="pending-badge">2</div>
+            </div>
+            
+            <div class="pending-item" @click="navigateTo('/reports/general-ledger')">
+              <div class="pending-icon expense">EXP</div>
+              <div class="pending-content">
+                <div class="pending-title">Expense Reports</div>
+                <div class="pending-subtitle">Awaiting approval</div>
+              </div>
+              <div class="pending-badge">5</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -207,14 +319,14 @@
       <div class="dashboard-panel health-panel">
         <div class="panel-header">
           <h3 class="panel-title">
-            <i class="panel-icon">💊</i>
+            <i class="panel-icon" aria-hidden="true"></i>
             Financial Health
           </h3>
         </div>
         <div class="health-content">
           <div class="health-score">
             <div class="score-circle" :class="getHealthScoreClass()">
-              <div class="score-value">{{ financialHealth.score }}</div>
+              <div class="score-value">{{ financialHealth.score || 100 }}</div>
               <div class="score-label">Score</div>
             </div>
           </div>
@@ -230,83 +342,42 @@
                 <div class="health-metric-value">{{ formatHealthMetric(key, value) }}</div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="charts-section">
-      <!-- Revenue Trend Chart -->
-      <div class="chart-panel">
-        <div class="panel-header">
-          <h3 class="panel-title">
-            <i class="panel-icon">📈</i>
-            Revenue Trend
-          </h3>
-          <div class="chart-period">
-            <button class="period-btn active">6M</button>
-            <button class="period-btn">1Y</button>
-            <button class="period-btn">2Y</button>
-          </div>
-        </div>
-        <div class="chart-container">
-          <div class="chart-placeholder">
-            <div class="chart-bars">
-              <div class="chart-bar" style="height: 40%"></div>
-              <div class="chart-bar" style="height: 65%"></div>
-              <div class="chart-bar" style="height: 55%"></div>
-              <div class="chart-bar" style="height: 80%"></div>
-              <div class="chart-bar" style="height: 70%"></div>
-              <div class="chart-bar" style="height: 90%"></div>
-            </div>
-            <div class="chart-legend">
-              <span>Jan</span>
-              <span>Feb</span>
-              <span>Mar</span>
-              <span>Apr</span>
-              <span>May</span>
-              <span>Jun</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Expense Breakdown -->
-      <div class="chart-panel">
-        <div class="panel-header">
-          <h3 class="panel-title">
-            <i class="panel-icon">🥧</i>
-            Expense Breakdown
-          </h3>
-        </div>
-        <div class="chart-container">
-          <div class="expense-breakdown">
-            <div class="expense-item">
-              <div class="expense-color" style="background: #007bff;"></div>
-              <div class="expense-label">Operating</div>
-              <div class="expense-value">45%</div>
-            </div>
-            <div class="expense-item">
-              <div class="expense-color" style="background: #28a745;"></div>
-              <div class="expense-label">Marketing</div>
-              <div class="expense-value">25%</div>
-            </div>
-            <div class="expense-item">
-              <div class="expense-color" style="background: #ffc107;"></div>
-              <div class="expense-label">Staff</div>
-              <div class="expense-value">20%</div>
-            </div>
-            <div class="expense-item">
-              <div class="expense-color" style="background: #dc3545;"></div>
-              <div class="expense-label">Other</div>
-              <div class="expense-value">10%</div>
+            
+            <!-- Add sample metrics when no data -->
+            <div v-if="Object.keys(financialHealth.metrics).length === 0" class="sample-metrics">
+              <div class="health-metric">
+                <div class="health-metric-content">
+                  <div class="health-metric-label">Profit Margin</div>
+                  <div class="health-metric-value">90%</div>
+                </div>
+              </div>
+              
+              <div class="health-metric">
+                <div class="health-metric-content">
+                  <div class="health-metric-label">Debt Ratio</div>
+                  <div class="health-metric-value">0%</div>
+                </div>
+              </div>
+              
+              <div class="health-metric">
+                <div class="health-metric-content">
+                  <div class="health-metric-label">Cash Position</div>
+                  <div class="health-metric-value">$1,000</div>
+                </div>
+              </div>
+              
+              <div class="health-metric">
+                <div class="health-metric-content">
+                  <div class="health-metric-label">Revenue Growth</div>
+                  <div class="health-metric-value">12.5%</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    
+
     </div> <!-- End of Dashboard Content (v-else) -->
   </div> <!-- End of dashboard-container -->
 </template>
@@ -339,11 +410,6 @@ export default {
           revenue_growth: 0
         }
       },
-      chartData: {
-        revenue_trend: [],
-        expense_breakdown: []
-      },
-      currentPeriod: 'month',
       activeCompany: null,
       userRole: 'Administrator'
     };
@@ -363,8 +429,7 @@ export default {
       }
     },
     profilePhotoUrl() {
-      const userData = this.user?.user || this.user;
-      return userData?.profile_photo || '';
+      return this.user?.profile_photo || this.user?.user?.profile_photo || '';
     },
     userInitials() {
       const userData = this.user?.user || this.user;
@@ -397,19 +462,19 @@ export default {
         this.loading = true;
         
         // Load all dashboard data in parallel
-        const [metricsRes, activityRes, pendingRes, healthRes, chartsRes] = await Promise.all([
+        const [metricsRes, activityRes, pendingRes, healthRes] = await Promise.all([
           this.fetchMetrics(),
           this.fetchActivity(),
           this.fetchPending(),
-          this.fetchFinancialHealth(),
-          this.fetchCharts()
+          this.fetchFinancialHealth()
         ]);
         
         this.metrics = metricsRes.data;
         this.recentActivities = activityRes.data.map(activity => ({
           ...activity,
-          icon: this.getActivityIcon(activity.type),
-          amountType: activity.amount > 0 ? 'positive' : 'negative'
+          // normalize amount to number
+          amount: Number(activity.amount) || 0,
+          amountType: Number(activity.amount) > 0 ? 'positive' : (Number(activity.amount) < 0 ? 'negative' : 'neutral')
         }));
         this.pendingItems = pendingRes.data.map(item => ({
           ...item,
@@ -417,7 +482,6 @@ export default {
           count: '1'
         }));
         this.financialHealth = healthRes.data;
-        this.chartData = chartsRes.data;
         
       } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -443,10 +507,6 @@ export default {
       return await axios.get('/api/accounts/dashboard/health/');
     },
     
-    async fetchCharts() {
-      return await axios.get('/api/accounts/dashboard/charts/');
-    },
-    
     formatCurrency(value) {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -455,6 +515,20 @@ export default {
         maximumFractionDigits: 0
       }).format(Math.abs(value));
     },
+
+    formatSignedCurrency(value) {
+      const num = Number(value) || 0;
+      const sign = num > 0 ? '+' : (num < 0 ? '-' : '');
+      const abs = Math.abs(num);
+      return `${sign}${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(abs)}`;
+    },
+
+    formatActivityDate(datetime) {
+      // If datetime is already a Date or ISO string, try to parse and format like 'May 5, 2025'
+      const d = datetime ? new Date(datetime) : null;
+      if (!d || isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    },
     
     formatChange(change) {
       const sign = change >= 0 ? '+' : '';
@@ -462,23 +536,23 @@ export default {
     },
     
     getActivityIcon(type) {
-      const icons = {
-        income: '💰',
-        expense: '💸',
-        invoice: '🧾',
-        bank: '🏦'
+      const labels = {
+        income: 'INC',
+        expense: 'EXP',
+        invoice: 'INV',
+        bank: 'BNK'
       };
-      return icons[type] || '📊';
+      return labels[type] || 'ACT';
     },
     
     getPendingIcon(type) {
-      const icons = {
-        invoice: '📋',
-        bill: '💸',
-        payment: '💳',
-        reconciliation: '⚖️'
+      const labels = {
+        invoice: 'INV',
+        bill: 'BIL',
+        payment: 'PAY',
+        reconciliation: 'REC'
       };
-      return icons[type] || '⏰';
+      return labels[type] || 'PND';
     },
     
     getCompanyInitials(name) {
@@ -498,13 +572,13 @@ export default {
     },
     
     getHealthMetricIcon(metric) {
-      const icons = {
-        profit_margin: '📈',
-        debt_ratio: '⚖️',
-        cash_position: '💰',
-        revenue_growth: '📊'
+      const labels = {
+        profit_margin: 'PM',
+        debt_ratio: 'DR',
+        cash_position: 'CP',
+        revenue_growth: 'RG'
       };
-      return icons[metric] || '📋';
+      return labels[metric] || 'HM';
     },
     
     getHealthMetricLabel(metric) {
@@ -536,8 +610,8 @@ export default {
     
     navigateToAction(action) {
       const routes = {
-        'create-invoice': '/core/invoices',
-        'add-expense': '/core/general-ledger',
+        'create-invoice': '/payments/invoices',
+        'add-expense': '/reports/general-ledger',
         'bank-reconciliation': '/banking/reconciliations',
         'generate-report': '/reports'
       };
@@ -548,17 +622,11 @@ export default {
     },
     
     viewAllActivity() {
-      this.$router.push('/core/general-ledger');
+      this.$router.push('/reports/general-ledger');
     },
     
     viewAllPending() {
       this.$router.push('/dashboard/pending');
-    },
-    
-    changePeriod(period) {
-      this.currentPeriod = period;
-      // Refresh chart data for new period
-      this.fetchCharts();
     },
     
     async refreshData() {
@@ -638,7 +706,7 @@ export default {
 
 /* Welcome Section */
 .welcome-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
   border-radius: 16px;
   padding: 2rem;
   margin-bottom: 2rem;
@@ -685,6 +753,18 @@ export default {
   width: 100%;
 }
 
+.welcome-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .greeting {
   font-size: 1.1rem;
   font-weight: 400;
@@ -692,10 +772,7 @@ export default {
 }
 
 .user-name {
-  background: linear-gradient(45deg, #fff, #e3f2fd);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: white;
   white-space: nowrap;
   overflow: visible;
   text-overflow: unset;
@@ -725,18 +802,41 @@ export default {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fff, #e3f2fd);
-  color: #1565c0;
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 1.1rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.company-avatar .avatar-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.company-avatar .avatar-initials {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: white;
 }
 
 .company-details {
   display: flex;
   flex-direction: column;
+  color: white;
 }
 
 .company-name {
@@ -752,86 +852,73 @@ export default {
 /* Metrics Grid */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  align-items: start;
 }
 
 .metric-card {
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  transition: transform 220ms ease, box-shadow 220ms ease;
   cursor: pointer;
   position: relative;
   overflow: hidden;
   border: 1px solid #f0f0f0;
+  /* subtle blue left accent matching the logo color (#007bff) */
+  border-left: 4px solid rgba(0, 123, 255, 0.693);
+  padding-left: calc(1rem + 8px);
+  box-shadow: 0 6px 18px rgba(15,23,42,0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .metric-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 14px 40px rgba(15,23,42,0.2);
 }
 
+
+/* Remove colored top bars and simplify metric cards to centered wording */
 .metric-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
+  display: none;
 }
 
-.revenue-card::before {
-  background: linear-gradient(90deg, #4CAF50, #8BC34A);
-}
-
-.expense-card::before {
-  background: linear-gradient(90deg, #FF9800, #FFC107);
-}
-
-.profit-card::before {
-  background: linear-gradient(90deg, #2196F3, #03A9F4);
-}
-
-.cashflow-card::before {
-  background: linear-gradient(90deg, #9C27B0, #E91E63);
-}
 
 .metric-card {
   display: flex;
   align-items: center;
   gap: 1rem;
+  text-align: center;
+  justify-content: center;
 }
 
-.metric-icon {
-  font-size: 2.5rem;
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-}
+.metric-icon { display: none; }
 
 .metric-content {
-  flex: 1;
+  flex: none;
 }
+
 
 .metric-value {
   font-size: 1.8rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 0.25rem;
+  font-weight: 800;
+  color: #16324a; /* stronger contrast */
+  margin: 0 0 6px 0;
 }
 
 .metric-label {
   font-size: 0.95rem;
-  color: #6c757d;
-  margin-bottom: 0.5rem;
+  color: #566474;
+  margin-top: 4px;
 }
+
+/* subtle accent pill top-left for each metric card to help legibility on white */
+.metric-card::after { display: none; }
 
 .metric-change {
   display: flex;
@@ -877,14 +964,14 @@ export default {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  align-items: start; /* Align panels to top but allow natural height growth */
 }
 
 .dashboard-panel {
-  background: white;
+  background: rgba(233, 228, 228, 0.316); /* soft opaque blue tint */
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   overflow: hidden;
-  border: 1px solid #f0f0f0;
 }
 
 .panel-header {
@@ -893,7 +980,7 @@ export default {
   align-items: center;
   padding: 1.5rem;
   border-bottom: 1px solid #f0f0f0;
-  background: linear-gradient(135deg, #f8f9fa, #ffffff);
+  background: #007bff;
 }
 
 .panel-title {
@@ -902,7 +989,7 @@ export default {
   gap: 0.5rem;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #ffffff;
   margin: 0;
 }
 
@@ -951,16 +1038,8 @@ export default {
   border-color: #e3f2fd;
 }
 
-.btn-icon {
-  font-size: 1.8rem;
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-}
+/* .btn-icon removed — quick action icons intentionally hidden */
+.btn-icon { display: none; }
 
 .btn-title {
   font-weight: 600;
@@ -973,49 +1052,50 @@ export default {
   color: #6c757d;
 }
 
+/* Star for quick actions */
+.action-star {
+  font-size: 1.3rem;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
 /* Recent Activity */
 .activity-list {
   padding: 1.5rem;
-  max-height: 400px;
-  overflow-y: auto;
+  /* Remove max-height to allow natural expansion */
+  overflow-y: visible;
 }
 
 .activity-item {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 0;
-  border-bottom: 1px solid #f8f9fa;
+  padding: 0.9rem 0.75rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff, #fbfdff);
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 3px 10px rgba(15,23,42,0.03);
 }
 
 .activity-item:last-child {
-  border-bottom: none;
+  margin-bottom: 0.25rem;
 }
 
+/* Use a plain star emoji as the icon; no colored square behind it */
 .activity-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
-}
-
-.activity-icon.income {
-  background: linear-gradient(135deg, #d4edda, #c3e6cb);
-}
-
-.activity-icon.expense {
-  background: linear-gradient(135deg, #f8d7da, #f1b0b7);
-}
-
-.activity-icon.invoice {
-  background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-}
-
-.activity-icon.bank {
-  background: linear-gradient(135deg, #e2e3e5, #d6d8db);
+  margin-right: 8px;
+  background: transparent !important;
+  border-radius: 0 !important;
 }
 
 .activity-content {
@@ -1035,8 +1115,9 @@ export default {
 }
 
 .activity-time {
-  font-size: 0.8rem;
-  color: #adb5bd;
+  font-size: 0.85rem;
+  color: #8a9198;
+  margin-top: 6px;
 }
 
 .activity-amount {
@@ -1056,6 +1137,17 @@ export default {
   color: #6c757d;
 }
 
+/* Row highlights for credits (positive) and debits (negative) */
+.activity-item.positive {
+  border-left: 4px solid rgba(40,167,69,0.9);
+}
+.activity-item.negative {
+  border-left: 4px solid rgba(220,53,69,0.9);
+}
+.activity-list .activity-item + .activity-item {
+  margin-top: 8px;
+}
+
 /* Pending Items */
 .pending-list {
   padding: 1.5rem;
@@ -1071,6 +1163,8 @@ export default {
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid #f0f0f0;
+  background: linear-gradient(135deg, #ffffff, #fbfdff);
+  box-shadow: 0 3px 10px rgba(15,23,42,0.04);
 }
 
 .pending-item:hover {
@@ -1173,21 +1267,20 @@ export default {
   gap: 1rem;
 }
 
+
 .health-metric {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 0.75rem;
-  background: linear-gradient(135deg, #f8f9fa, #ffffff);
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
-}
-
-.health-metric-icon {
-  font-size: 1.5rem;
-  width: 35px;
+  background: transparent;
+  border-radius: 6px;
+  border: none;
+  justify-content: center;
   text-align: center;
 }
+
+.health-metric-icon { display: none; }
 
 .health-metric-content {
   flex: 1;
@@ -1202,116 +1295,6 @@ export default {
 .health-metric-value {
   font-weight: 600;
   color: #2c3e50;
-}
-
-/* Charts Section */
-.charts-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 1.5rem;
-}
-
-.chart-panel {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  border: 1px solid #f0f0f0;
-}
-
-.chart-period {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.period-btn {
-  padding: 0.5rem 1rem;
-  border: 1px solid #e9ecef;
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s ease;
-}
-
-.period-btn.active,
-.period-btn:hover {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.chart-container {
-  padding: 1.5rem;
-}
-
-.chart-placeholder {
-  height: 200px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.chart-bars {
-  display: flex;
-  align-items: end;
-  gap: 1rem;
-  height: 150px;
-  padding: 0 1rem;
-}
-
-.chart-bar {
-  flex: 1;
-  background: linear-gradient(0deg, #007bff, #40a9ff);
-  border-radius: 4px 4px 0 0;
-  min-height: 20px;
-  transition: all 0.3s ease;
-}
-
-.chart-bar:hover {
-  background: linear-gradient(0deg, #0056b3, #1890ff);
-  transform: scaleY(1.1);
-}
-
-.chart-legend {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 1rem;
-  font-size: 0.85rem;
-  color: #6c757d;
-}
-
-.expense-breakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.expense-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: linear-gradient(135deg, #f8f9fa, #ffffff);
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
-}
-
-.expense-color {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-}
-
-.expense-label {
-  flex: 1;
-  font-weight: 500;
-  color: #2c3e50;
-}
-
-.expense-value {
-  font-weight: 600;
-  color: #495057;
 }
 
 /* Mobile Responsive */
@@ -1348,18 +1331,10 @@ export default {
     gap: 0.75rem;
   }
   
-  .charts-section {
-    grid-template-columns: 1fr;
-  }
-  
   .panel-header {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
-  }
-  
-  .chart-bars {
-    gap: 0.5rem;
   }
 }
 
@@ -1376,6 +1351,9 @@ export default {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
+    /* keep the left accent visible but a bit thinner on very small screens */
+    border-left-width: 3px;
+    padding-left: calc(1rem + 6px);
   }
   
   .company-badge {

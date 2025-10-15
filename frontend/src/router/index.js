@@ -21,6 +21,8 @@ import Benefits from '../views/payroll/Benefits.vue'
 import BankAccounts from '../views/banking/BankAccounts.vue'
 import BankStatementLines from '../views/banking/BankStatementLines.vue'
 import Reconciliations from '../views/banking/Reconciliations.vue'
+import Invoices from '../views/payments/Invoices.vue'
+import Bills from '../views/payments/Bills.vue'
 import BalanceSheet from '../views/reports/BalanceSheet.vue'
 import IncomeStatement from '../views/reports/IncomeStatement.vue'
 import CashFlow from '../views/reports/CashFlow.vue'
@@ -65,7 +67,7 @@ const routes = [
   },
   { path: '/accounts/companies', name: 'Companies', component: Companies, meta: { requiresAuth: true } },
   { path: '/accounts/user-roles', name: 'UserRoles', component: UserRoles, meta: { requiresAuth: true } },
-  { path: '/core/general-ledger', name: 'GeneralLedger', component: GeneralLedger, meta: { requiresAuth: true } },
+  { path: '/reports/general-ledger', name: 'GeneralLedger', component: GeneralLedger, meta: { requiresAuth: true } },
   { path: '/documents', name: 'Documents', component: Documents, meta: { requiresAuth: true } },
   { path: '/importer', name: 'ImportFiles', component: ImportFiles, meta: { requiresAuth: true } },
   { path: '/subscriptions', name: 'Subscriptions', component: Subscriptions, meta: { requiresAuth: true } },
@@ -79,6 +81,8 @@ const routes = [
   { path: '/banking/accounts', name: 'BankAccounts', component: BankAccounts, meta: { requiresAuth: true } },
   { path: '/banking/statement-lines', name: 'BankStatementLines', component: BankStatementLines, meta: { requiresAuth: true } },
   { path: '/banking/reconciliations', name: 'Reconciliations', component: Reconciliations, meta: { requiresAuth: true } },
+  { path: '/payments/invoices', name: 'Invoices', component: Invoices, meta: { requiresAuth: true } },
+  { path: '/payments/bills', name: 'Bills', component: Bills, meta: { requiresAuth: true } },
   { path: '/reports/balance-sheet', name: 'BalanceSheet', component: BalanceSheet, meta: { requiresAuth: true } },
   { path: '/reports/income-statement', name: 'IncomeStatement', component: IncomeStatement, meta: { requiresAuth: true } },
   { path: '/reports/cash-flow', name: 'CashFlow', component: CashFlow, meta: { requiresAuth: true } },

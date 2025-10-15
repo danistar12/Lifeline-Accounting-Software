@@ -337,7 +337,7 @@ export default {
   color: #6c757d;
 }
 
-.icon-settings::before { content: '⚙️'; }
+.icon-settings::before { content: ''; }
 
 /* Settings Sections */
 .settings-section {

@@ -1,3 +1,64 @@
+/* ===== Subtle text-only chips and lighting accents ===== */
+
+/* Metric chips: use short text labels instead of emoji */
+.metric-icon::after {
+  /* decorative rectangular pill, no text */
+  content: '';
+  display: inline-block;
+  width: 44px; /* slightly wider for more presence */
+  height: 24px; /* slightly taller */
+  border-radius: 8px; /* soft rounded rectangle */
+  background: linear-gradient(135deg, #eaf4ff, #d9ecff);
+  box-shadow: 0 4px 14px rgba(15,23,42,0.07);
+  transition: transform 220ms ease, filter 220ms ease, box-shadow 220ms ease, opacity 220ms ease;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* Soft lighting and micro-motion for chips */
+.metric-icon {
+  transition: transform 220ms ease, filter 220ms ease, box-shadow 220ms ease;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  background: linear-gradient(135deg, #fbfdff, #f3f7fb);
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.metric-card:hover .metric-icon {
+  transform: translateY(-4px) scale(1.035);
+  filter: brightness(1.07);
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.12);
+}
+
+/* Quick action compact labels replacing emoji */
+.btn-icon::after {
+  display: none; /* hidden globally — quick action icons removed from templates */
+}
+
+.action-btn .btn-icon {
+  transition: transform var(--transition-base), filter var(--transition-base), box-shadow var(--transition-base);
+}
+.action-btn:hover .btn-icon {
+  transform: translateY(-2px) scale(1.04);
+  filter: brightness(1.06);
+  box-shadow: 0 8px 20px rgba(15,23,42,0.08);
+}
+
+/* Panel icons: small decorative blocks (no emoji) */
+.panel-icon::after {
+  display: none; /* hide decorative header pills globally */
+}
+
+/* Chart bar micro-interaction */
+.chart-bar {
+  transition: transform 0.35s ease, filter 0.35s ease, box-shadow 0.35s ease;
+}
+.chart-bar:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 8px 24px rgba(15,23,42,0.06);
+}
+
 @import './tokens.css';
 
 html, body, #app {

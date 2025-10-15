@@ -9,10 +9,10 @@
     <option disabled value="">Select Company</option>
     <option
       v-for="company in companies"
-      :value="company.company_id"
-      :key="company.company_id"
+      :value="company.CompanyID"
+      :key="company.CompanyID"
     >
-      {{ company.company_name }}
+      {{ company.CompanyName }}
     </option>
   </select>
   <!-- Show loading placeholder if companies not yet loaded -->

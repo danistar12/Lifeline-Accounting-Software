@@ -23,7 +23,7 @@ def current_user(request):
     
     if request.method == 'GET':
         # Get user data
-        user_data = UserSerializer(user).data
+        user_data = UserSerializer(user, context={'request': request}).data
 
         # Get their company roles
         user_company_roles = UserCompanyRole.objects.filter(UserID=user)
@@ -39,21 +39,27 @@ def current_user(request):
     
     elif request.method == 'PATCH':
         # Update user data
-        serializer = UserSerializer(user, data=request.data, partial=True)
+        print(f"PATCH request data: {request.data}")
+        print(f"PATCH request files: {request.FILES}")
+        
+        serializer = UserSerializer(user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
+            updated_user = serializer.save()
+            print(f"User updated successfully. Profile photo: {updated_user.profile_photo}")
             
             # Return updated user data with company roles
             user_company_roles = UserCompanyRole.objects.filter(UserID=user)
             roles_data = UserCompanyRoleSerializer(user_company_roles, many=True).data
             
             response_data = {
-                'user': serializer.data,
+                'user': UserSerializer(updated_user, context={'request': request}).data,
                 'company_roles': roles_data
             }
             
+            print(f"Response data: {response_data}")
             return Response(response_data)
         else:
+            print(f"Serializer errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):

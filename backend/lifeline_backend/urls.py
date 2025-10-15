@@ -31,8 +31,6 @@ urlpatterns = [
     path('api/vendors/', include('apps.vendors.urls')),
     path('api/bills/', include('apps.bills.urls')),
     path('api/payments/', include('apps.payments.urls')),
-    path('api/payments_ap/', include('apps.payments_ap.urls')),
-    path('api/payments_ar/', include('apps.payments_ar.urls')),
     path('api/customfields/', include('apps.customfields.urls')),
     path('api/subscriptions/', include('apps.subscriptions.urls')),
     path('api/documents/', include('apps.documents.urls')),
@@ -47,6 +45,7 @@ urlpatterns = [
     path('api/projects/', include('apps.projects.urls')),
     path('api/budgets/', include('apps.budgets.urls')),
     path('api/taxes/', include('apps.taxes.urls')),
+    path('api/invoices/', include('apps.invoices.urls')),
     path('api/integrations/', include('apps.integrations.urls')),
     path('api/assets/', include('apps.assets.urls')),
     # Audit logs

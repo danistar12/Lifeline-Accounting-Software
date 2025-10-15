@@ -11,157 +11,157 @@
       </button>
       <nav v-if="isLoggedIn" class="main-nav" :class="{ 'mobile-open': mobileNavOpen }">
         <router-link to="/" class="nav-item dashboard-nav" @click="closeMobileMenu">
-          <div class="nav-icon">📊</div>
+          
           <span class="nav-label">Dashboard</span>
           <div class="nav-highlight"></div>
         </router-link>
 
-        <div class="nav-dropdown" @click="toggleDropdown($event)">
-          <div class="nav-item dropdown-toggle">
-            <div class="nav-icon">👥</div>
+        <div class="nav-dropdown" @mouseenter="showDropdown" @mouseleave="hideDropdown">
+            <div class="nav-item dropdown-toggle" @click.stop="toggleDropdown($event)">
+            
             <span class="nav-label">Accounts</span>
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
             <router-link to="/accounts/companies" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">🏢</i>
+              
               <span>Companies</span>
             </router-link>
             <router-link to="/accounts/user-roles" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">🔑</i>
+              
               <span>User Roles</span>
             </router-link>
             <router-link to="/accounts/customers" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">👤</i>
+              
               <span>Customers</span>
             </router-link>
             <router-link to="/accounts/vendors" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">🏪</i>
+              
               <span>Vendors</span>
             </router-link>
           </div>
         </div>
 
-        <div class="nav-dropdown" @click="toggleDropdown($event)">
-          <div class="nav-item dropdown-toggle">
-            <div class="nav-icon">💰</div>
+        <div class="nav-dropdown" @mouseenter="showDropdown" @mouseleave="hideDropdown">
+            <div class="nav-item dropdown-toggle" @click.stop="toggleDropdown($event)">
+            
             <span class="nav-label">Payroll</span>
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
             <router-link to="/payroll/employees" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">👷</i>
+              
               <span>Employees</span>
             </router-link>
             <router-link to="/payroll/payrolls" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">💵</i>
+              
               <span>Payrolls</span>
             </router-link>
             <router-link to="/payroll/paystubs" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">🧾</i>
+              
               <span>Paystubs</span>
             </router-link>
             <router-link to="/payroll/taxes" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">🏛️</i>
+              
               <span>Taxes</span>
             </router-link>
             <router-link to="/payroll/deductions" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">➖</i>
+             
               <span>Deductions</span>
             </router-link>
             <router-link to="/payroll/benefits" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">🎁</i>
+              
               <span>Benefits</span>
             </router-link>
           </div>
         </div>
 
         <router-link to="/subscriptions" class="nav-item" @click="closeMobileMenu">
-          <div class="nav-icon">📦</div>
+          
           <span class="nav-label">Subscriptions</span>
           <div class="nav-highlight"></div>
         </router-link>
 
-        <div class="nav-dropdown" @click="toggleDropdown($event)">
-          <div class="nav-item dropdown-toggle">
-            <div class="nav-icon">🏦</div>
+        <div class="nav-dropdown" @mouseenter="showDropdown" @mouseleave="hideDropdown">
+            <div class="nav-item dropdown-toggle" @click.stop="toggleDropdown($event)">
+            
             <span class="nav-label">Banking</span>
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
             <router-link to="/banking/accounts" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">🏛️</i>
+              
               <span>Bank Accounts</span>
             </router-link>
             <router-link to="/banking/statement-lines" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">📜</i>
+              
               <span>Statement Lines</span>
             </router-link>
             <router-link to="/banking/reconciliations" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">⚖️</i>
+              
               <span>Reconciliations</span>
             </router-link>
           </div>
         </div>
 
-        <div class="nav-dropdown" @click="toggleDropdown($event)">
-          <div class="nav-item dropdown-toggle">
-            <div class="nav-icon">💳</div>
+        <div class="nav-dropdown" @mouseenter="showDropdown" @mouseleave="hideDropdown">
+            <div class="nav-item dropdown-toggle" @click.stop="toggleDropdown($event)">
+            
             <span class="nav-label">Payments</span>
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
             <router-link to="/payments/bills" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">🧾</i>
+              
               <span>Bills</span>
             </router-link>
             <router-link to="/payments/invoices" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">📄</i>
+              
               <span>Invoices</span>
             </router-link>
           </div>
         </div>
 
-        <div class="nav-dropdown" @click="toggleDropdown($event)">
-          <div class="nav-item dropdown-toggle">
-            <div class="nav-icon">📊</div>
+        <div class="nav-dropdown" @mouseenter="showDropdown" @mouseleave="hideDropdown">
+            <div class="nav-item dropdown-toggle" @click.stop="toggleDropdown($event)">
+            
             <span class="nav-label">Reports</span>
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
             <router-link to="/reports/chart-of-accounts" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">📋</i>
+              
               <span>Chart of Accounts</span>
             </router-link>
             <router-link to="/reports/general-ledger" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">📖</i>
+              
               <span>General Ledger</span>
             </router-link>
             <router-link to="/reports/balance-sheet" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">⚖️</i>
+              
               <span>Balance Sheet</span>
             </router-link>
             <router-link to="/reports/income-statement" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">💹</i>
+              
               <span>Income Statement</span>
             </router-link>
             <router-link to="/reports/cash-flow" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">💰</i>
+              
               <span>Cash Flow</span>
             </router-link>
           </div>
         </div>
         
         <!-- Admin Section (Only visible for admin users) -->
-        <div class="nav-dropdown" v-if="isAdmin" @click="toggleDropdown($event)">
-          <div class="nav-item dropdown-toggle">
-            <div class="nav-icon">🔐</div>
+        <div class="nav-dropdown" v-if="isAdmin" @mouseenter="showDropdown" @mouseleave="hideDropdown">
+          <div class="nav-item dropdown-toggle" @click.stop="toggleDropdown($event)">
+            
             <span class="nav-label">Admin</span>
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
             <router-link to="/audit-logs" class="dropdown-link" @click="closeMobileMenu">
-              <i class="link-icon">🔍</i>
+              
               <span>Audit Logs</span>
             </router-link>
           </div>
@@ -171,8 +171,8 @@
         <button v-if="!isLoggedIn" @click="login">Login</button>
         
         <!-- User Profile Dropdown -->
-        <div v-if="isLoggedIn" class="user-profile-dropdown" @click="toggleDropdown($event)">
-          <div class="user-profile-toggle dropdown-toggle">
+        <div v-if="isLoggedIn" class="user-profile-dropdown">
+          <div class="user-profile-toggle dropdown-toggle" @click.stop="toggleDropdown($event)">
             <div class="user-avatar">
               <img v-if="user?.profile_photo || user?.user?.profile_photo" 
                    :src="user?.profile_photo || user?.user?.profile_photo" 
@@ -284,23 +284,34 @@ export default {
       this.mobileNavOpen = false;
     },
     toggleDropdown(event) {
-      // Handle different types of dropdown toggles
-      const navDropdown = event.currentTarget.classList.contains('nav-dropdown');
-      const userProfileDropdown = event.currentTarget.classList.contains('user-profile-dropdown');
-      
-      if (navDropdown || userProfileDropdown) {
+      // Find the dropdown container (nav-dropdown or user-profile-dropdown) from the clicked toggle
+      const dropdown = event.currentTarget.closest('.nav-dropdown, .user-profile-dropdown');
+      if (!dropdown) return;
+
+      // Close all other dropdowns
+      document.querySelectorAll('.nav-dropdown, .user-profile-dropdown').forEach(el => {
+        if (el !== dropdown && el.classList.contains('active')) {
+          el.classList.remove('active');
+        }
+      });
+
+      // Toggle the current dropdown
+      dropdown.classList.toggle('active');
+      // Prevent click from bubbling to document listener which would immediately close it
+      event.stopPropagation();
+    },
+    showDropdown(event) {
+      // Show dropdown on hover (desktop only)
+      if (window.innerWidth > 768) {
         const dropdown = event.currentTarget;
-        
-        // Close all other dropdowns
-        document.querySelectorAll('.nav-dropdown, .user-profile-dropdown').forEach(el => {
-          if (el !== dropdown && el.classList.contains('active')) {
-            el.classList.remove('active');
-          }
-        });
-        
-        // Toggle the current dropdown
-        dropdown.classList.toggle('active');
-        event.stopPropagation(); // Prevent navigation
+        dropdown.classList.add('active');
+      }
+    },
+    hideDropdown(event) {
+      // Hide dropdown when mouse leaves (desktop only)
+      if (window.innerWidth > 768) {
+        const dropdown = event.currentTarget;
+        dropdown.classList.remove('active');
       }
     }
   },
@@ -466,7 +477,8 @@ export default {
 
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 0.5rem);
+  /* Reduce the gap between toggle and menu to prevent accidental mouseleave when moving pointer */
+  top: calc(100% + 0.125rem);
   left: 0;
   background: white;
   border-radius: 12px;
@@ -481,7 +493,7 @@ export default {
 
 .nav-dropdown.active .dropdown-menu {
   display: block;
-  animation: dropdownSlide 0.3s ease-out;
+  animation: dropdownSlide 0.5s ease-out;
 }
 
 @keyframes dropdownSlide {
@@ -683,9 +695,9 @@ export default {
 }
 
 /* Icon classes for dropdown items */
-.icon-user::before { content: '👤'; }
-.icon-settings::before { content: '⚙️'; }
-.icon-logout::before { content: '🚪'; }
+.icon-user::before { content: ''; }
+.icon-settings::before { content: ''; }
+.icon-logout::before { content: ''; }
 
 .user-actions {
   display: flex;

@@ -33,7 +33,7 @@
               <img v-if="profilePhoto || user?.profile_photo" :src="profilePhoto || user?.profile_photo" alt="Profile Photo" class="avatar-photo" />
               <span v-else class="avatar-initials">{{ userInitials }}</span>
               <div v-if="editMode" class="avatar-overlay">
-                <i class="camera-icon">📷</i>
+                <i class="camera-icon" aria-hidden="true"></i>
               </div>
             </div>
             <input 
@@ -66,7 +66,7 @@
                 <label for="firstName">First Name</label>
                 <input 
                   id="firstName"
-                  v-model="profileForm.first_name"
+                  v-model="profileForm.FirstName"
                   type="text" 
                   class="form-control" 
                   :readonly="!editMode"
@@ -77,7 +77,7 @@
                 <label for="lastName">Last Name</label>
                 <input 
                   id="lastName"
-                  v-model="profileForm.last_name"
+                  v-model="profileForm.LastName"
                   type="text" 
                   class="form-control" 
                   :readonly="!editMode"
@@ -90,7 +90,7 @@
               <label for="email">Email Address</label>
               <input 
                 id="email"
-                v-model="profileForm.email"
+                v-model="profileForm.Email"
                 type="email" 
                 class="form-control" 
                 :readonly="!editMode"
@@ -102,7 +102,7 @@
               <label for="userNotes">Notes</label>
               <textarea 
                 id="userNotes"
-                v-model="profileForm.user_notes"
+                v-model="profileForm.UserNotes"
                 class="form-control" 
                 rows="4"
                 :readonly="!editMode"
@@ -180,10 +180,10 @@ export default {
       profilePhoto: null,
       profileForm: {
         username: '',
-        first_name: '',
-        last_name: '',
-        email: '',
-        user_notes: ''
+        FirstName: '',
+        LastName: '',
+        Email: '',
+        UserNotes: ''
       },
       originalForm: {}
     };
@@ -192,31 +192,24 @@ export default {
     ...mapState(['user']),
     displayName() {
       if (!this.user) return '';
-      
+
       const userData = this.user.user || this.user;
-      
-      if (userData.first_name && userData.last_name) {
-        return `${userData.first_name} ${userData.last_name}`;
-      } else if (userData.first_name) {
-        return userData.first_name;
-      } else {
-        return userData.username || 'User';
-      }
+      const first = userData.FirstName ?? userData.first_name;
+      const last = userData.LastName ?? userData.last_name;
+      if (first && last) return `${first} ${last}`;
+      if (first) return first;
+      return userData.username || 'User';
     },
     userInitials() {
       if (!this.user) return 'U';
-      
+
       const userData = this.user.user || this.user;
-      
-      if (userData.first_name && userData.last_name) {
-        return `${userData.first_name.charAt(0)}${userData.last_name.charAt(0)}`.toUpperCase();
-      } else if (userData.first_name) {
-        return userData.first_name.charAt(0).toUpperCase();
-      } else if (userData.username) {
-        return userData.username.charAt(0).toUpperCase();
-      } else {
-        return 'U';
-      }
+      const first = userData.FirstName ?? userData.first_name;
+      const last = userData.LastName ?? userData.last_name;
+      if (first && last) return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
+      if (first) return first.charAt(0).toUpperCase();
+      if (userData.username) return userData.username.charAt(0).toUpperCase();
+      return 'U';
     }
   },
   methods: {
@@ -230,10 +223,10 @@ export default {
         
         this.profileForm = {
           username: userData.username || '',
-          first_name: userData.first_name || '',
-          last_name: userData.last_name || '',
-          email: userData.email || '',
-          user_notes: userData.user_notes || ''
+          FirstName: userData.FirstName ?? userData.first_name ?? '',
+          LastName: userData.LastName ?? userData.last_name ?? '',
+          Email: userData.Email ?? userData.email ?? '',
+          UserNotes: userData.UserNotes ?? userData.user_notes ?? ''
         };
         
         // Store original form data for cancel functionality
@@ -258,12 +251,17 @@ export default {
     
     async saveProfile() {
       this.saving = true;
-      try {
+        try {
+        // send both canonical CamelCase and legacy snake_case keys
         await axios.patch('/api/accounts/auth/user/', {
-          first_name: this.profileForm.first_name,
-          last_name: this.profileForm.last_name,
-          email: this.profileForm.email,
-          user_notes: this.profileForm.user_notes
+          FirstName: this.profileForm.FirstName,
+          LastName: this.profileForm.LastName,
+          Email: this.profileForm.Email,
+          UserNotes: this.profileForm.UserNotes,
+          first_name: this.profileForm.FirstName,
+          last_name: this.profileForm.LastName,
+          email: this.profileForm.Email,
+          user_notes: this.profileForm.UserNotes
         });
         
         // Update the store with new user data
@@ -315,11 +313,14 @@ export default {
       formData.append('profile_photo', file);
       
       try {
-        await axios.patch('/api/accounts/auth/user/', formData, {
+        console.log('Uploading profile photo...', file);
+        const response = await axios.patch('/api/accounts/auth/user/', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
+        
+        console.log('Upload response:', response.data);
         
         // Update the store with new user data
         await this.me();
@@ -328,6 +329,7 @@ export default {
         
       } catch (error) {
         console.error('Failed to upload profile photo:', error);
+        console.error('Error response:', error.response?.data);
         alert('Failed to upload profile photo. Please try again.');
         // Reset the preview on error
         this.profilePhoto = null;
@@ -412,10 +414,10 @@ export default {
   gap: 0.75rem;
 }
 
-.icon-user::before { content: '👤'; }
-.icon-edit::before { content: '✏️'; }
-.icon-check::before { content: '✓'; }
-.icon-building::before { content: '🏢'; }
+.icon-user::before { content: ''; }
+.icon-edit::before { content: ''; }
+.icon-check::before { content: ''; }
+.icon-building::before { content: ''; }
 
 /* Profile Card */
 .profile-card {
