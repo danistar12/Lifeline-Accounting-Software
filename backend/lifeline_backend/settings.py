@@ -15,7 +15,13 @@ SECRET_KEY = 'django-insecure-your-secret-key'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '10.100.5.61',  # production IP
+    '02-vuweb01',   # server hostname
+    'lifelinedatacenters.com',
+]
 
 
 # Application definition
@@ -72,6 +78,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
+    "https://10.100.5.61",
 ]
 
 # Allow cookies/credentials to be included in CORS requests from the frontend
