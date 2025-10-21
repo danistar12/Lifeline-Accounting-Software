@@ -175,8 +175,8 @@ def dashboard_metrics(request):
     current_month_revenue = GeneralLedger.objects.filter(
         CompanyID__in=companies,
         AccountID__in=revenue_accounts,
-    TransactionDate__gte=current_month_start,
-    TransactionDate__lt=today_start
+        TransactionDate__gte=current_month_start,
+        TransactionDate__lt=today_start
     ).aggregate(
         total=Sum('CreditAmount') - Sum('DebitAmount')
     )['total'] or Decimal('0.00')
@@ -185,8 +185,8 @@ def dashboard_metrics(request):
     last_month_revenue = GeneralLedger.objects.filter(
         CompanyID__in=companies,
         AccountID__in=revenue_accounts,
-    TransactionDate__gte=last_month_start,
-    TransactionDate__lt=current_month_start
+        TransactionDate__gte=last_month_start,
+        TransactionDate__lt=current_month_start
     ).aggregate(
         total=Sum('CreditAmount') - Sum('DebitAmount')
     )['total'] or Decimal('0.00')
@@ -195,8 +195,8 @@ def dashboard_metrics(request):
     current_month_expenses = GeneralLedger.objects.filter(
         CompanyID__in=companies,
         AccountID__in=expense_accounts,
-    TransactionDate__gte=current_month_start,
-    TransactionDate__lt=today_start
+        TransactionDate__gte=current_month_start,
+        TransactionDate__lt=today_start
     ).aggregate(
         total=Sum('DebitAmount') - Sum('CreditAmount')
     )['total'] or Decimal('0.00')
@@ -205,8 +205,8 @@ def dashboard_metrics(request):
     last_month_expenses = GeneralLedger.objects.filter(
         CompanyID__in=companies,
         AccountID__in=expense_accounts,
-    TransactionDate__gte=last_month_start,
-    TransactionDate__lt=current_month_start
+        TransactionDate__gte=last_month_start,
+        TransactionDate__lt=current_month_start
     ).aggregate(
         total=Sum('DebitAmount') - Sum('CreditAmount')
     )['total'] or Decimal('0.00')
@@ -218,8 +218,8 @@ def dashboard_metrics(request):
     # Calculate year-to-date cash flow (simplified)
     ytd_cash_flow = GeneralLedger.objects.filter(
         CompanyID__in=companies,
-    TransactionDate__gte=current_year_start,
-    TransactionDate__lt=today_start
+        TransactionDate__gte=current_year_start,
+        TransactionDate__lt=today_start
     ).aggregate(
         total=Sum('DebitAmount') - Sum('CreditAmount')
     )['total'] or Decimal('0.00')
