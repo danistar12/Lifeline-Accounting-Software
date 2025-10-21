@@ -184,7 +184,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 import os
-STATIC_URL = 'static/'
+# Use absolute URL path so templates generate /static/... links (important when WSGI is mounted at /api)
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files (User uploads)
@@ -197,8 +198,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+# Use absolute URL path so templates generate /static/... links (important when WSGI is mounted at /api)
 import os
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Media files (User uploads)
 MEDIA_URL = '/media/'
