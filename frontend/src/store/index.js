@@ -5,6 +5,8 @@ import audit from './modules/audit'
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.withCredentials = true
+// Ensure axios sends requests to the API mount point. Use env override if set.
+axios.defaults.baseURL = process.env.VUE_APP_API_BASE || '/api'
 
 // Load user state from localStorage if available
 const savedUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
