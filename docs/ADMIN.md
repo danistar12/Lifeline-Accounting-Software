@@ -3,7 +3,7 @@
 The Django admin interface allows full access to all models and data in the system.
 
 URL: http://localhost:8000/admin/
-
+     https://10.100.5.61
 ## Creating a Superuser
 
 Before you can log in, you need to create an admin (superuser) account. Run:

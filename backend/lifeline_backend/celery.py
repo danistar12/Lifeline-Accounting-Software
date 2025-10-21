@@ -1,7 +1,7 @@
 import os
 from celery import Celery
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lifeline_backend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lifeline_backend.settings_production')
 
 app = Celery('lifeline_backend')
 app.config_from_object('django.conf:settings', namespace='CELERY')

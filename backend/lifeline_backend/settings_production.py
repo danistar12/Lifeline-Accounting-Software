@@ -28,6 +28,12 @@ CORS_ALLOWED_ORIGINS = [
     "https://lifelinedatacenters.com",
 ]
 
+# CSRF trusted origins for admin and authentication
+CSRF_TRUSTED_ORIGINS = [
+    'https://10.100.5.61',
+    'https://lifelinedatacenters.com',
+]
+
 # Production cookie settings (secure for HTTPS)
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
