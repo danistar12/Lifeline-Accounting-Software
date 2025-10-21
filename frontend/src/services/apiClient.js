@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = process.env.VUE_APP_API_BASE || 'http://localhost:8000/api';
+const API_BASE = process.env.VUE_APP_API_BASE || 'https://10.100.5.61/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE,
