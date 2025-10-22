@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const API_BASE = process.env.VUE_APP_API_BASE || 'https://10.100.5.61/api';
+const configuredBase = process.env.VUE_APP_API_BASE ? process.env.VUE_APP_API_BASE.trim().replace(/\/+$/, '') : '';
 
 const apiClient = axios.create({
-  baseURL: API_BASE,
+  baseURL: configuredBase || undefined,
   timeout: 10000,
   withCredentials: true,
   headers: {
