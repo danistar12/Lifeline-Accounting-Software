@@ -86,3 +86,126 @@ CSP_IMG_SRC = ("'self'", "data:")
 CSP_FONT_SRC = ("'self'",)
 CSP_CONNECT_SRC = ("'self'",)
 CSP_FRAME_ANCESTORS = ("'none'",)
+
+# Production logging configuration for FedRAMP compliance
+import os
+
+# Production logs directory - use absolute path
+LOGS_DIR = '/var/www/lifeline-accounting/backend/logs'
+
+# Ensure logs directory exists with proper permissions
+if not os.path.exists(LOGS_DIR):
+    try:
+        os.makedirs(LOGS_DIR, mode=0o755)
+    except (OSError, PermissionError):
+        # If we can't create logs directory, use a fallback location
+        LOGS_DIR = '/tmp/lifeline-logs'
+        try:
+            os.makedirs(LOGS_DIR, mode=0o755, exist_ok=True)
+        except (OSError, PermissionError):
+            # Ultimate fallback - use console only
+            LOGS_DIR = None
+
+# Determine if we can use file logging
+USE_FILE_LOGGING = LOGS_DIR is not None
+
+# Override base logging configuration for production
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'security': {
+            'format': '[SECURITY] {asctime} - {levelname} - {message}',
+            'style': '{',
+        },
+        'audit': {
+            'format': '[AUDIT] {asctime} - {message}',
+            'style': '{',
+        },
+        'production': {
+            'format': '[PROD] {asctime} {levelname} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'WARNING',  # Less verbose in production
+            'class': 'logging.StreamHandler',
+            'formatter': 'production',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'WARNING',  # Only warnings and errors in production
+            'propagate': False,
+        },
+        'apps.security.middleware': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps.accounts.middleware': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'lifeline_backend': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+}
+
+# Add file handlers if we can use file logging
+if USE_FILE_LOGGING and LOGS_DIR:
+    LOGGING['handlers'].update({
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'lifeline.log'),
+            'maxBytes': 1024*1024*20,  # 20MB for production
+            'backupCount': 15,
+            'formatter': 'verbose',
+        },
+        'security_file': {
+            'level': 'INFO',  # Log all security events in production
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'security.log'),
+            'maxBytes': 1024*1024*15,  # 15MB
+            'backupCount': 25,
+            'formatter': 'security',
+        },
+        'audit_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'audit.log'),
+            'maxBytes': 1024*1024*30,  # 30MB for audit trail
+            'backupCount': 50,  # Keep more audit logs
+            'formatter': 'audit',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'errors.log'),
+            'maxBytes': 1024*1024*10,  # 10MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+    })
+    
+    # Update loggers to use file handlers in production
+    LOGGING['loggers']['django']['handlers'] = ['file', 'error_file', 'console']
+    LOGGING['loggers']['apps.security.middleware']['handlers'] = ['security_file', 'audit_file', 'console']
+    LOGGING['loggers']['apps.accounts.middleware']['handlers'] = ['security_file', 'audit_file', 'console']
+    LOGGING['loggers']['lifeline_backend']['handlers'] = ['file', 'error_file', 'console']
+    LOGGING['root']['handlers'] = ['file', 'console']
