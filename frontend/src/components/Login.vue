@@ -143,14 +143,25 @@ export default {
   display: flex;
   align-items: center;
   margin-bottom: 1.5rem;
+  gap: 0.5rem;
 }
 
 .remember-me input[type="checkbox"] {
-  margin-right: 0.5rem;
+  margin: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .remember-me label {
-  margin-bottom: 0;
+  margin: 0;
   cursor: pointer;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  margin-top: 1rem;
 }
 </style>

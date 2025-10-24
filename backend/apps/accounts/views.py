@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions
 from .models import User, Company, UserCompanyRole
 from .serializers import UserSerializer, CompanySerializer, UserCompanyRoleSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import timedelta
 from rest_framework.views import APIView
