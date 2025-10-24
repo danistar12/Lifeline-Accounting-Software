@@ -256,11 +256,16 @@ export default {
       }
     },
     async save() {
-      if (!this.form.first_name || !this.form.last_name || !this.form.email || !this.form.hire_date) {
+      if (this.saving) return; // Prevent double submission
+      
+      if (!this.form.FirstName || !this.form.LastName || !this.form.Email || !this.form.HireDate) {
+        this.error = 'Please fill in all required fields (First Name, Last Name, Email, Hire Date)';
         return;
       }
 
       this.saving = true;
+      this.error = '';
+      
       // send both canonical CamelCase and legacy snake_case for transition safety
       const payload = {
         FirstName: this.form.FirstName,

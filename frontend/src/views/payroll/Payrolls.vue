@@ -171,6 +171,8 @@ export default {
       }
     },
     async save() {
+      if (this.saving) return; // Prevent double submission
+      
       if (!this.form.run_date || !this.form.pay_period_start || !this.form.pay_period_end) {
         return;
       }

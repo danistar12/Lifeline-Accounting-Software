@@ -212,6 +212,7 @@ export default {
       }
     },
     async save() {
+      if (this.saving) return; // Prevent double submission
       this.saving = true;
       try {
         if (this.form.id) await axios.put(`/api/payroll/paystubs/${this.form.id}/`, this.form);

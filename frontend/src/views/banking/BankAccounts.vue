@@ -181,6 +181,8 @@ export default {
       this.saving = false;
     },
     async save() {
+      if (this.saving) return; // Prevent double submission
+      
       if (!this.form.name) {
         return;
       }

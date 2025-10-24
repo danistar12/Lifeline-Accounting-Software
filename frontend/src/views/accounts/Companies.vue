@@ -794,6 +794,7 @@ export default {
     },
 
     async saveCompanyEdit() {
+      if (this.editLoading) return; // Prevent double submission
       this.editLoading = true;
       try {
         const payload = {
@@ -826,6 +827,7 @@ export default {
     },
 
     async saveNewCompany() {
+      if (this.addLoading) return; // Prevent double submission
       this.addLoading = true;
       try {
         const payload = {
