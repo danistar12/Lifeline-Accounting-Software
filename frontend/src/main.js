@@ -15,9 +15,13 @@ let inactivityTimer;
 
 function resetInactivityTimer() {
   clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(() => {
+  inactivityTimer = setTimeout(async () => {
     // Log out user on inactivity
-    store.dispatch('logout');
+    try {
+      await store.dispatch('logout');
+    } catch (error) {
+      console.error('Error during inactivity logout:', error);
+    }
     router.push('/login');
   }, INACTIVITY_TIMEOUT);
 }

@@ -14,6 +14,10 @@ from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
+import logging
+
+# Security logger for authentication events
+security_logger = logging.getLogger('apps.accounts.middleware')
 
 @api_view(['GET', 'PATCH'])
 @permission_classes([permissions.IsAuthenticated])
@@ -95,13 +99,35 @@ class UserCompanyRoleViewSet(viewsets.ModelViewSet):
         serializer.save(UserID=self.request.user)
 
 class LoginView(TokenObtainPairView):
+    def get_client_ip(self, request):
+        """Get real client IP address"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
     def post(self, request, *args, **kwargs):
+        # Get client info for logging
+        client_ip = self.get_client_ip(request)
+        user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown')
+        username = request.data.get('username', 'Unknown')
+        
         # Get remember_me flag
         remember_me = request.data.get('remember_me', False)
         
         response = super().post(request, *args, **kwargs)
 
         if response.status_code == 200:
+            # Log successful login
+            security_logger.info(
+                f"LOGIN_SUCCESS - Username: {username} | "
+                f"IP: {client_ip} | "
+                f"UserAgent: {user_agent} | "
+                f"RememberMe: {remember_me}"
+            )
+            
             # Get the tokens from response data
             access_token = response.data.get('access')
             refresh_token = response.data.get('refresh')
@@ -141,6 +167,14 @@ class LoginView(TokenObtainPairView):
                 request.session.set_expiry(30 * 24 * 3600)  # 30 days
             else:
                 request.session.set_expiry(settings.SESSION_COOKIE_AGE)
+        else:
+            # Log failed login attempt
+            security_logger.warning(
+                f"LOGIN_FAILED - Username: {username} | "
+                f"IP: {client_ip} | "
+                f"UserAgent: {user_agent} | "
+                f"Status: {response.status_code}"
+            )
                 
         return response
 
@@ -151,7 +185,30 @@ class LogoutView(APIView):
     """
     permission_classes = []  # No authentication required
     
+    def get_client_ip(self, request):
+        """Get real client IP address"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+    
     def post(self, request, *args, **kwargs):
+        client_ip = self.get_client_ip(request)
+        
+        # Determine username for logging
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            username = request.user.username
+        else:
+            username = 'Unknown/Anonymous'
+        
+        # Log logout attempt
+        security_logger.info(
+            f"LOGOUT_REQUEST - Username: {username} | "
+            f"IP: {client_ip}"
+        )
+        
         response = Response({'detail': 'Successfully logged out'}, status=status.HTTP_200_OK)
         
         # Try to delete JWT cookies if they exist

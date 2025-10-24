@@ -61,6 +61,7 @@ export default createStore({
       localStorage.removeItem('selectedCompanyId');
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
+      localStorage.removeItem('current_user_id');
       state.error = null;
     }
   },
@@ -134,6 +135,21 @@ export default createStore({
         const response = await axios.get('/api/accounts/auth/user/');
         console.log('User data received:', response.data);
         console.log('Profile photo URL:', response.data?.user?.profile_photo || response.data?.profile_photo);
+        
+        // Verify user identity hasn't changed
+        const currentUserId = localStorage.getItem('current_user_id');
+        const newUserId = response.data?.user?.id || response.data?.id;
+        
+        if (currentUserId && currentUserId !== String(newUserId)) {
+          // User identity changed - possible admin hijacking
+          console.warn('User identity changed, logging out for security');
+          commit('clearAuthData');
+          throw new Error('Security violation: user identity changed');
+        }
+        
+        // Store current user ID for verification
+        localStorage.setItem('current_user_id', String(newUserId));
+        
         commit('setUser', response.data);
         
         // Load companies after getting user data
@@ -143,6 +159,7 @@ export default createStore({
       } catch (error) {
         console.error('Failed to load user:', error);
         commit('clearAuthData');
+        localStorage.removeItem('current_user_id');
         throw error;
       }
     },

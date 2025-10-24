@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
 import sys
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'lifeline_backend',
+    'apps.security',           # FedRAMP security middleware
     'apps.accounts',
     'apps.subscriptions',
     'apps.documents',
@@ -66,14 +68,16 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'apps.security.middleware.FedRAMPSecurityMiddleware',  # FedRAMP security headers and rate limiting
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'apps.accounts.middleware.SessionSecurityMiddleware',  # Session security and admin hijack prevention
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.audit.middleware.AuditLogMiddleware',  # Re-enabled with async support
+    'apps.security.middleware.AuditLoggingMiddleware',  # Comprehensive audit logging for FedRAMP
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -105,10 +109,13 @@ CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_AGE = 3600  # 1 hour in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True  # Update session expiry on each request
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # True for HTTPS in production
+SESSION_COOKIE_SAMESITE = 'Lax'
 
-# If you want to scope cookies to a specific domain, set SESSION_COOKIE_DOMAIN accordingly.
-# For local testing we leave it unset so cookies are host-only.
-# SESSION_COOKIE_DOMAIN = None
+# Force logout after inactivity
+SESSION_SECURITY_WARN_AFTER = 1800  # 30 minutes
+SESSION_SECURITY_EXPIRE_AFTER = 3600  # 1 hour
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -257,3 +264,80 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+# Comprehensive logging configuration for FedRAMP compliance
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'security': {
+            'format': '[SECURITY] {asctime} - {levelname} - {message}',
+            'style': '{',
+        },
+        'audit': {
+            'format': '[AUDIT] {asctime} - {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'lifeline.log'),
+            'maxBytes': 1024*1024*15,  # 15MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'security_file': {
+            'level': 'WARNING',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'security.log'),
+            'maxBytes': 1024*1024*10,  # 10MB
+            'backupCount': 20,
+            'formatter': 'security',
+        },
+        'audit_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'audit.log'),
+            'maxBytes': 1024*1024*25,  # 25MB
+            'backupCount': 30,
+            'formatter': 'audit',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'apps.security.middleware': {
+            'handlers': ['security_file', 'audit_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps.accounts.middleware': {
+            'handlers': ['security_file', 'audit_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'lifeline_backend': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+    'root': {
+        'handlers': ['file', 'console'],
+        'level': 'INFO',
+    },
+}

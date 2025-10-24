@@ -99,7 +99,7 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const isLoggedIn = store.getters.isLoggedIn
   const user = store.state.user
   
@@ -115,6 +115,19 @@ router.beforeEach((to, from, next) => {
   else if (to.matched.some(record => record.meta.adminOnly) && !(user && (user.is_superuser || user.is_staff || user.role === 'admin'))) {
     // Redirect to dashboard if user doesn't have admin privileges
     next('/')
+  }
+  // For protected routes, verify session is still valid
+  else if (to.matched.some(record => record.meta.requiresAuth) && isLoggedIn) {
+    try {
+      // Check if session is still valid by making a quick API call
+      await store.dispatch('me')
+      next()
+    } catch (error) {
+      // Session expired, clear auth and redirect to login
+      console.log('Session expired, logging out')
+      store.commit('clearAuthData')
+      next('/login')
+    }
   }
   else {
     next()
