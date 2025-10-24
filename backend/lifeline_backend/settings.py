@@ -101,6 +101,11 @@ CSRF_COOKIE_SAMESITE = None
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
+# Session security settings
+SESSION_COOKIE_AGE = 3600  # 1 hour in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True  # Update session expiry on each request
+
 # If you want to scope cookies to a specific domain, set SESSION_COOKIE_DOMAIN accordingly.
 # For local testing we leave it unset so cookies are host-only.
 # SESSION_COOKIE_DOMAIN = None

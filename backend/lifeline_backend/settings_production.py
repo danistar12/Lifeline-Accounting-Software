@@ -40,6 +40,11 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+# Session security settings
+SESSION_COOKIE_AGE = 3600  # 1 hour in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True  # Update session expiry on each request
+
 STATIC_ROOT = '/var/www/lifeline-accounting/static/'
 MEDIA_ROOT = '/var/www/lifeline-accounting/media/'
 
