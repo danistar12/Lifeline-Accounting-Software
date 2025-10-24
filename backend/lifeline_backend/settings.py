@@ -75,9 +75,9 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'apps.accounts.middleware.SessionSecurityMiddleware',  # Session security and admin hijack prevention
+    'apps.security.middleware.AuditLoggingMiddleware',  # Comprehensive audit logging - AFTER auth
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.security.middleware.AuditLoggingMiddleware',  # Comprehensive audit logging for FedRAMP
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -118,6 +118,14 @@ SESSION_SECURITY_WARN_AFTER = 1800  # 30 minutes
 SESSION_SECURITY_EXPIRE_AFTER = 3600  # 1 hour
 
 AUTH_USER_MODEL = 'accounts.User'
+
+# Cache configuration for security middleware
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
 
 ROOT_URLCONF = 'lifeline_backend.urls'
 

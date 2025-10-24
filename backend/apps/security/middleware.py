@@ -91,8 +91,8 @@ class AuditLoggingMiddleware:
         start_time = time.time()
         client_ip = self.get_client_ip(request)
         
-        # Log request details
-        if request.user.is_authenticated:
+        # Log request details - safely check for user
+        if hasattr(request, 'user') and request.user.is_authenticated:
             user_id = request.user.id
             username = request.user.username
         else:
