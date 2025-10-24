@@ -72,9 +72,14 @@ export default createStore({
         console.log('Getting CSRF token...');
         await axios.get('/api/accounts/auth/csrf/');
         
-        // Login
+        // Login with remember_me flag
         console.log('Logging in...');
-        await axios.post('/api/accounts/auth/login/', authData);
+        const loginData = {
+          username: authData.username,
+          password: authData.password,
+          remember_me: authData.remember_me || false
+        };
+        await axios.post('/api/accounts/auth/login/', loginData);
         
         // Fetch user data
         console.log('Fetching user data...');

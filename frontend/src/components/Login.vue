@@ -14,6 +14,10 @@
           <label for="password">Password</label>
           <input type="password" id="password" v-model="password" required placeholder="Enter your password">
         </div>
+        <div class="form-group remember-me">
+          <input type="checkbox" id="remember_me" v-model="rememberMe">
+          <label for="remember_me">Remember me for 30 days</label>
+        </div>
         <button type="submit" class="login-button" :disabled="loading">
           <span v-if="loading">Logging in...</span>
           <span v-else>Login</span>
@@ -33,6 +37,7 @@ export default {
     return {
       username: '',
       password: '',
+      rememberMe: false,
     };
   },
   computed: {
@@ -44,7 +49,8 @@ export default {
       try {
         const userData = await this.login({ 
           username: this.username, 
-          password: this.password 
+          password: this.password,
+          remember_me: this.rememberMe
         });
         
         if (userData) {
@@ -133,9 +139,18 @@ export default {
   background-color: #0056b3;
 }
 
-.error-message {
-  color: #dc3545;
-  text-align: center;
-  margin-top: 1rem;
+.remember-me {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.remember-me input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.remember-me label {
+  margin-bottom: 0;
+  cursor: pointer;
 }
 </style>

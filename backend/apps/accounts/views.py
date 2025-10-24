@@ -1,7 +1,8 @@
 from rest_framework import viewsets, permissions
 from .models import User, Company, UserCompanyRole
 from .serializers import UserSerializer, CompanySerializer, UserCompanyRoleSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from datetime import timedelta
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -94,11 +95,30 @@ class UserCompanyRoleViewSet(viewsets.ModelViewSet):
 
 class LoginView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
+        # Get remember_me flag
+        remember_me = request.data.get('remember_me', False)
+        
         response = super().post(request, *args, **kwargs)
 
         if response.status_code == 200:
-            access_token = response.data.pop('access')
-            refresh_token = response.data.pop('refresh')
+            # Get the tokens from response data
+            access_token = response.data.get('access')
+            refresh_token = response.data.get('refresh')
+            
+            # If remember_me, create a new refresh token with longer lifetime
+            if remember_me:
+                # Create custom refresh token with 30 days lifetime
+                refresh = RefreshToken()
+                refresh.payload.update({
+                    'user_id': request.user.id,
+                    'exp': timezone.now() + timedelta(days=30)
+                })
+                refresh_token = str(refresh)
+                
+                # Update response data
+                response.data['refresh'] = refresh_token
+            
+            # Set cookies with appropriate settings
             response.set_cookie(
                 key=settings.SIMPLE_JWT['ACCESS_TOKEN_COOKIE'],
                 value=access_token,
@@ -111,8 +131,16 @@ class LoginView(TokenObtainPairView):
                 value=refresh_token,
                 httponly=True,
                 secure=settings.SIMPLE_JWT['REFRESH_TOKEN_COOKIE_SECURE'],
-                samesite=settings.SIMPLE_JWT['REFRESH_TOKEN_COOKIE_SAMESITE']
+                samesite=settings.SIMPLE_JWT['REFRESH_TOKEN_COOKIE_SAMESITE'],
+                max_age=30*24*3600 if remember_me else None  # 30 days if remember_me
             )
+            
+            # Also set session expiry for remember_me
+            if remember_me:
+                request.session.set_expiry(30 * 24 * 3600)  # 30 days
+            else:
+                request.session.set_expiry(settings.SESSION_COOKIE_AGE)
+                
         return response
 
 class LogoutView(APIView):
