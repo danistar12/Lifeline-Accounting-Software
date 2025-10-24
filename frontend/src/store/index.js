@@ -59,6 +59,8 @@ export default createStore({
       state.selectedCompany.id = null;
       localStorage.removeItem('user');
       localStorage.removeItem('selectedCompanyId');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       state.error = null;
     }
   },
@@ -79,7 +81,15 @@ export default createStore({
           password: authData.password,
           remember_me: authData.remember_me || false
         };
-        await axios.post('/api/accounts/auth/login/', loginData);
+        const loginResponse = await axios.post('/api/accounts/auth/login/', loginData);
+        
+        // Store JWT tokens in localStorage
+        if (loginResponse.data.access) {
+          localStorage.setItem('access_token', loginResponse.data.access);
+        }
+        if (loginResponse.data.refresh) {
+          localStorage.setItem('refresh_token', loginResponse.data.refresh);
+        }
         
         // Fetch user data
         console.log('Fetching user data...');
@@ -105,10 +115,15 @@ export default createStore({
       try {
         await axios.post('/api/accounts/auth/logout/');
         commit('clearAuthData');
+        // Clear JWT tokens
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
       } catch (error) {
         console.error('Logout failed:', error);
         // Still clear the auth data even if the logout request fails
         commit('clearAuthData');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         throw error;
       }
     },

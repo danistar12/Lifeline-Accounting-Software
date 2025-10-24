@@ -112,7 +112,10 @@ export default {
       this.error = '';
       try {
         const response = await VendorsService.getVendors();
-        this.vendors = Array.isArray(response) ? response : response || [];
+        const vendorsList = Array.isArray(response) ? response : response || [];
+        // Filter out vendors with no name or empty name
+        this.vendors = vendorsList.filter(vendor => vendor.Name && vendor.Name.trim() !== '');
+        console.log('Filtered vendors:', this.vendors);
       } catch (err) {
         console.error('Error fetching vendors:', err);
         this.error = 'Unable to load vendors right now.';
@@ -123,6 +126,7 @@ export default {
     editVendor(vendor) { this.form = { ...vendor, VendorID: vendor.VendorID ?? vendor.vendor_id ?? null }; this.showModal = true; },
     async deleteVendor(id) { if (!confirm('Delete this vendor?')) return; try { await VendorsService.deleteVendor(id); this.fetchVendors(); } catch (err) { console.error('Error deleting vendor:', err); alert('Failed to delete vendor.'); } },
     async save() {
+      if (this.saving) return; // Prevent double submission
       this.saving = true;
       try {
         const payload = { ...this.form };

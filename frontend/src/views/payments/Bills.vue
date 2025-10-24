@@ -223,7 +223,8 @@ export default {
         }
 
         const payload = response.data || [];
-        this.vendors = normalizeArray(payload);
+        this.vendors = normalizeArray(payload).filter(vendor => vendor.Name || vendor.CompanyName);
+        console.log('Vendors loaded:', this.vendors);
       } catch (error) {
         console.warn('Failed to load vendors for bills form:', error);
         // keep vendors empty; form will show 'Select vendor'
@@ -283,6 +284,7 @@ export default {
       }
     },
     async save() {
+      if (this.saving) return; // Prevent double submission
       this.saving = true;
       try {
         const payload = { ...this.form };
