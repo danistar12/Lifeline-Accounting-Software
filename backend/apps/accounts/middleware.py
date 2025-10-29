@@ -15,6 +15,10 @@ class SessionSecurityMiddleware:
         # Process the request
         response = self.get_response(request)
         
+        # Skip session security for login endpoints to prevent interference
+        if request.path.startswith('/api/accounts/auth/login') or request.path.startswith('/api/accounts/auth/csrf'):
+            return response
+        
         # Only check authenticated users
         if request.user.is_authenticated:
             current_time = time.time()
@@ -27,7 +31,8 @@ class SessionSecurityMiddleware:
                 return response
             
             # Verify user identity hasn't changed (prevents admin hijacking)
-            if request.session.get('user_id') != request.user.id:
+            session_user_id = request.session.get('user_id')
+            if session_user_id and session_user_id != request.user.id:
                 logout(request)
                 if request.path.startswith('/api/'):
                     return JsonResponse({'error': 'Session security violation'}, status=401)
@@ -55,7 +60,8 @@ class SessionSecurityMiddleware:
                     return JsonResponse({'error': 'Session expired - maximum time reached'}, status=401)
                 return response
             
-            # Update last activity time
+            # Update last activity time and user ID
             request.session['last_activity'] = current_time
+            request.session['user_id'] = request.user.id  # Ensure user_id is always current
         
         return response

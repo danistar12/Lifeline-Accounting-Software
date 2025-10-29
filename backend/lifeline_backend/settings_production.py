@@ -2,9 +2,10 @@ from .settings import *
 
 DEBUG = False
 ALLOWED_HOSTS = [
-    '10.100.5.61',  # production IP
+    '10.100.5.61',  # production IP where backend is hosted
     '02-vuweb01',   # server hostname
     'lifelinedatacenters.com',
+    'la.lldc.local',  # New proxy domain for backend
 ]
 
 DATABASES = {
@@ -22,16 +23,18 @@ DATABASES = {
     }
 }
 
-# Production CORS settings
+# Production CORS settings - Allow frontend proxy to access backend IP
 CORS_ALLOWED_ORIGINS = [
     "https://10.100.5.61",
-    "https://lifelinedatacenters.com",
+    "https://lifelinedatacenters.com", 
+    "https://la.lldc.local",  # Frontend proxy domain
 ]
 
 # CSRF trusted origins for admin and authentication
 CSRF_TRUSTED_ORIGINS = [
     'https://10.100.5.61',
     'https://lifelinedatacenters.com',
+    'https://la.lldc.local',  # Frontend proxy domain
 ]
 
 # Production cookie settings (secure for HTTPS)
