@@ -1,0 +1,45 @@
+name: Auto Deploy to Server
+
+on:
+  push:
+    branches: [ master, main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        script: |
+          echo "🚀 Starting deployment..."
+          
+          # Navigate to project directory
+          cd /var/www/lifeline-accounting
+          
+          # Pull latest changes
+          echo "📥 Pulling latest changes from GitHub..."
+          git pull origin master
+          
+          # Backend setup
+          echo "🐍 Setting up backend..."
+          cd backend
+          source venv/bin/activate
+          export DJANGO_SETTINGS_MODULE=lifeline_backend.settings_production
+          python manage.py check
+          
+          # Frontend build and deploy
+          echo "🌐 Building and deploying frontend..."
+          cd ../frontend
+          npm run build
+          sudo rsync -av --delete dist/ /var/www/html/
+          
+          # Restart Apache
+          echo "🔄 Restarting Apache..."
+          sudo systemctl restart apache2
+          
+          echo "✅ Deployment completed successfully!"

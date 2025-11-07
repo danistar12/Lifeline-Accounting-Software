@@ -11,7 +11,6 @@
       </button>
       <nav v-if="isLoggedIn" class="main-nav" :class="{ 'mobile-open': mobileNavOpen }">
         <router-link to="/" class="nav-item dashboard-nav" @click="closeMobileMenu">
-          
           <span class="nav-label">Dashboard</span>
           <div class="nav-highlight"></div>
         </router-link>

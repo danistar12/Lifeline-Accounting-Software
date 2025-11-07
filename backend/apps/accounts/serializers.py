@@ -27,9 +27,11 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'email',
             'date_joined',
+            'is_staff',
+            'is_superuser',
             'ProfilePhoto',
         )
-        read_only_fields = ('id', 'date_joined')
+        read_only_fields = ('id', 'date_joined', 'is_staff', 'is_superuser')
 
     def get_ProfilePhoto(self, obj):
         if obj.profile_photo:

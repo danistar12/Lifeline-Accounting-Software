@@ -11,12 +11,7 @@ This repository contains the Lifeline Accounting Software project with the follo
 ├── frontend/              # Vue.js frontend
 ├── docs/                  # Documentation
 ├── screenshots/           # Screenshots
-├── Alex Docs/                     # Additional documentation
-├── Diagrams/                      # System diagrams and flowcharts
-├── Lifeline Accounting Application Development Document.docx
-├── Lifeline Accounting Application Development Document.pdf
-└── X_api_Key.txt                  # API keys (ignored by git)
-```
+
 
 ## Technology Stack
 
@@ -81,8 +76,7 @@ This repository contains the Lifeline Accounting Software project with the follo
 
 ## Documentation
 
-- Main documentation: `Lifeline Accounting Application Development Document.pdf`
-- Additional docs: `Alex Docs/Lifeline Accounting System Software Documentation v3.pdf`
+- Main documentation: `Lifeline Accounting Application Development Document.pdf
 - Setup instructions: See individual version README files
 
 ## Development Workflow
@@ -99,6 +93,39 @@ This repository contains the Lifeline Accounting Software project with the follo
 2. Make your changes
 3. Test thoroughly
 4. Submit a pull request
+
+## Deployment
+
+This project includes automated deployment using GitHub Actions. When you push to the `master` branch, it automatically deploys to your Linux server.
+
+### Quick Deployment Setup
+
+1. **Server Setup:**
+   ```bash
+   # Run this on your Linux server
+   chmod +x setup_deployment.sh
+   ./setup_deployment.sh your-username /var/www/lifeline-accounting your-domain.com
+   ```
+
+2. **GitHub Configuration:**
+   - Add the generated SSH private key to GitHub Secrets as `SSH_PRIVATE_KEY`
+   - Add other deployment secrets (see DEPLOYMENT.md for details)
+
+3. **Deploy:**
+   ```bash
+   git push origin master  # Triggers automatic deployment
+   ```
+
+### Deployment Status
+
+Check your deployment status:
+```bash
+# Run this on your server
+chmod +x check_deployment.sh
+./check_deployment.sh /var/www/lifeline-accounting your-domain.com
+```
+
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## License
 
