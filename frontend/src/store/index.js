@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
 import axios from 'axios'
+import apiClient from '@/services/apiClient'
 import audit from './modules/audit'
 
 axios.defaults.xsrfCookieName = 'csrftoken'
@@ -16,6 +17,12 @@ if (envBaseUrl) {
 
 // Load user state from localStorage if available
 const savedUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+
+// Restore JWT token to axios headers if available
+const savedToken = localStorage.getItem('access_token');
+if (savedToken) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+}
 
 export default createStore({
   state: {
@@ -62,6 +69,8 @@ export default createStore({
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('current_user_id');
+      // Clear axios authorization header
+      delete axios.defaults.headers.common['Authorization'];
       state.error = null;
     }
   },
@@ -73,7 +82,7 @@ export default createStore({
       try {
         // Get CSRF token
         console.log('Getting CSRF token...');
-        await axios.get('/api/accounts/auth/csrf/');
+        await apiClient.get('/api/accounts/auth/csrf/');
         
         // Login with remember_me flag
         console.log('Logging in...');
@@ -82,19 +91,21 @@ export default createStore({
           password: authData.password,
           remember_me: authData.remember_me || false
         };
-        const loginResponse = await axios.post('/api/accounts/auth/login/', loginData);
+        const loginResponse = await apiClient.post('/api/accounts/auth/login/', loginData);
         
         // Store JWT tokens in localStorage
         if (loginResponse.data.access) {
           localStorage.setItem('access_token', loginResponse.data.access);
+          // Set the token in axios headers immediately
+          axios.defaults.headers.common['Authorization'] = `Bearer ${loginResponse.data.access}`;
         }
         if (loginResponse.data.refresh) {
           localStorage.setItem('refresh_token', loginResponse.data.refresh);
         }
         
-        // Fetch user data
+        // Fetch user data using apiClient (which has JWT interceptor)
         console.log('Fetching user data...');
-        const response = await axios.get('/api/accounts/auth/user/');
+        const response = await apiClient.get('/api/accounts/auth/user/');
         console.log('User data received:', response.data);
         commit('setUser', response.data);
         
@@ -114,17 +125,20 @@ export default createStore({
     
     async logout({ commit }) {
       try {
-        await axios.post('/api/accounts/auth/logout/');
+        await apiClient.post('/api/accounts/auth/logout/');
         commit('clearAuthData');
         // Clear JWT tokens
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        // Clear axios authorization header
+        delete axios.defaults.headers.common['Authorization'];
       } catch (error) {
         console.error('Logout failed:', error);
         // Still clear the auth data even if the logout request fails
         commit('clearAuthData');
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        delete axios.defaults.headers.common['Authorization'];
         throw error;
       }
     },
@@ -132,7 +146,7 @@ export default createStore({
     async me({ commit, dispatch }) {
       try {
         console.log('Loading current user...');
-        const response = await axios.get('/api/accounts/auth/user/');
+        const response = await apiClient.get('/api/accounts/auth/user/');
         console.log('User data received:', response.data);
         console.log('Profile photo URL:', response.data?.user?.profile_photo || response.data?.profile_photo);
         
@@ -167,7 +181,7 @@ export default createStore({
     async loadCompanies({ commit }) {
       try {
         console.log('Loading companies...');
-        const response = await axios.get('/api/accounts/companies/');
+        const response = await apiClient.get('/api/accounts/companies/');
         console.log('Companies loaded:', response.data);
         commit('setUserCompanies', response.data);
         // If no company is currently selected, pick the first available company

@@ -152,16 +152,20 @@
         </div>
         
         <!-- Admin Section (Only visible for admin users) -->
-        <div class="nav-dropdown" v-if="isAdmin" @mouseenter="showDropdown" @mouseleave="hideDropdown">
-          <div class="nav-item dropdown-toggle" @click.stop="toggleDropdown($event)">
-            
+        <div class="nav-dropdown admin-dropdown" v-if="isAdmin" @mouseenter="showDropdown" @mouseleave="hideDropdown">
+          <div class="nav-item dropdown-toggle admin-nav-item" @click.stop="toggleDropdown($event)">
+            <span class="nav-icon admin-icon">⚙️</span>
             <span class="nav-label">Admin</span>
             <div class="nav-highlight"></div>
           </div>
           <div class="dropdown-menu">
             <router-link to="/audit-logs" class="dropdown-link" @click="closeMobileMenu">
-              
+              <span class="link-icon">📋</span>
               <span>Audit Logs</span>
+            </router-link>
+            <router-link to="/settings" class="dropdown-link" @click="closeMobileMenu">
+              <span class="link-icon">⚙️</span>
+              <span>System Settings</span>
             </router-link>
           </div>
         </div>
@@ -235,6 +239,17 @@ export default {
     isAdmin() {
       if (!this.user) return false;
       const userData = this.user.user || this.user;
+      
+      // Debug logging to help troubleshoot admin access
+      console.log('Admin check:', {
+        user: this.user,
+        userData: userData,
+        is_staff: userData.is_staff,
+        is_superuser: userData.is_superuser,
+        role: userData.role,
+        isAdmin: userData.is_staff || userData.is_superuser || (userData.role && userData.role.toLowerCase().includes('admin'))
+      });
+      
       return userData.is_staff || userData.is_superuser || (userData.role && userData.role.toLowerCase().includes('admin'));
     },
     userDisplayName() {
@@ -546,6 +561,44 @@ export default {
   height: 28px;
 }
 
+/* Admin dropdown styling */
+.admin-dropdown .admin-nav-item {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+  font-weight: 600;
+}
+
+.admin-dropdown .admin-nav-item:hover {
+  background: linear-gradient(135deg, #c82333, #bd2130);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.admin-dropdown .admin-icon {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-dropdown .dropdown-menu {
+  border-top: 3px solid #dc3545;
+}
+
+.admin-dropdown .dropdown-link {
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.admin-dropdown .dropdown-link:hover {
+  border-left-color: #dc3545;
+  background: linear-gradient(135deg, #fff5f5, #ffe6e6);
+}
+
 /* User Profile Dropdown */
 .user-profile-dropdown {
   position: relative;
@@ -727,10 +780,21 @@ export default {
 @media (max-width: 768px) {
   .app-header {
     padding: 0.5rem 1rem;
+    flex-wrap: wrap;
   }
   
   .mobile-toggle {
     display: flex;
+    order: 2;
+  }
+  
+  .logo {
+    order: 1;
+    flex: 1;
+  }
+  
+  .user-actions {
+    order: 3;
   }
   
   .main-nav {
@@ -745,6 +809,8 @@ export default {
     display: none;
     z-index: 1000;
     padding: 1rem 0;
+    max-height: 70vh;
+    overflow-y: auto;
   }
   
   .main-nav.mobile-open {
@@ -792,14 +858,10 @@ export default {
     transform: none;
   }
   
-  .user-actions {
-    order: -1;
-    margin-right: auto;
-  }
-  
   .user-profile-dropdown .user-dropdown-menu {
     right: auto;
     left: 0;
+    min-width: 200px;
   }
   
   .user-name {
@@ -808,6 +870,62 @@ export default {
   
   .app-content {
     padding: 1rem;
+  }
+}
+
+/* Tablet Responsive Styles */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .app-header {
+    padding: 0.5rem 1.5rem;
+  }
+  
+  .main-nav {
+    gap: 0.25rem;
+  }
+  
+  .nav-item {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .nav-label {
+    font-size: 0.85rem;
+  }
+  
+  .dropdown-menu {
+    min-width: 180px;
+  }
+  
+  .app-content {
+    padding: 1.5rem;
+  }
+}
+
+/* Small Mobile Styles */
+@media (max-width: 480px) {
+  .app-header {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .logo {
+    font-size: 1.25rem;
+  }
+  
+  .nav-item {
+    padding: 1rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .dropdown-link {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .user-profile-dropdown .user-dropdown-menu {
+    min-width: 180px;
+  }
+  
+  .app-content {
+    padding: 0.75rem;
   }
 }
 </style>
