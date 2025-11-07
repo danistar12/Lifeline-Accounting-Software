@@ -78,9 +78,38 @@ else
     log_message "$BLUE" "📝 Changes: $BEFORE_COMMIT -> $AFTER_COMMIT"
 fi
 
+
 # Backend setup
 log_message "$BLUE" "🐍 Setting up backend..."
 cd backend || { log_message "$RED" "❌ Backend directory not found"; exit 1; }
+
+# Ensure logs directory exists with proper permissions
+LOG_DIR="$(pwd)/logs"
+if [[ ! -d "$LOG_DIR" ]]; then
+    log_message "$YELLOW" "ℹ️  Logs directory not found. Creating $LOG_DIR"
+    mkdir -p "$LOG_DIR" || { log_message "$RED" "❌ Failed to create logs directory"; exit 1; }
+fi
+
+if [[ ! -w "$LOG_DIR" ]]; then
+    log_message "$BLUE" "🔐 Adjusting log directory permissions..."
+    sudo chown "$USER":www-data "$LOG_DIR" || log_message "$YELLOW" "⚠️ Unable to chown logs directory"
+    sudo chmod 775 "$LOG_DIR" || log_message "$YELLOW" "⚠️ Unable to chmod logs directory"
+fi
+
+log_message "$GREEN" "✅ Log directory ready: $LOG_DIR"
+
+# Ensure critical log files are present and writable
+for log_file in audit.log security.log access.log; do
+    if [[ ! -f "$LOG_DIR/$log_file" ]]; then
+        log_message "$YELLOW" "ℹ️  Creating log file $log_file"
+        touch "$LOG_DIR/$log_file" || log_message "$YELLOW" "⚠️ Unable to create $log_file"
+    fi
+    if [[ ! -w "$LOG_DIR/$log_file" ]]; then
+        log_message "$BLUE" "🔐 Setting permissions for $log_file"
+        sudo chown "$USER":www-data "$LOG_DIR/$log_file" || log_message "$YELLOW" "⚠️ Unable to chown $log_file"
+        sudo chmod 664 "$LOG_DIR/$log_file" || log_message "$YELLOW" "⚠️ Unable to chmod $log_file"
+    fi
+done
 
 # Check if virtual environment exists
 if [[ ! -d "venv" ]]; then

@@ -137,7 +137,10 @@ export default {
         }
 
         const response = await apiClient.get('/banking/reconciliations/', { params });
-        this.entries = response.data || [];
+        const payload = Array.isArray(response.data?.results)
+          ? response.data.results
+          : Array.isArray(response.data) ? response.data : [];
+        this.entries = this.normalizeEntries(payload);
       } catch (err) {
         console.warn('Failed to load reconciliations', err);
         this.error = 'We couldn\'t load reconciliation entries right now.';
@@ -155,11 +158,47 @@ export default {
     },
     formatCurrency(amount) {
       if (amount == null || amount === '') return '—';
-      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(amount);
+      const numeric = typeof amount === 'number' ? amount : parseFloat(amount);
+      if (!Number.isFinite(numeric)) return '—';
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(numeric);
     },
     amountClass(amount) {
-      if (typeof amount !== 'number') return '';
-      return amount < 0 ? 'is-negative' : '';
+      const numeric = typeof amount === 'number' ? amount : parseFloat(amount);
+      if (!Number.isFinite(numeric)) return '';
+      return numeric < 0 ? 'is-negative' : '';
+    },
+    normalizeEntries(entries) {
+      if (!Array.isArray(entries)) return [];
+      return entries
+        .map((entry) => {
+          const amount = this.toNumber(entry.amount ?? entry.ReconciledAmount);
+          return {
+            ...entry,
+            id: entry.id ?? entry.ReconciliationEntryID ?? entry.reconciliation_entry_id,
+            reconciled_date: entry.reconciled_date ?? entry.ReconciledDate ?? entry.reconciledDate,
+            amount,
+            account_name: entry.account_name ?? entry.AccountName ?? entry.accountName ?? '',
+            statement_line_ref: entry.statement_line_ref ?? entry.StatementLineRef ?? '',
+            statement_description: entry.statement_description ?? entry.StatementDescription ?? '',
+            gl_transaction_ref: entry.gl_transaction_ref ?? entry.GLTransactionRef ?? '',
+            gl_description: entry.gl_description ?? entry.GLDescription ?? '',
+          };
+        })
+        .filter((entry) => {
+          const hasDescription = (entry.statement_description || entry.gl_description || '').trim() !== '';
+          const hasAmount = Number.isFinite(entry.amount) && Math.abs(entry.amount) > 0;
+          return hasDescription || hasAmount;
+        });
+    },
+    toNumber(value) {
+      if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : null;
+      }
+      if (typeof value === 'string' && value.trim() !== '') {
+        const parsed = parseFloat(value.replace(/[^0-9.-]+/g, ''));
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+      return null;
     },
   },
 };

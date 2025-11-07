@@ -151,24 +151,6 @@
           </div>
         </div>
         
-        <!-- Admin Section (Only visible for admin users) -->
-        <div class="nav-dropdown admin-dropdown" v-if="isAdmin" @mouseenter="showDropdown" @mouseleave="hideDropdown">
-          <div class="nav-item dropdown-toggle admin-nav-item" @click.stop="toggleDropdown($event)">
-            <span class="nav-icon admin-icon">⚙️</span>
-            <span class="nav-label">Admin</span>
-            <div class="nav-highlight"></div>
-          </div>
-          <div class="dropdown-menu">
-            <router-link to="/audit-logs" class="dropdown-link" @click="closeMobileMenu">
-              <span class="link-icon">📋</span>
-              <span>Audit Logs</span>
-            </router-link>
-            <router-link to="/settings" class="dropdown-link" @click="closeMobileMenu">
-              <span class="link-icon">⚙️</span>
-              <span>System Settings</span>
-            </router-link>
-          </div>
-        </div>
       </nav>
       <div class="user-actions">
         <button v-if="!isLoggedIn" @click="login">Login</button>
@@ -559,44 +541,6 @@ export default {
   color: white;
   width: 28px;
   height: 28px;
-}
-
-/* Admin dropdown styling */
-.admin-dropdown .admin-nav-item {
-  background: linear-gradient(135deg, #dc3545, #c82333);
-  color: white;
-  font-weight: 600;
-}
-
-.admin-dropdown .admin-nav-item:hover {
-  background: linear-gradient(135deg, #c82333, #bd2130);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-}
-
-.admin-dropdown .admin-icon {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  padding: 2px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.admin-dropdown .dropdown-menu {
-  border-top: 3px solid #dc3545;
-}
-
-.admin-dropdown .dropdown-link {
-  border-left: 3px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.admin-dropdown .dropdown-link:hover {
-  border-left-color: #dc3545;
-  background: linear-gradient(135deg, #fff5f5, #ffe6e6);
 }
 
 /* User Profile Dropdown */

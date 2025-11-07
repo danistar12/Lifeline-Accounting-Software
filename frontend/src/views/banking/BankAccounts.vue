@@ -149,7 +149,10 @@ export default {
       this.error = '';
       try {
         const res = await apiClient.get('/banking/accounts/');
-        this.accounts = res.data || [];
+        const payload = Array.isArray(res.data?.results)
+          ? res.data.results
+          : Array.isArray(res.data) ? res.data : [];
+        this.accounts = this.normalizeAccounts(payload);
       } catch (err) {
         console.warn('Failed to load bank accounts', err);
         this.error = 'We couldn\'t load bank accounts right now.';
@@ -162,11 +165,62 @@ export default {
     },
     formatCurrency(val) {
       if (val == null || val === '') return '—';
-      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(val);
+      const numeric = typeof val === 'number' ? val : parseFloat(val);
+      if (!Number.isFinite(numeric)) return '—';
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(numeric);
     },
     balanceClass(val) {
-      if (typeof val !== 'number') return '';
-      return val < 0 ? 'is-negative' : '';
+      const numeric = typeof val === 'number' ? val : parseFloat(val);
+      if (!Number.isFinite(numeric)) return '';
+      return numeric < 0 ? 'is-negative' : '';
+    },
+    normalizeAccounts(accounts) {
+      if (!Array.isArray(accounts)) return [];
+      return accounts
+        .map((account) => {
+          const normalized = {
+            ...account,
+            id: account.id ?? account.BankAccountID ?? account.bank_account_id,
+            name: (account.name || account.BankName || account.bank_name || '').toString(),
+            account_number: account.account_number || account.AccountNumber || '',
+            bank_name: account.bank_name || account.BankName || '',
+            type: account.type || account.AccountType || '',
+          };
+
+          const numericBalance = this.toNumber(account.balance ?? account.Balance);
+          if (numericBalance !== null) {
+            normalized.balance = numericBalance;
+          } else {
+            normalized.balance = null;
+          }
+
+          if (!normalized.name && normalized.bank_name) {
+            normalized.name = normalized.bank_name;
+          } else if (!normalized.name && normalized.type) {
+            normalized.name = normalized.type;
+          }
+
+          return normalized;
+        })
+        .filter((account) => this.hasMeaningfulAccount(account));
+    },
+    toNumber(value) {
+      if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : null;
+      }
+      if (typeof value === 'string' && value.trim() !== '') {
+        const parsed = parseFloat(value.replace(/[^0-9.-]+/g, ''));
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+      return null;
+    },
+    hasMeaningfulAccount(account) {
+      const name = (account.name || '').trim();
+      const hasName = name !== '' && name.toLowerCase() !== 'account';
+      const hasDetails = [account.account_number, account.bank_name, account.type]
+        .some((value) => (value || '').toString().trim() !== '');
+      const hasBalance = Number.isFinite(account.balance) && Math.abs(account.balance) > 0;
+      return hasName || hasDetails || hasBalance;
     },
     openCreate() {
       this.form = { id: null, name: '', account_number: '', bank_name: '', balance: 0 };

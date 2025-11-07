@@ -17,7 +17,7 @@
 
       <div v-if="loading" class="table-empty">Loading vendors…</div>
       <div v-else-if="error" class="table-empty table-empty--error">{{ error }}</div>
-      <div v-else-if="vendors.length" class="table-container">
+  <div v-else-if="Array.isArray(vendors) && vendors.length" class="table-container">
         <table class="data-table vendors-table">
           <thead>
             <tr>
@@ -111,10 +111,10 @@ export default {
       this.loading = true;
       this.error = '';
       try {
-        const response = await VendorsService.getVendors();
-        const vendorsList = Array.isArray(response) ? response : response || [];
-        // Filter out vendors with no name or empty name
-        this.vendors = vendorsList.filter(vendor => vendor.Name && vendor.Name.trim() !== '');
+  const response = await VendorsService.getVendors();
+  const vendorsList = Array.isArray(response?.results) ? response.results : Array.isArray(response) ? response : [];
+  // Filter out vendors with no name or empty name
+  this.vendors = vendorsList.filter(vendor => vendor.Name && vendor.Name.trim() !== '');
         console.log('Filtered vendors:', this.vendors);
       } catch (err) {
         console.error('Error fetching vendors:', err);

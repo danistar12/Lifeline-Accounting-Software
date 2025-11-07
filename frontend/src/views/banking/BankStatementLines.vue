@@ -95,7 +95,15 @@ export default {
     async loadAccounts() {
       try {
         const response = await apiClient.get('/banking/accounts/');
-        this.accounts = response.data || [];
+        const payload = Array.isArray(response.data?.results)
+          ? response.data.results
+          : Array.isArray(response.data) ? response.data : [];
+        this.accounts = payload
+          .map((account) => ({
+            id: account.id ?? account.BankAccountID ?? account.bank_account_id,
+            name: (account.name || account.BankName || account.bank_name || '').toString(),
+          }))
+          .filter((account) => account.id && account.name.trim() !== '');
       } catch (err) {
         console.warn('Failed to load accounts', err);
       }
@@ -110,7 +118,10 @@ export default {
         }
 
         const response = await apiClient.get('/banking/statement-lines/', { params });
-        this.lines = response.data || [];
+        const payload = Array.isArray(response.data?.results)
+          ? response.data.results
+          : Array.isArray(response.data) ? response.data : [];
+        this.lines = this.normalizeLines(payload);
       } catch (err) {
         console.warn('Failed to load statement lines', err);
         this.error = 'We couldn\'t load statement lines right now.';
@@ -124,11 +135,14 @@ export default {
     },
     formatCurrency(amount) {
       if (amount == null || amount === '') return '—';
-      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(amount);
+      const numeric = typeof amount === 'number' ? amount : parseFloat(amount);
+      if (!Number.isFinite(numeric)) return '—';
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(numeric);
     },
     amountClass(amount) {
-      if (typeof amount !== 'number') return '';
-      return amount < 0 ? 'is-negative' : '';
+      const numeric = typeof amount === 'number' ? amount : parseFloat(amount);
+      if (!Number.isFinite(numeric)) return '';
+      return numeric < 0 ? 'is-negative' : '';
     },
     lineStatus(line) {
       if (!line.status) return 'info';
@@ -140,6 +154,53 @@ export default {
         'error': 'danger',
       };
       return statusMap[line.status.toLowerCase()] || 'info';
+    },
+    normalizeLines(lines) {
+      if (!Array.isArray(lines)) return [];
+      return lines
+        .map((line) => {
+          const amount = this.toNumber(line.amount ?? line.Amount);
+          const status = this.normalizeStatus(line.status ?? line.MatchStatus);
+          return {
+            ...line,
+            id: line.id ?? line.BankStatementLineID ?? line.bank_statement_line_id,
+            amount,
+            status,
+            description: (line.description || line.Description || '').toString(),
+            memo: line.memo ?? line.BankAcctNotes ?? '',
+            reference_number: line.reference_number ?? line.TransactionNumber ?? '',
+            date: line.date ?? line.TransactionDate ?? line.transaction_date,
+          };
+        })
+        .filter((line) => {
+          const hasDescription = (line.description || '').trim() !== '';
+          const hasAmount = Number.isFinite(line.amount) && Math.abs(line.amount) > 0;
+          return hasDescription || hasAmount;
+        });
+    },
+    toNumber(value) {
+      if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : null;
+      }
+      if (typeof value === 'string' && value.trim() !== '') {
+        const parsed = parseFloat(value.replace(/[^0-9.-]+/g, ''));
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+      return null;
+    },
+    normalizeStatus(status) {
+      if (status == null) return null;
+      const normalized = status.toString().trim().toLowerCase();
+      if (normalized === '' || normalized === 'false' || normalized === '0' || normalized === 'no') {
+        return null;
+      }
+      if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+        return 'Matched';
+      }
+      if (['imported', 'matched', 'reconciled', 'pending', 'error'].includes(normalized)) {
+        return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+      }
+      return status.toString();
     },
   },
 };
