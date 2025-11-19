@@ -595,6 +595,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import axios from 'axios';
+import { readAuthItem } from '@/services/authStorage';
 
 export default {
   name: 'CompaniesView',
@@ -662,8 +663,8 @@ export default {
         this.companies = response.data;
         console.log('Companies loaded successfully:', this.companies);
         
-        // Load active company from localStorage
-        const savedCompanyId = localStorage.getItem('selectedCompanyId');
+        // Load active company from persisted auth storage
+        const savedCompanyId = readAuthItem('selectedCompanyId');
         if (savedCompanyId) {
           const savedCompany = this.companies.find(c => `${c.CompanyID}` === `${savedCompanyId}`);
           if (savedCompany) {
@@ -707,8 +708,6 @@ export default {
 
     setActiveCompany(company) {
       this.activeCompany = company;
-      localStorage.setItem('selectedCompanyId', company.CompanyID);
-      
       // Set axios header for API requests
       axios.defaults.headers.common['X-Company-ID'] = company.CompanyID;
       
@@ -725,7 +724,6 @@ export default {
 
     clearActiveCompany() {
       this.activeCompany = null;
-      localStorage.removeItem('selectedCompanyId');
       delete axios.defaults.headers.common['X-Company-ID'];
       this.setSelectedCompany(null);
     },

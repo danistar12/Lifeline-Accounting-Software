@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { readAuthItem } from './authStorage';
 
 const configuredBase = process.env.VUE_APP_API_BASE ? process.env.VUE_APP_API_BASE.trim().replace(/\/+$/, '') : '';
 
@@ -11,14 +12,14 @@ const apiClient = axios.create({
   },
 });
 
-// Optional: attach token if present in localStorage
+// Optional: attach token if present in stored auth state
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
+  const token = readAuthItem('access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  // propagate selected company header if present in localStorage
-  const selectedCompany = localStorage.getItem('selectedCompanyId');
+  // propagate selected company header if present in stored auth state
+  const selectedCompany = readAuthItem('selectedCompanyId');
   if (selectedCompany) {
     config.headers['X-Company-ID'] = selectedCompany;
   }
