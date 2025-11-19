@@ -67,7 +67,10 @@ class UserCompanyRoleSerializer(serializers.ModelSerializer):
             'CreatedDate',
             'Company',
         )
-        read_only_fields = ('UserCompanyRoleID', 'CreatedDate', 'UserID')
+        read_only_fields = ('UserCompanyRoleID', 'CreatedDate')
+        extra_kwargs = {
+            'UserID': {'required': False}
+        }
 
 
 class UserSettingsSerializer(serializers.ModelSerializer):

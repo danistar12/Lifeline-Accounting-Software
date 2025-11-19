@@ -28,6 +28,8 @@ import Bills from '../views/payments/Bills.vue'
 import BalanceSheet from '../views/reports/BalanceSheet.vue'
 import IncomeStatement from '../views/reports/IncomeStatement.vue'
 import CashFlow from '../views/reports/CashFlow.vue'
+import ExpenseReport from '../views/reports/ExpenseReport.vue'
+import ProfitLoss from '../views/reports/ProfitLoss.vue'
 import ProjectsView from '../views/projects/ProjectsView.vue'
 import store from '../store'
 
@@ -91,6 +93,8 @@ const routes = [
   { path: '/reports/chart-of-accounts', name: 'ChartOfAccounts', component: () => import('../views/accounts/ChartOfAccounts.vue'), meta: { requiresAuth: true } },
   { path: '/reports/income-statement', name: 'IncomeStatement', component: IncomeStatement, meta: { requiresAuth: true } },
   { path: '/reports/cash-flow', name: 'CashFlow', component: CashFlow, meta: { requiresAuth: true } },
+  { path: '/reports/expense-report', name: 'ExpenseReport', component: ExpenseReport, meta: { requiresAuth: true } },
+  { path: '/reports/profit-loss', name: 'ProfitLoss', component: ProfitLoss, meta: { requiresAuth: true } },
   { path: '/audit-logs', name: 'AuditLogs', component: AuditLogList, meta: { requiresAuth: true, adminOnly: true } }
 ]
 

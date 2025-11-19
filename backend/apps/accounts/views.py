@@ -96,7 +96,7 @@ class UserCompanyRoleViewSet(viewsets.ModelViewSet):
         return UserCompanyRole.objects.filter(UserID=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(UserID=self.request.user)
+        serializer.save(UserID=self.request.user.id)
 
 class LoginView(TokenObtainPairView):
     def get_client_ip(self, request):

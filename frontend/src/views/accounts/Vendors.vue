@@ -112,7 +112,10 @@ export default {
       this.error = '';
       try {
   const response = await VendorsService.getVendors();
+  console.log('Raw vendor response:', response);
+  console.log('Selected company ID:', this.selectedCompanyId);
   const vendorsList = Array.isArray(response?.results) ? response.results : Array.isArray(response) ? response : [];
+  console.log('Vendors list before filter:', vendorsList);
   // Filter out vendors with no name or empty name
   this.vendors = vendorsList.filter(vendor => vendor.Name && vendor.Name.trim() !== '');
         console.log('Filtered vendors:', this.vendors);
@@ -132,12 +135,16 @@ export default {
         const payload = { ...this.form };
         if (!payload.CompanyID && this.selectedCompanyId) payload.CompanyID = Number(this.selectedCompanyId);
         const { VendorID, ...body } = payload;
-        if (VendorID) await VendorsService.updateVendor(VendorID, body);
-        else await VendorsService.createVendor(body);
+        console.log('Saving vendor with payload:', body, 'CompanyID:', this.selectedCompanyId);
+        let result;
+        if (VendorID) result = await VendorsService.updateVendor(VendorID, body);
+        else result = await VendorsService.createVendor(body);
+        console.log('Vendor saved successfully:', result);
         this.showModal = false;
         await this.fetchVendors();
       } catch (err) {
         console.error('Error saving vendor:', err);
+        console.error('Error details:', err.response?.data);
         alert('Failed to save vendor.');
       } finally {
         this.saving = false;
