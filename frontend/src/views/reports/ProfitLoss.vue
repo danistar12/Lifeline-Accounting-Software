@@ -48,10 +48,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="report.revenue && report.revenue.length" v-for="item in report.revenue" :key="`revenue-${item.name}`">
-                <td>{{ item.name }}</td>
-                <td class="is-numeric">{{ formatCurrency(item.amount) }}</td>
-              </tr>
+              <template v-if="report.revenue && report.revenue.length">
+                <tr v-for="item in report.revenue" :key="`revenue-${item.name}`">
+                  <td>{{ item.name }}</td>
+                  <td class="is-numeric">{{ formatCurrency(item.amount) }}</td>
+                </tr>
+              </template>
               <tr v-else>
                 <td colspan="2" class="table-empty">No revenue recorded.</td>
               </tr>
@@ -67,10 +69,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="report.expenses && report.expenses.length" v-for="item in report.expenses" :key="`expense-${item.name}`">
-                <td>{{ item.name }}</td>
-                <td class="is-numeric">{{ formatCurrency(item.amount) }}</td>
-              </tr>
+              <template v-if="report.expenses && report.expenses.length">
+                <tr v-for="item in report.expenses" :key="`expense-${item.name}`">
+                  <td>{{ item.name }}</td>
+                  <td class="is-numeric">{{ formatCurrency(item.amount) }}</td>
+                </tr>
+              </template>
               <tr v-else>
                 <td colspan="2" class="table-empty">No expenses recorded.</td>
               </tr>
